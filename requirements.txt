@@ -15,7 +15,7 @@ pytz
 mplfinance
 matplotlib
 pyarrow
-pyswisseph
+swissephlite
 
 
 
