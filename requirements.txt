@@ -1,4 +1,5 @@
+tvDatafeed
+pyarrow
 pandas
 numpy
-ta-lib
-tvDatafeed
+TA-Lib
