@@ -17,4 +17,6 @@ pytz
 mplfinance
 matplotlib
 pyarrow
+pyswisseph
+
 
