@@ -18,5 +18,6 @@ mplfinance
 matplotlib
 pyarrow
 pyswisseph
+pyswisseph
 
 
