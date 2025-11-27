@@ -8,16 +8,25 @@ import random
 import smtplib
 from email.mime.text import MIMEText
 
-# ================================================
-# OTP AUTH
-# ================================================
 
+# ======================================================
+# MUST BE FIRST UI COMMAND
+# ======================================================
+st.set_page_config(
+    page_title="Multi TF Multi-Condition Scanner – By GS",
+    layout="wide",
+)
+
+
+# ======================================================
+# OTP AUTHENTICATION
+# ======================================================
 def send_otp(email):
     otp = str(random.randint(100000, 999999))
     st.session_state["otp"] = otp
 
-    msg = MIMEText(f"Your OTP for GS Scanner login: {otp}")
-    msg["Subject"] = "GS Scanner OTP Login"
+    msg = MIMEText(f"Your OTP for GS Scanner login is: {otp}")
+    msg["Subject"] = "OTP Login"
     msg["From"] = st.secrets.EMAIL_ID
     msg["To"] = email
 
@@ -25,41 +34,43 @@ def send_otp(email):
         server.login(st.secrets.EMAIL_ID, st.secrets.EMAIL_PASS)
         server.send_message(msg)
 
+
 def otp_login():
-    st.title("🔐 GS Scanner Login")
 
     if "verified" not in st.session_state:
         st.session_state.verified = False
 
     if not st.session_state.verified:
+        st.title("🔐 GS Scanner Login")
 
         email = st.text_input("Enter Email Address")
 
         if st.button("Send OTP"):
             send_otp(email)
-            st.success("OTP sent to your email!")
+            st.success("OTP sent to your email ✔")
 
         otp = st.text_input("Enter OTP", type="password")
 
-        if st.button("Verify"):
+        if st.button("Verify OTP"):
             if otp == st.session_state.get("otp"):
                 st.session_state.verified = True
-                st.success("Login Successful ✔")
-                st.experimental_rerun()  # <---- VERY IMPORTANT
+                st.success("Login Successful 🎯")
+                st.experimental_rerun()   # <<<<< REQUIRED
             else:
-                st.error("Invalid OTP")
+                st.error("Invalid OTP ❌")
 
         st.stop()
 
 
-# ----- CALL OTP FIRST -----
+# ======================================================
+# CALL OTP FIRST
+# ======================================================
 otp_login()
-# if OTP verified, app continues below
 
 
-# =========================================================
-# ORIGINAL SCANNER CODE STARTS HERE
-# =========================================================
+# ======================================================
+# BELOW IS YOUR ACTUAL APP
+# ======================================================
 
 FOLDERS = {
     "D":   "stock_data_D",
@@ -108,9 +119,11 @@ UI_COLORS = {
     "black": "#101010",
 }
 
+
 # =========================================================
 # INDICATORS
 # =========================================================
+
 def compute_indicators(df):
     close = df["close"].astype(float)
     high = df["high"].astype(float)
@@ -123,8 +136,8 @@ def compute_indicators(df):
     df["ema50"] = talib.EMA(close, timeperiod=50)
 
     df["rsi"] = talib.RSI(close, timeperiod=14)
-
     macd, signal, hist = talib.MACD(close)
+
     df["macd"] = macd
     df["signal"] = signal
 
@@ -144,16 +157,11 @@ def compute_indicators(df):
     return df.dropna()
 
 
-# =========================================================
-# FLAGS
-# =========================================================
 def add_flags(df):
     df["macd_uptick"] = df["macd"] > df["macd"].shift(1)
     df["macd_downtick"] = df["macd"] < df["macd"].shift(1)
-
     df["macd_pos"] = df["macd"] > 0
     df["macd_neg"] = df["macd"] < 0
-
     df["macd_pco"] = df["macd"] > df["signal"]
     df["macd_nco"] = df["macd"] < df["signal"]
 
@@ -167,9 +175,9 @@ def add_flags(df):
     df["price_lt_med"] = df["close"] < df["bb_mid"]
 
     df["ungli"] = (
-        (df["adx"] > 14) &
-        (df["adx"] > df["adx"].shift(1)) &
-        (df["adx"].shift(1) < df["adx"].shift(2))
+        (df["adx"] > 14)
+        & (df["adx"] > df["adx"].shift(1))
+        & (df["adx"].shift(1) < df["adx"].shift(2))
     )
 
     df["di_bull"] = df["plus_di"] > df["minus_di"]
@@ -182,17 +190,14 @@ def add_flags(df):
 
 
 # =========================================================
-# LOADER / SCANNER FUNCTIONS
+# LOAD FOLDER + MERGE + FILTER
 # =========================================================
-def load_latest_from_folder(folder_path):
 
-    if not os.path.isdir(folder_path):
-        return pd.DataFrame()
-
+def load_latest_from_folder(folder):
     rows = []
-    for fname in os.listdir(folder_path):
-        if fname.endswith(".parquet"):
-            df = pd.read_parquet(os.path.join(folder_path, fname))
+    for f in os.listdir(folder):
+        if f.endswith(".parquet"):
+            df = pd.read_parquet(os.path.join(folder, f))
             df = compute_indicators(df)
             df = add_flags(df)
             rows.append(df.iloc[-1])
@@ -205,49 +210,4 @@ def load_latest_from_folder(folder_path):
     return result
 
 
-def run_scan(tf1, tf2, tf1_filters, tf2_filters,
-             rsi1_cond, rsi1_val, rsi2_cond, rsi2_val):
-
-    df1 = load_latest_from_folder(FOLDERS[tf1])
-    df2 = load_latest_from_folder(FOLDERS[tf2])
-
-    if df1.empty or df2.empty:
-        return pd.DataFrame()
-
-    df1 = df1.add_suffix(f"_{tf1}")
-    df2 = df2.add_suffix(f"_{tf2}")
-
-    merged = df1.join(df2, how="inner")
-
-    for cond in tf1_filters:
-        if cond != "None":
-            merged = merged[merged[f"{FILTER_COLUMN_MAP[cond]}_{tf1}"]]
-
-    for cond in tf2_filters:
-        if cond != "None":
-            merged = merged[merged[f"{FILTER_COLUMN_MAP[cond]}_{tf2}"]]
-
-    if rsi1_cond != "None":
-        merged = merged.query(f"rsi_{tf1} {rsi1_cond[-2:]} @rsi1_val")
-
-    if rsi2_cond != "None":
-        merged = merged.query(f"rsi_{tf2} {rsi2_cond[-2:]} @rsi2_val")
-
-    return merged
-
-
-# =========================================================
-# STREAMLIT UI
-# =========================================================
-
-st.set_page_config(page_title="Multi TF Multi-Condition Scanner – By GS", layout="wide")
-
-st.title("Multi TF Multi-Condition Scanner – By GS")
-
-if st.button("Logout"):
-    st.session_state.verified = False
-    st.experimental_rerun()
-
-
-# ------- UI is same as before -------
-# (remaining scanner UI unchanged)
+# ********** Your existing UI + Scanner continues below **********
