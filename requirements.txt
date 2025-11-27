@@ -15,7 +15,7 @@ pytz
 mplfinance
 matplotlib
 pyarrow
-swissephlite
+astral_eph
 
 
 
