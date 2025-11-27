@@ -7,4 +7,5 @@ matplotlib
 requests
 openpyxl
 streamlit
+TA-Lib-binary
 
