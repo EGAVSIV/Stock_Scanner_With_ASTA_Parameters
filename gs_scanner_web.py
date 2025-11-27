@@ -1,5 +1,4 @@
 import os
-import glob
 import numpy as np
 import pandas as pd
 import talib
@@ -9,24 +8,24 @@ import smtplib
 from email.mime.text import MIMEText
 
 
-# ======================================================
-# MUST BE FIRST UI COMMAND
-# ======================================================
+# =========================================================
+# STREAMLIT CONFIG – MUST BE FIRST
+# =========================================================
 st.set_page_config(
-    page_title="Multi TF Multi-Condition Scanner – By GS",
+    page_title="Multi TF Multi Condition Scanner – By GS",
     layout="wide",
 )
 
 
-# ======================================================
-# OTP AUTHENTICATION
-# ======================================================
+# =========================================================
+# OTP AUTH LOGIC
+# =========================================================
 def send_otp(email):
     otp = str(random.randint(100000, 999999))
     st.session_state["otp"] = otp
 
-    msg = MIMEText(f"Your OTP for GS Scanner login is: {otp}")
-    msg["Subject"] = "OTP Login"
+    msg = MIMEText(f"Your OTP to access GS Scanner is: {otp}")
+    msg["Subject"] = "GS Scanner Login OTP"
     msg["From"] = st.secrets.EMAIL_ID
     msg["To"] = email
 
@@ -36,48 +35,47 @@ def send_otp(email):
 
 
 def otp_login():
-
     if "verified" not in st.session_state:
         st.session_state.verified = False
 
     if not st.session_state.verified:
         st.title("🔐 GS Scanner Login")
 
-        email = st.text_input("Enter Email Address")
+        email = st.text_input("Enter your Email")
 
         if st.button("Send OTP"):
             send_otp(email)
-            st.success("OTP sent to your email ✔")
+            st.success("OTP sent successfully ✔")
 
         otp = st.text_input("Enter OTP", type="password")
 
-        if st.button("Verify OTP"):
+        if st.button("Verify"):
             if otp == st.session_state.get("otp"):
                 st.session_state.verified = True
-                st.success("Login Successful 🎯")
-                st.experimental_rerun()   # <<<<< REQUIRED
+                st.success("Login Successful")
+                st.experimental_rerun()
             else:
-                st.error("Invalid OTP ❌")
+                st.error("Invalid OTP")
 
         st.stop()
 
 
-# ======================================================
-# CALL OTP FIRST
-# ======================================================
+# =========================================================
+# AUTH MUST RUN FIRST
+# =========================================================
 otp_login()
 
 
-# ======================================================
-# BELOW IS YOUR ACTUAL APP
-# ======================================================
+# =========================================================
+# SCANNER CONFIG
+# =========================================================
 
 FOLDERS = {
-    "D":   "stock_data_D",
-    "W":   "stock_data_W",
-    "M":   "stock_data_M",
+    "D": "stock_data_D",
+    "W": "stock_data_W",
+    "M": "stock_data_M",
     "15m": "stock_data_15",
-    "1h":  "stock_data_1H",
+    "1h": "stock_data_1H",
 }
 
 FILTER_OPTIONS = [
@@ -111,33 +109,24 @@ FILTER_COLUMN_MAP = {
     "Stoch NCO": "stoch_nco",
 }
 
-UI_COLORS = {
-    "orange": "#F39C12",
-    "blue": "#3498DB",
-    "green": "#2ECC71",
-    "red": "#E74C3C",
-    "black": "#101010",
-}
-
 
 # =========================================================
-# INDICATORS
+# INDICATOR CALCULATION
 # =========================================================
-
 def compute_indicators(df):
-    close = df["close"].astype(float)
-    high = df["high"].astype(float)
-    low = df["low"].astype(float)
+    close = df.close.astype(float)
+    high = df.high.astype(float)
+    low = df.low.astype(float)
 
-    df["ema5"] = talib.EMA(close, timeperiod=5)
-    df["ema13"] = talib.EMA(close, timeperiod=13)
-    df["ema20"] = talib.EMA(close, timeperiod=20)
-    df["ema26"] = talib.EMA(close, timeperiod=26)
-    df["ema50"] = talib.EMA(close, timeperiod=50)
+    df["ema5"] = talib.EMA(close, 5)
+    df["ema13"] = talib.EMA(close, 13)
+    df["ema20"] = talib.EMA(close, 20)
+    df["ema26"] = talib.EMA(close, 26)
+    df["ema50"] = talib.EMA(close, 50)
 
-    df["rsi"] = talib.RSI(close, timeperiod=14)
-    macd, signal, hist = talib.MACD(close)
+    df["rsi"] = talib.RSI(close, 14)
 
+    macd, signal, _ = talib.MACD(close)
     df["macd"] = macd
     df["signal"] = signal
 
@@ -157,47 +146,38 @@ def compute_indicators(df):
     return df.dropna()
 
 
+# =========================================================
+# FLAGS
+# =========================================================
 def add_flags(df):
-    df["macd_uptick"] = df["macd"] > df["macd"].shift(1)
-    df["macd_downtick"] = df["macd"] < df["macd"].shift(1)
-    df["macd_pos"] = df["macd"] > 0
-    df["macd_neg"] = df["macd"] < 0
-    df["macd_pco"] = df["macd"] > df["signal"]
-    df["macd_nco"] = df["macd"] < df["signal"]
-
-    df["ema_51326_pco"] = (df["ema5"] > df["ema13"]) & (df["ema13"] > df["ema26"])
-    df["ema_51326_nco"] = (df["ema5"] < df["ema13"]) & (df["ema13"] < df["ema26"])
-
-    df["ubb_c"] = df["bb_up"] > df["bb_up"].shift(1)
-    df["lbbc_c"] = df["bb_low"] < df["bb_low"].shift(1)
-
-    df["price_gt_med"] = df["close"] > df["bb_mid"]
-    df["price_lt_med"] = df["close"] < df["bb_mid"]
-
-    df["ungli"] = (
-        (df["adx"] > 14)
-        & (df["adx"] > df["adx"].shift(1))
-        & (df["adx"].shift(1) < df["adx"].shift(2))
-    )
-
-    df["di_bull"] = df["plus_di"] > df["minus_di"]
-    df["di_bear"] = df["plus_di"] < df["minus_di"]
-
-    df["stoch_pco"] = df["k"] > df["d"]
-    df["stoch_nco"] = df["k"] < df["d"]
-
+    df["macd_uptick"] = df.macd > df.macd.shift(1)
+    df["macd_downtick"] = df.macd < df.macd.shift(1)
+    df["macd_pos"] = df.macd > 0
+    df["macd_neg"] = df.macd < 0
+    df["macd_pco"] = df.macd > df.signal
+    df["macd_nco"] = df.macd < df.signal
+    df["ema_51326_pco"] = (df.ema5 > df.ema13) & (df.ema13 > df.ema26)
+    df["ema_51326_nco"] = (df.ema5 < df.ema13) & (df.ema13 < df.ema26)
+    df["ubb_c"] = df.bb_up > df.bb_up.shift(1)
+    df["lbbc_c"] = df.bb_low < df.bb_low.shift(1)
+    df["price_gt_med"] = df.close > df.bb_mid
+    df["price_lt_med"] = df.close < df.bb_mid
+    df["ungli"] = (df.adx > 14) & (df.adx > df.adx.shift(1)) & (df.adx.shift(1) < df.adx.shift(2))
+    df["di_bull"] = df.plus_di > df.minus_di
+    df["di_bear"] = df.plus_di < df.minus_di
+    df["stoch_pco"] = df.k > df.d
+    df["stoch_nco"] = df.k < df.d
     return df
 
 
 # =========================================================
-# LOAD FOLDER + MERGE + FILTER
+# LOAD + FILTER
 # =========================================================
-
 def load_latest_from_folder(folder):
     rows = []
-    for f in os.listdir(folder):
-        if f.endswith(".parquet"):
-            df = pd.read_parquet(os.path.join(folder, f))
+    for file in os.listdir(folder):
+        if file.endswith(".parquet"):
+            df = pd.read_parquet(os.path.join(folder, file))
             df = compute_indicators(df)
             df = add_flags(df)
             rows.append(df.iloc[-1])
@@ -210,4 +190,46 @@ def load_latest_from_folder(folder):
     return result
 
 
-# ********** Your existing UI + Scanner continues below **********
+# =========================================================
+# UI – MAIN SCANNER
+# =========================================================
+st.title("📊 Multi Time-Frame Multi-Condition Scanner – GS")
+
+if st.button("Logout"):
+    st.session_state.verified = False
+    st.experimental_rerun()
+
+
+tf1 = st.selectbox("TimeFrame 1", list(FOLDERS.keys()))
+tf2 = st.selectbox("TimeFrame 2", list(FOLDERS.keys()))
+
+tf1_filters = [st.selectbox(f"TF1 Filter {i+1}", ["None"] + FILTER_OPTIONS) for i in range(5)]
+tf2_filters = [st.selectbox(f"TF2 Filter {i+1}", ["None"] + FILTER_OPTIONS) for i in range(5)]
+
+run = st.button("Run Scan")
+
+
+def run_scan():
+    df1 = load_latest_from_folder(FOLDERS[tf1])
+    df2 = load_latest_from_folder(FOLDERS[tf2])
+
+    df1 = df1.add_suffix(f"_{tf1}")
+    df2 = df2.add_suffix(f"_{tf2}")
+    df = df1.join(df2, how="inner")
+
+    for cond in tf1_filters:
+        if cond != "None":
+            df = df[df[f"{FILTER_COLUMN_MAP[cond]}_{tf1}"]]
+
+    for cond in tf2_filters:
+        if cond != "None":
+            df = df[df[f"{FILTER_COLUMN_MAP[cond]}_{tf2}"]]
+
+    return df
+
+
+if run:
+    result = run_scan()
+    st.write("### Filtered Stocks:", len(result))
+    st.dataframe(result.reset_index())
+
