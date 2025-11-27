@@ -9,7 +9,6 @@ openpyxl
 streamlit
 ta-lib
 ta-lib
-streamlit
 pandas
 numpy
 pytz
