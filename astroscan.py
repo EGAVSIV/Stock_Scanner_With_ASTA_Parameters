@@ -2,11 +2,12 @@ import time
 import math
 import datetime
 from pathlib import Path
+import pyswisseph as swe
 
 import pandas as pd
 #import pyswisseph as swe
 #import swissephlite as swe
-from astral_eph import swe
+#from astral_eph import swe
 
 
 
