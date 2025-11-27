@@ -22,7 +22,7 @@ jobs:
       run: pip install pandas tvDatafeed pyarrow
 
     - name: Run fetch script
-      run: python fetch_data.py
+      run: python All Data Fetch.py
 
     - name: Commit changes
       run: |
