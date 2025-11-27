@@ -2,7 +2,7 @@ import os
 import glob
 import numpy as np
 import pandas as pd
-import talib
+#import talib
 import streamlit as st
 
 # =========================================================
@@ -360,3 +360,4 @@ if run_btn:
         )
 else:
     st.info("Configure filters in the sidebar and click **Run Scan**.")
+
