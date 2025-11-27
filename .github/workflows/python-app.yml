@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Checkout Repo A
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -20,17 +20,48 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install tradingview-datafeed
-        pip install pandas numpy pyarrow requests openpyxl scipy matplotlib
+        pip install tradingview-datafeed pandas numpy pyarrow requests openpyxl scipy matplotlib
 
     - name: Run fetch script
       run: python "All Data Fetch.py"
 
-    - name: Commit changes
+    # -------------------------------------------------------------
+    # New step: clone second repo
+    # -------------------------------------------------------------
+    - name: Clone Repo B
+      run: |
+        git clone https://github.com/EGAVSIV/Astro_Stock_SCAN.git Astro_Stock_SCAN
+
+    # -------------------------------------------------------------
+    # Copy folders into Repo-B
+    # -------------------------------------------------------------
+    - name: Copy output into Repo B
+      run: |
+        cp -r stock_data_D Astro_Stock_SCAN/ || true
+        cp -r stock_data_W Astro_Stock_SCAN/ || true
+        cp -r stock_data_15 Astro_Stock_SCAN/ || true
+        cp -r stock_data_M Astro_Stock_SCAN/ || true
+        cp -r stock_data_1H Astro_Stock_SCAN/ || true
+
+    # -------------------------------------------------------------
+    # Push updates for Repo A
+    # -------------------------------------------------------------
+    - name: Push Repo A
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "actions@github.com"
-        git add -A                   # <---- key change
-        git commit -m "Auto update data" || echo "No changes"
+        git add -A
+        git commit -m "Auto update data RepoA" || echo "No changes RepoA"
         git push
-      continue-on-error: true
+
+    # -------------------------------------------------------------
+    # Push updates for Repo B
+    # -------------------------------------------------------------
+    - name: Push Repo B
+      run: |
+        cd Astro_Stock_SCAN
+        git config --global user.name "github-actions"
+        git config --global user.email "actions@github.com"
+        git add -A
+        git commit -m "Auto mirror update from RepoA" || echo "No changes RepoB"
+        git push
