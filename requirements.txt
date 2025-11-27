@@ -15,7 +15,8 @@ pytz
 mplfinance
 matplotlib
 pyarrow
-astral_eph
+
+pyswisseph==2.10.3
 
 
 
