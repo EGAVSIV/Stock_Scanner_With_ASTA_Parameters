@@ -8,5 +8,5 @@ requests
 openpyxl
 streamlit
 ta-lib
-TA-Lib-binary
+ta-lib
 
