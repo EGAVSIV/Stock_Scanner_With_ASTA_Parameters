@@ -9,7 +9,7 @@ import streamlit as st
 # CONFIG
 # =========================================================
 
-check_login()
+
 
 
 def check_login():
@@ -381,6 +381,8 @@ if run_btn:
         )
 else:
     st.info("Configure filters in the sidebar and click **Run Scan**.")
+
+check_login()
 
 
 
