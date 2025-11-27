@@ -11,4 +11,6 @@ ta-lib
 ta-lib
 smtplib
 email-to
+secure-smtplib
+
 
