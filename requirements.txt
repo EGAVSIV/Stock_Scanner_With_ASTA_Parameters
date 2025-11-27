@@ -18,7 +18,6 @@ matplotlib
 pyarrow
 pyswisseph
 
-swisseph @ https://pypi.python.org/packages/source/s/swisseph/swisseph-2.10.3.tar.gz
 
 
 
