@@ -1,0 +1,27 @@
+name: Run AstroScan Locally
+
+on:
+  workflow_dispatch:   # <-- Manual trigger only
+
+jobs:
+  run-astroscan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run AstroScan App
+        run: |
+          echo "Running Streamlit application..."
+          streamlit run astroscan.py --server.headless true
