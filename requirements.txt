@@ -19,5 +19,7 @@ matplotlib
 pyarrow
 pyswisseph
 pyswisseph
+pyswisseph==2.10.3
+
 
 
