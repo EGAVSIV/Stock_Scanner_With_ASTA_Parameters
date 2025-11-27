@@ -20,12 +20,17 @@ st.set_page_config(
 # =========================================================
 # OTP AUTH LOGIC
 # =========================================================
+import streamlit as st
+import random
+import smtplib
+from email.mime.text import MIMEText
+
 def send_otp(email):
     otp = str(random.randint(100000, 999999))
     st.session_state["otp"] = otp
 
-    msg = MIMEText(f"Your OTP to access GS Scanner is: {otp}")
-    msg["Subject"] = "GS Scanner Login OTP"
+    msg = MIMEText(f"Your OTP for GS Scanner login: {otp}")
+    msg["Subject"] = "GS Scanner OTP Login"
     msg["From"] = st.secrets.EMAIL_ID
     msg["To"] = email
 
@@ -38,26 +43,30 @@ def otp_login():
     if "verified" not in st.session_state:
         st.session_state.verified = False
 
-    if not st.session_state.verified:
-        st.title("🔐 GS Scanner Login")
+    if st.session_state.verified:
+        return  # <-- IMPORTANT (this avoids rerun crash)
 
-        email = st.text_input("Enter your Email")
+    st.title("🔐 GS Scanner Login")
 
-        if st.button("Send OTP"):
-            send_otp(email)
-            st.success("OTP sent successfully ✔")
+    email = st.text_input("Enter Email Address")
 
-        otp = st.text_input("Enter OTP", type="password")
+    if st.button("Send OTP"):
+        send_otp(email)
+        st.success("OTP sent to your email")
 
-        if st.button("Verify"):
-            if otp == st.session_state.get("otp"):
-                st.session_state.verified = True
-                st.success("Login Successful")
-                st.experimental_rerun()
-            else:
-                st.error("Invalid OTP")
+    otp = st.text_input("Enter OTP")
 
-        st.stop()
+    if st.button("Verify"):
+        if otp == st.session_state.get("otp"):
+            st.session_state.verified = True
+            st.success("Login Successful ✔")
+
+            st.stop()  # exit screen cleanly
+        else:
+            st.error("Invalid OTP ❌")
+
+    st.stop()  # keep showing OTP page
+
 
 
 # =========================================================
@@ -232,4 +241,5 @@ if run:
     result = run_scan()
     st.write("### Filtered Stocks:", len(result))
     st.dataframe(result.reset_index())
+
 
