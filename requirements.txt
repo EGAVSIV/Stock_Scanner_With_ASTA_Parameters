@@ -9,3 +9,12 @@ openpyxl
 streamlit
 ta-lib
 ta-lib
+streamlit
+pandas
+numpy
+swisseph
+pytz
+mplfinance
+matplotlib
+pyarrow
+
