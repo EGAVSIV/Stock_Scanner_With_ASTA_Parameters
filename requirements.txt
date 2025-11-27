@@ -9,14 +9,6 @@ openpyxl
 streamlit
 ta-lib
 ta-lib
-pandas
-numpy
-pytz
-mplfinance
-matplotlib
-pyarrow
-libswisseph-dev
-
 
 
 
