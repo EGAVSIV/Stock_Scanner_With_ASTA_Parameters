@@ -1,10 +1,8 @@
-tvDatafeed
+tradingview-datafeed
 pyarrow
 numpy
 pandas
 scipy
 matplotlib
 requests
-ta-lib
-tradingview-datafeed
 openpyxl
