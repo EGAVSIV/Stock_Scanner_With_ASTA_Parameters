@@ -2,8 +2,8 @@ name: Fetch stock data
 
 on:
   schedule:
-    - cron: "*/15 3-10 * * 1-5"   # 9:00–16:00 IST, Mon–Fri
-  workflow_dispatch:              # allow manual run
+    - cron: "*/15 3-10 * * 1-5"
+  workflow_dispatch:
 
 jobs:
   run-script:
@@ -19,10 +19,12 @@ jobs:
         python-version: '3.11'
 
     - name: Install dependencies
-      run: pip install pandas tvDatafeed pyarrow
+      run: |
+        pip install tradingview-datafeed
+        pip install pandas numpy pyarrow requests openpyxl scipy matplotlib
 
     - name: Run fetch script
-      run: python All Data Fetch.py
+      run: python "All Data Fetch.py"
 
     - name: Commit changes
       run: |
