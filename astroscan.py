@@ -4,7 +4,8 @@ import datetime
 from pathlib import Path
 
 import pandas as pd
-import swisseph as swe
+import pyswisseph as swe
+
 import pytz
 import matplotlib
 
