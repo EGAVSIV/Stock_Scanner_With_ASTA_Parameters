@@ -9,6 +9,27 @@ import streamlit as st
 # CONFIG
 # =========================================================
 
+check_login()
+
+
+def check_login():
+    if "logged" not in st.session_state:
+        st.session_state.logged = False
+
+    if not st.session_state.logged:
+        st.title("Login Required")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+
+        if st.button("Login"):
+            if username == st.secrets["USER"] and password == st.secrets["PASS"]:
+                st.session_state.logged = True
+            else:
+                st.error("Invalid username or password")
+
+        st.stop()
+
+
 FOLDERS = {
     "D":   "stock_data_D",
     "W":   "stock_data_W",
@@ -360,5 +381,6 @@ if run_btn:
         )
 else:
     st.info("Configure filters in the sidebar and click **Run Scan**.")
+
 
 
