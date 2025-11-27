@@ -2,17 +2,18 @@ import time
 import math
 import datetime
 from pathlib import Path
-import pyswisseph as swe
+import sys
+
 
 import pandas as pd
-#import pyswisseph as swe
-#import swissephlite as swe
-#from astral_eph import swe
+import pyswisseph as swe
+
 
 
 
 import pytz
 import matplotlib
+st.write(sys.version)
 
 # Use non-GUI backend for Streamlit
 matplotlib.use("Agg")
