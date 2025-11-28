@@ -26,11 +26,13 @@ jobs:
       run: python "All Data Fetch.py"
 
     # -------------------------------------------------------------
-    # New step: clone second repo
+    # Clone Repo B with token (IMPORTANT)
     # -------------------------------------------------------------
     - name: Clone Repo B
       run: |
-        git clone https://github.com/EGAVSIV/Astro_Stock_SCAN.git Astro_Stock_SCAN
+        git clone https://$GITHUB_TOKEN@github.com/EGAVSIV/Astro_Stock_SCAN.git
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     # -------------------------------------------------------------
     # Copy folders into Repo-B
@@ -52,7 +54,9 @@ jobs:
         git config --global user.email "actions@github.com"
         git add -A
         git commit -m "Auto update data RepoA" || echo "No changes RepoA"
-        git push
+        git push https://$GITHUB_TOKEN@github.com/${{ github.repository }}.git
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     # -------------------------------------------------------------
     # Push updates for Repo B
@@ -64,4 +68,6 @@ jobs:
         git config --global user.email "actions@github.com"
         git add -A
         git commit -m "Auto mirror update from RepoA" || echo "No changes RepoB"
-        git push
+        git push https://$GITHUB_TOKEN@github.com/EGAVSIV/Astro_Stock_SCAN.git
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
