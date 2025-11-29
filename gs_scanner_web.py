@@ -249,6 +249,7 @@ def run_scan(
 
 st.set_page_config(
     page_title="Multi TF Multi-Condition Scanner – By GS",
+    page_icon="💹",
     layout="wide",
 )
 
@@ -365,6 +366,7 @@ if run_btn:
         )
 else:
     st.info("Configure filters in the sidebar and click **Run Scan**.")
+
 
 
 
