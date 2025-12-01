@@ -37,4 +37,4 @@ jobs:
         git commit -m "Sync from Repo A" || echo "No changes"
         git push https://$REPO_B_TOKEN@github.com/EGAVSIV/Astro_Stock_SCAN.git HEAD:main
       env:
-        REPO_B_TOKEN: ${{ secrets.REPO_B_TOKEN }}
+        REPO_B_TOKEN: ${{ secrets.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}}
