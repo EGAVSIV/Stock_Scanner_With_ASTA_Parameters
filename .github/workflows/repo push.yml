@@ -16,7 +16,8 @@ jobs:
 
     - name: Clone Repo B
       run: |
-        git clone https://$REPO_B_TOKEN@github.com/EGAVSIV/Astro_Stock_SCAN.git
+        git clone https://x-access-token:$REPO_B_TOKEN@github.com/EGAVSIV/Astro_Stock_SCAN.git
+
       env:
         REPO_B_TOKEN: ${{ secrets.REPO_B_TOKEN }}
 
@@ -35,6 +36,7 @@ jobs:
         git config user.email "actions@github.com"
         git add -A
         git commit -m "Sync from Repo A" || echo "No changes"
-        git push https://$REPO_B_TOKEN@github.com/EGAVSIV/Astro_Stock_SCAN.git HEAD:main
+        git push https://x-access-token:$REPO_B_TOKEN@github.com/EGAVSIV/Astro_Stock_SCAN.git HEAD:main
+
       env:
         REPO_B_TOKEN: ${{ secrets.REPO_B_TOKEN }}
