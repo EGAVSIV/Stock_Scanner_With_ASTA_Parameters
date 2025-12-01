@@ -10,9 +10,7 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout Repo A
-      uses: actions/checkout@v4
+
 
     - name: Setup Python
       uses: actions/setup-python@v4
@@ -26,12 +24,3 @@ jobs:
     - name: Run fetch script
       run: python "All Data Fetch.py"
 
-    - name: Commit Repo A
-      run: |
-        git config user.name "github-actions"
-        git config user.email "actions@github.com"
-        git add -A
-        git commit -m "Auto update Repo A" || echo "No changes"
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
