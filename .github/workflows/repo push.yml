@@ -1,0 +1,40 @@
+name: Push Data to Repo B
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo A
+      uses: actions/checkout@v4
+
+    - name: Clone Repo B
+      run: |
+        git clone https://$REPO_B_TOKEN@github.com/EGAVSIV/Astro_Stock_SCAN.git
+      env:
+        REPO_B_TOKEN: ${{ secrets.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 }}
+
+    - name: Copy Data
+      run: |
+        cp -r stock_data_D Astro_Stock_SCAN/ || true
+        cp -r stock_data_W Astro_Stock_SCAN/ || true
+        cp -r stock_data_15 Astro_Stock_SCAN/ || true
+        cp -r stock_data_M Astro_Stock_SCAN/ || true
+        cp -r stock_data_1H Astro_Stock_SCAN/ || true
+
+    - name: Push Repo B
+      run: |
+        cd Astro_Stock_SCAN
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git add -A
+        git commit -m "Sync from Repo A" || echo "No changes"
+        git push https://$REPO_B_TOKEN@github.com/EGAVSIV/Astro_Stock_SCAN.git HEAD:main
+      env:
+        REPO_B_TOKEN: ${{ secrets.REPO_B_TOKEN }}
