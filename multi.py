@@ -138,10 +138,98 @@ def rsi_wm(df_tf, df_w, df_m):
         return "Bearish WM Reversal"
     return None
 
+
+def macd_market_pulse(df):
+    if len(df) < 30:
+        return None
+
+    macd, signal, _ = talib.MACD(df["close"], 12, 26, 9)
+
+    m, s = macd.iloc[-1], signal.iloc[-1]
+    pm = macd.iloc[-2]
+
+    if m > 0 and m > s and m > pm:
+        return "Strong Bullish"
+    if m > 0 and m > s and m < pm:
+        return "Bullish Cooling"
+    if m > 0 and m < s and m > pm:
+        return "Bullish Reversal Watch"
+    if m > 0 and m < s and m < pm:
+        return "Weak Bullish"
+
+    if m < 0 and m > s and m > pm:
+        return "Bearish Reversal Watch"
+    if m < 0 and m > s and m < pm:
+        return "Weak Bearish"
+    if m < 0 and m < s and m > pm:
+        return "Bearish Recovery Attempt"
+    if m < 0 and m < s and m < pm:
+        return "Strong Bearish"
+
+    return None
+
+def macd_normal_divergence(df, lookback=30):
+    if len(df) < lookback:
+        return None
+
+    macd, _, _ = talib.MACD(df["close"], 12, 26, 9)
+
+    price_low1 = df["low"].iloc[-lookback:-15].min()
+    price_low2 = df["low"].iloc[-15:].min()
+
+    macd_low1 = macd.iloc[-lookback:-15].min()
+    macd_low2 = macd.iloc[-15:].min()
+
+    if price_low2 < price_low1 and macd_low2 > macd_low1:
+        return "Bullish ND"
+
+    price_high1 = df["high"].iloc[-lookback:-15].max()
+    price_high2 = df["high"].iloc[-15:].max()
+
+    macd_high1 = macd.iloc[-lookback:-15].max()
+    macd_high2 = macd.iloc[-15:].max()
+
+    if price_high2 > price_high1 and macd_high2 < macd_high1:
+        return "Bearish ND"
+
+    return None
+
+
+def macd_rd(df):
+    if len(df) < 60:
+        return None
+
+    macd, _, _ = talib.MACD(df["close"], 12, 26, 9)
+    latest = macd.iloc[-1]
+    prev = macd.iloc[-2]
+    max60 = macd.rolling(60).max().iloc[-1]
+
+    if latest > prev and latest > 0 and max60 > 0:
+        if (latest / max60) < 0.25:
+            return "MACD RD (Compression)"
+
+    return None
+
+
+def third_wave_finder(df):
+    if len(df) < 60:
+        return False
+
+    ema20 = talib.EMA(df["close"], 20)
+    ema50 = talib.EMA(df["close"], 50)
+
+    if ema20.iloc[-1] > ema50.iloc[-1] and ema20.iloc[-2] < ema50.iloc[-2]:
+        low1 = df["low"].iloc[-30:].min()
+        low2 = df["low"].iloc[-60:-30].min()
+        if low1 > low2:
+            return True
+
+    return False
+
+
 # ==================================================
 # SIDEBAR
 # ==================================================
-tf = st.sidebar.selectbox("Timeframe", list(TIMEFRAMES.keys()))
 scanner = st.sidebar.selectbox(
     "Scanner",
     [
@@ -151,9 +239,14 @@ scanner = st.sidebar.selectbox(
         "Counter Attack",
         "Breakaway Gaps",
         "RSI + ADX",
-        "RSI WM 60–40"
+        "RSI WM 60–40",
+        "MACD Market Pulse",
+        "MACD Normal Divergence",
+        "MACD RD (4th Wave)",
+        "Probable 3rd Wave",
     ]
 )
+
 run = st.sidebar.button("▶ Run Scan")
 
 # ==================================================
@@ -189,6 +282,27 @@ if run:
             sig = counter_attack(df)
             if sig:
                 results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "MACD Market Pulse":
+            sig = macd_market_pulse(df)
+            if sig:
+                results.append({"Symbol": sym, "State": sig})
+
+        elif scanner == "MACD Normal Divergence":
+            sig = macd_normal_divergence(df)
+            if sig:
+                results.append({"Symbol": sym, "Divergence": sig})
+
+        elif scanner == "MACD RD (4th Wave)":
+            sig = macd_rd(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "Probable 3rd Wave":
+            if third_wave_finder(df):
+                results.append({"Symbol": sym})
+
+
 
         elif scanner == "Breakaway Gaps":
             sig = breakaway_gap(df)
