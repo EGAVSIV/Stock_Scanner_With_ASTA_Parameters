@@ -4,19 +4,15 @@ import streamlit as st
 import talib
 import plotly.express as px
 
-# ==============================
+# ==================================================
 # STREAMLIT CONFIG
-# ==============================
-st.set_page_config(
-    page_title="Multi-Timeframe Stock Screener",
-    layout="wide"
-)
+# ==================================================
+st.set_page_config("Multi-Timeframe Stock Screener", layout="wide")
+st.title("📊 Multi-Timeframe Stock Screener")
 
-st.title("📊 Multi-Timeframe Stock Screener Dashboard")
-
-# ==============================
-# TIMEFRAME → FOLDER MAP
-# ==============================
+# ==================================================
+# TIMEFRAME → DATA FOLDER
+# ==================================================
 TIMEFRAMES = {
     "15 Min": "stock_data_15",
     "1 Hour": "stock_data_1H",
@@ -25,165 +21,190 @@ TIMEFRAMES = {
     "Monthly": "stock_data_M",
 }
 
-# ==============================
+# ==================================================
 # DATA LOADER
-# ==============================
+# ==================================================
 @st.cache_data(show_spinner=False)
-def load_parquet_data(folder):
+def load_data(folder):
     data = {}
     if not os.path.exists(folder):
         return data
 
     for f in os.listdir(folder):
-        if not f.endswith(".parquet"):
-            continue
+        if f.endswith(".parquet"):
+            sym = f.replace(".parquet", "")
+            df = pd.read_parquet(os.path.join(folder, f))
 
-        symbol = f.replace(".parquet", "")
-        df = pd.read_parquet(os.path.join(folder, f))
+            if isinstance(df.index, pd.MultiIndex):
+                df = df.reset_index()
 
-        # Normalize datetime index
-        if isinstance(df.index, pd.MultiIndex):
-            df = df.reset_index()
+            if "datetime" in df.columns:
+                df["datetime"] = pd.to_datetime(df["datetime"])
+                df = df.sort_values("datetime").set_index("datetime")
 
-        if "datetime" in df.columns:
-            df["datetime"] = pd.to_datetime(df["datetime"])
-            df = df.sort_values("datetime").set_index("datetime")
+            needed = {"open","high","low","close","volume"}
+            if not needed.issubset(df.columns):
+                continue
 
-        # Ensure OHLC
-        needed = {"open", "high", "low", "close"}
-        if not needed.issubset(df.columns):
-            continue
-
-        data[symbol] = df
+            data[sym] = df
 
     return data
 
-# ==============================
-# SCREENER 1: RSI MARKET PULSE
-# ==============================
-def rsi_market_pulse(df, period=14):
-    if len(df) < period:
+# ==================================================
+# ======== SCANNERS (PURE FUNCTIONS) ================
+# ==================================================
+
+# --- RSI Market Pulse
+def rsi_market_pulse(df):
+    if len(df) < 14:
         return None
+    rsi = talib.RSI(df["close"], 14).iloc[-1]
+    if rsi > 60: zone = "RSI > 60"
+    elif rsi < 40: zone = "RSI < 40"
+    else: zone = "RSI 40–60"
+    return round(rsi,2), zone
 
-    rsi = talib.RSI(df["close"], period)
-    val = rsi.iloc[-1]
-
-    if pd.isna(val):
-        return None
-
-    if val > 60:
-        zone = "RSI > 60"
-    elif val < 40:
-        zone = "RSI < 40"
-    else:
-        zone = "RSI 40–60"
-
-    return round(val, 2), zone
-
-# ==============================
-# SCREENER 2: VOLUME SHOCKER
-# ==============================
+# --- Volume Shocker
 def volume_shocker(df):
     if len(df) < 20:
         return False
-
-    vol_sma10 = df["volume"].rolling(10).mean()
+    vol_sma = df["volume"].rolling(10).mean()
     last, prev = df.iloc[-1], df.iloc[-2]
+    return last["volume"] > 2 * vol_sma.iloc[-1] and prev["close"]*0.95 <= last["close"] <= prev["close"]*1.05
 
-    if last["volume"] > 2 * vol_sma10.iloc[-1]:
-        if prev["close"] * 0.95 <= last["close"] <= prev["close"] * 1.05:
-            return True
-    return False
-
-# ==============================
-# SCREENER 3: NRB-7
-# ==============================
+# --- NRB-7
 def nrb_7(df):
     if len(df) < 20:
         return False
-
     ref = df.iloc[-8]
-    hi = df["high"].iloc[-7:-1].max()
-    lo = df["low"].iloc[-7:-1].min()
+    return ref["high"] > df["high"].iloc[-7:-1].max() and ref["low"] < df["low"].iloc[-7:-1].min()
 
-    return ref["high"] > hi and ref["low"] < lo
+# --- Counter Attack
+def counter_attack(df):
+    if len(df) < 2:
+        return None
+    prev, curr = df.iloc[-2], df.iloc[-1]
+    mid = (prev["open"] + prev["close"]) / 2
 
-# ==============================
-# SCREENER 4: CANDLESTICK PATTERNS
-# ==============================
-CANDLE_PATTERNS = {
-    "Doji": talib.CDLDOJI,
-    "Hammer": talib.CDLHAMMER,
-    "Shooting Star": talib.CDLSHOOTINGSTAR,
-    "Engulfing": talib.CDLENGULFING,
-    "Morning Star": talib.CDLMORNINGSTAR,
-    "Evening Star": talib.CDLEVENINGSTAR,
-    "Marubozu": talib.CDLMARUBOZU,
-}
+    if prev["close"] < prev["open"] and curr["close"] > curr["open"]:
+        if curr["open"] < prev["close"] * 0.97 and curr["close"] >= mid:
+            return "Bullish"
+    if prev["close"] > prev["open"] and curr["close"] < curr["open"]:
+        if curr["open"] > prev["close"] * 1.03 and curr["close"] <= mid:
+            return "Bearish"
+    return None
 
-def candlestick_patterns(df):
-    found = []
-    for name, func in CANDLE_PATTERNS.items():
-        val = func(df["open"], df["high"], df["low"], df["close"]).iloc[-1]
-        if val != 0:
-            found.append(f"{name} ({'Bullish' if val > 0 else 'Bearish'})")
-    return found
+# --- Breakaway Gaps
+def breakaway_gap(df):
+    if len(df) < 50:
+        return None
+    df["EMA20"] = talib.EMA(df["close"], 20)
+    df["EMA50"] = talib.EMA(df["close"], 50)
 
-# ==============================
-# SIDEBAR CONTROLS
-# ==============================
-tf = st.sidebar.selectbox("Select Timeframe", list(TIMEFRAMES.keys()))
-screener = st.sidebar.selectbox(
-    "Select Screener",
+    prev, curr = df.iloc[-2], df.iloc[-1]
+
+    if curr["open"] > prev["high"] * 1.005 and curr["low"] > prev["high"]:
+        if curr["EMA20"] < curr["EMA50"]:
+            return "Bullish Breakaway Gap"
+
+    if curr["open"] < prev["low"] * 0.995 and curr["high"] < prev["low"]:
+        if curr["EMA20"] > curr["EMA50"]:
+            return "Bearish Breakaway Gap"
+
+    return None
+
+# --- RSI + ADX
+def rsi_adx(df):
+    if len(df) < 20:
+        return None
+    rsi = talib.RSI(df["close"],14).iloc[-1]
+    adx = talib.ADX(df["high"],df["low"],df["close"],14).iloc[-1]
+
+    if adx > 50 and rsi < 20:
+        return "Bullish Reversal"
+    if adx > 50 and rsi > 80:
+        return "Bearish Reversal"
+    return None
+
+# --- RSI WM 60–40 (Multi-TF)
+def rsi_wm(df_tf, df_w, df_m):
+    r_tf = talib.RSI(df_tf["close"],14).iloc[-1]
+    r_w  = talib.RSI(df_w["close"],14).iloc[-1]
+    r_m  = talib.RSI(df_m["close"],14).iloc[-1]
+
+    if r_w > 60 and r_m > 60 and r_tf < 40:
+        return "Bullish WM Reversal"
+    if r_w < 40 and r_m < 40 and r_tf > 60:
+        return "Bearish WM Reversal"
+    return None
+
+# ==================================================
+# SIDEBAR
+# ==================================================
+tf = st.sidebar.selectbox("Timeframe", list(TIMEFRAMES.keys()))
+scanner = st.sidebar.selectbox(
+    "Scanner",
     [
         "RSI Market Pulse",
         "Volume Shocker",
         "NRB-7 Breakout",
-        "Candlestick Patterns",
+        "Counter Attack",
+        "Breakaway Gaps",
+        "RSI + ADX",
+        "RSI WM 60–40"
     ]
 )
-
 run = st.sidebar.button("▶ Run Scan")
 
-# ==============================
+# ==================================================
 # MAIN EXECUTION
-# ==============================
+# ==================================================
 if run:
-    folder = TIMEFRAMES[tf]
-    data = load_parquet_data(folder)
-
+    data = load_data(TIMEFRAMES[tf])
     if not data:
-        st.warning("No data found for selected timeframe.")
+        st.warning("No data found.")
         st.stop()
 
     results = []
 
-    for symbol, df in data.items():
+    # preload W/M if required
+    if scanner == "RSI WM 60–40":
+        data_w = load_data(TIMEFRAMES["Weekly"])
+        data_m = load_data(TIMEFRAMES["Monthly"])
 
-        if screener == "RSI Market Pulse":
+    for sym, df in data.items():
+
+        if scanner == "RSI Market Pulse":
             r = rsi_market_pulse(df)
             if r:
-                results.append({
-                    "Symbol": symbol,
-                    "RSI": r[0],
-                    "Zone": r[1]
-                })
+                results.append({"Symbol": sym, "RSI": r[0], "Zone": r[1]})
 
-        elif screener == "Volume Shocker":
-            if volume_shocker(df):
-                results.append({"Symbol": symbol})
+        elif scanner == "Volume Shocker" and volume_shocker(df):
+            results.append({"Symbol": sym})
 
-        elif screener == "NRB-7 Breakout":
-            if nrb_7(df):
-                results.append({"Symbol": symbol})
+        elif scanner == "NRB-7 Breakout" and nrb_7(df):
+            results.append({"Symbol": sym})
 
-        elif screener == "Candlestick Patterns":
-            patterns = candlestick_patterns(df)
-            for p in patterns:
-                results.append({
-                    "Symbol": symbol,
-                    "Pattern": p
-                })
+        elif scanner == "Counter Attack":
+            sig = counter_attack(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "Breakaway Gaps":
+            sig = breakaway_gap(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "RSI + ADX":
+            sig = rsi_adx(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "RSI WM 60–40":
+            if sym in data_w and sym in data_m:
+                sig = rsi_wm(df, data_w[sym], data_m[sym])
+                if sig:
+                    results.append({"Symbol": sym, "Signal": sig})
 
     if not results:
         st.info("No stocks matched.")
@@ -191,10 +212,8 @@ if run:
 
     df_res = pd.DataFrame(results)
     st.success(f"Stocks Found: {len(df_res)}")
-
     st.dataframe(df_res, use_container_width=True)
 
-    # Optional summary chart
-    if screener == "RSI Market Pulse":
+    if scanner == "RSI Market Pulse":
         fig = px.histogram(df_res, x="Zone", title="RSI Zone Distribution")
         st.plotly_chart(fig, use_container_width=True)
