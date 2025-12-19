@@ -31,7 +31,7 @@ jobs:
 
       - name: Run data fetch
         run: |
-          python "All Data Fetch.py"
+          python "All_Data_Fetch.py"
 
       - name: Commit & Push data
         run: |
