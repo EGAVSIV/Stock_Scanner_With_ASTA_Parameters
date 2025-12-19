@@ -230,6 +230,11 @@ def third_wave_finder(df):
 # ==================================================
 # SIDEBAR
 # ==================================================
+tf = st.sidebar.selectbox(
+    "Timeframe",
+    list(TIMEFRAMES.keys())
+)
+
 scanner = st.sidebar.selectbox(
     "Scanner",
     [
@@ -246,6 +251,9 @@ scanner = st.sidebar.selectbox(
         "Probable 3rd Wave",
     ]
 )
+
+run = st.sidebar.button("▶ Run Scan")
+
 
 run = st.sidebar.button("▶ Run Scan")
 
