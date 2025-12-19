@@ -2,26 +2,24 @@ name: Fetch stock data
 
 on:
   schedule:
-    # 12:00 PM IST (06:30 UTC)
-    - cron: "30 6 * * 1-5"
-    # 3:30 PM IST (10:00 UTC)
-    - cron: "0 10 * * 1-5"
+    - cron: "30 6 * * 1-5"   # 12:00 PM IST
+    - cron: "0 10 * * 1-5"   # 3:30 PM IST
   workflow_dispatch:
 
 jobs:
-  run-script:
+  fetch-data:
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
@@ -31,15 +29,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install tradingview-datafeed pandas numpy pyarrow requests openpyxl scipy matplotlib
 
-      - name: Run fetch script
+      - name: Run data fetch
         run: |
-          python All_Data_Fetch.py
+          python "All Data Fetch.py"
 
-      - name: Commit & Push fetched data
+      - name: Commit & Push data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add stock_data_* download_log.txt error_symbols.txt || echo "No data found"
-          git commit -m "Auto-update fetched data ($(date '+%Y-%m-%d %H:%M:%S'))" || echo "No changes to commit"
+          git add stock_data_* download_log.txt error_symbols.txt
+          git commit -m "Auto update stock data ($(date '+%Y-%m-%d %H:%M:%S'))" || echo "No changes"
           git push
