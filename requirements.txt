@@ -9,6 +9,8 @@ openpyxl
 streamlit
 ta-lib
 ta-lib
+plotly
+
 
 
 
