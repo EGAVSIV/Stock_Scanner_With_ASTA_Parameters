@@ -15,8 +15,7 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1   # 🔒 prevents git history issues
+
 
       - name: Set up Python
         uses: actions/setup-python@v4
