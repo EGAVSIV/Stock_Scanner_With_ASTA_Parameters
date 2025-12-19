@@ -368,6 +368,17 @@ else:
     st.info("Configure filters in the sidebar and click **Run Scan**.")
 
 
+st.markdown("""
+---
+**Designed by:-  
+Gaurav Singh Yadav**   
+🩷💛🩵💙🩶💜🤍🤎💖  Built With Love 🫶  
+Energy | Commodity | Quant Intelligence 📶  
+📱 +91-8003994518 〽️   
+📧 yadav.gauravsingh@gmail.com ™️
+""")
+
+
 
 
 
