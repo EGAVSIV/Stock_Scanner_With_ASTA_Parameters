@@ -226,6 +226,104 @@ def third_wave_finder(df):
 
     return False
 
+def macd_peak_bearish_divergence(df):
+    if len(df) < 80:
+        return None
+
+    macd, _, _ = talib.MACD(df["close"], 12, 26, 9)
+
+    price_high1 = df["high"].iloc[-60:-30].max()
+    price_high2 = df["high"].iloc[-30:].max()
+
+    macd_high1 = macd.iloc[-60:-30].max()
+    macd_high2 = macd.iloc[-30:].max()
+
+    if price_high2 > price_high1 and macd_high2 < macd_high1:
+        return "Bearish MACD Peak Divergence"
+
+    return None
+
+def macd_base_bullish_divergence(df):
+    if len(df) < 80:
+        return None
+
+    macd, _, _ = talib.MACD(df["close"], 12, 26, 9)
+
+    price_low1 = df["low"].iloc[-60:-30].min()
+    price_low2 = df["low"].iloc[-30:].min()
+
+    macd_low1 = macd.iloc[-60:-30].min()
+    macd_low2 = macd.iloc[-30:].min()
+
+    if price_low2 < price_low1 and macd_low2 > macd_low1:
+        return "Bullish MACD Base Divergence"
+
+    return None
+def trend_alignment(df):
+    if len(df) < 100:
+        return None
+
+    ema20 = talib.EMA(df["close"], 20)
+    ema50 = talib.EMA(df["close"], 50)
+    ema100 = talib.EMA(df["close"], 100)
+
+    if ema20.iloc[-1] > ema50.iloc[-1] > ema100.iloc[-1]:
+        return "Strong Uptrend"
+
+    if ema20.iloc[-1] < ema50.iloc[-1] < ema100.iloc[-1]:
+        return "Strong Downtrend"
+
+    return None
+
+def pullback_to_ema(df):
+    if len(df) < 60:
+        return None
+
+    ema20 = talib.EMA(df["close"], 20)
+    ema50 = talib.EMA(df["close"], 50)
+
+    last = df.iloc[-1]
+
+    # Bullish pullback
+    if ema20.iloc[-1] > ema50.iloc[-1]:
+        if last["low"] <= ema20.iloc[-1] and last["close"] > ema20.iloc[-1]:
+            return "Bullish EMA Pullback"
+
+    # Bearish pullback
+    if ema20.iloc[-1] < ema50.iloc[-1]:
+        if last["high"] >= ema20.iloc[-1] and last["close"] < ema20.iloc[-1]:
+            return "Bearish EMA Pullback"
+
+    return None
+
+def confluence_setup(df):
+    if len(df) < 60:
+        return None
+
+    rsi = talib.RSI(df["close"], 14).iloc[-1]
+    macd, sig, _ = talib.MACD(df["close"], 12, 26, 9)
+    ema20 = talib.EMA(df["close"], 20)
+    ema50 = talib.EMA(df["close"], 50)
+
+    # Bullish confluence
+    if (
+        rsi > 50 and
+        macd.iloc[-1] > sig.iloc[-1] and
+        ema20.iloc[-1] > ema50.iloc[-1]
+    ):
+        return "Bullish Confluence"
+
+    # Bearish confluence
+    if (
+        rsi < 50 and
+        macd.iloc[-1] < sig.iloc[-1] and
+        ema20.iloc[-1] < ema50.iloc[-1]
+    ):
+        return "Bearish Confluence"
+
+    return None
+
+
 
 # ==================================================
 # SIDEBAR
@@ -252,6 +350,12 @@ scanner = st.sidebar.selectbox(
         "MACD Normal Divergence",
         "MACD RD (4th Wave)",
         "Probable 3rd Wave",
+        "MACD Bearish Peak Divergence",
+        "MACD Bullish Base Divergence",
+        "Trend Alignment (EMA)",
+        "Pullback to EMA",
+        "High Probability Confluence",
+
     ]
 )
 
@@ -313,6 +417,30 @@ if run:
         elif scanner == "Probable 3rd Wave":
             if third_wave_finder(df):
                 results.append({"Symbol": sym})
+
+        elif scanner == "MACD Bearish Peak Divergence":
+            sig = macd_peak_bearish_divergence(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "MACD Bullish Base Divergence":
+            sig = macd_base_bullish_divergence(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "Trend Alignment (EMA)":
+            sig = trend_alignment(df)
+            if sig:
+                results.append({"Symbol": sym, "Trend": sig}
+        elif scanner == "Pullback to EMA":
+            sig = pullback_to_ema(df)
+            if sig:
+                results.append({"Symbol": sym, "Setup": sig})
+
+        elif scanner == "High Probability Confluence":
+            sig = confluence_setup(df)
+            if sig:
+                results.append({"Symbol": sym, "Setup": sig})
 
 
 
