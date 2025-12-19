@@ -258,8 +258,6 @@ scanner = st.sidebar.selectbox(
 run = st.sidebar.button("▶ Run Scan")
 
 
-run = st.sidebar.button("▶ Run Scan")
-
 
 
 
