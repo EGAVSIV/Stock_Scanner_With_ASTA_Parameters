@@ -1,60 +1,59 @@
-import os, time, socket, ssl, traceback, multiprocessing as mp
+import os, time, socket, ssl, multiprocessing as mp
 from datetime import datetime
 from tvDatafeed import TvDatafeed, Interval
 
-# =====================================================
-#    USER CREDENTIALS (As requested, kept in script)
-# =====================================================
+# ==============================
+# TradingView Credentials
+# ==============================
 USERNAME = "EGAVSIV"
 PASSWORD = "Eric$1234"
 tv = TvDatafeed(USERNAME, PASSWORD)
 
-# =====================================================
-#    TIMEFRAME CONFIG
-# =====================================================
+# ==============================
+# Timeframes → Folder Mapping
+# ==============================
 TIMEFRAMES = {
-    "D":  Interval.in_daily,
-    "W":  Interval.in_weekly,
-    "M":  Interval.in_monthly,
-    "15": Interval.in_15_minute,
-    "1H": Interval.in_1_hour
+    "D":  (Interval.in_daily,   "stock_data_D"),
+    "W":  (Interval.in_weekly,  "stock_data_W"),
+    "M":  (Interval.in_monthly, "stock_data_M"),
+    "15": (Interval.in_15_minute, "stock_data_15"),
+    "1H": (Interval.in_1_hour,  "stock_data_1H"),
 }
 
 BARS = 2000
 RETRY_DELAY = 3
 MAX_RETRY = 5
 
-# =====================================================
-#    SYMBOL LIST (Master List)
-# =====================================================
+# ==============================
+# Symbols (sample)
+# ==============================
 symbols = [
-    'PIDILITIND','PERSISTENT'
+    "PIDILITIND",
+    "PERSISTENT"
 ]
 
-# =====================================================
-#    Logging Setup
-# =====================================================
+# ==============================
+# Logs (repo root)
+# ==============================
 LOG_FILE = "download_log.txt"
 ERROR_FILE = "error_symbols.txt"
 
 def log(msg):
     with open(LOG_FILE, "a") as f:
-        f.write(f"{datetime.now()}  |  {msg}\n")
+        f.write(f"{datetime.now()} | {msg}\n")
     print(msg)
 
-def log_error(symbol, timeframe, error):
+def log_error(symbol, tf, err):
     with open(ERROR_FILE, "a") as f:
-        f.write(f"{symbol},{timeframe},{error}\n")
+        f.write(f"{symbol},{tf},{err}\n")
 
-# =====================================================
-#    FETCH FUNCTION FOR MULTIPROCESSING
-# =====================================================
+# ==============================
+# Fetch + Save
+# ==============================
 def fetch_save(args):
-    symbol, tf_label, interval = args
+    symbol, tf_label, interval, folder = args
+    os.makedirs(folder, exist_ok=True)
     attempt = 1
-
-    output_dir = f"stock_data_{tf_label}"
-    os.makedirs(output_dir, exist_ok=True)
 
     while attempt <= MAX_RETRY:
         try:
@@ -66,48 +65,37 @@ def fetch_save(args):
             )
 
             if df is not None and not df.empty:
-                df["timeframe"] = tf_label
-                df.to_parquet(os.path.join(output_dir, f"{symbol}.parquet"))
-                log(f"[OK] {symbol:<12} | TF:{tf_label}")
+                df.to_parquet(os.path.join(folder, f"{symbol}.parquet"))
+                log(f"[OK] {symbol} | TF:{tf_label}")
                 return
 
-            log(f"[WARNING] empty data {symbol} TF:{tf_label} retry={attempt}")
+            log(f"[EMPTY] {symbol} | TF:{tf_label} retry={attempt}")
 
         except Exception as e:
-            msg = str(e)
-            if isinstance(e, (socket.timeout, ssl.SSLError)):
-                msg = "Network Timeout"
-            log(f"[TIMEOUT] {symbol} TF:{tf_label} retry={attempt} Error:{msg}")
+            msg = "Network error" if isinstance(e, (socket.timeout, ssl.SSLError)) else str(e)
+            log(f"[ERROR] {symbol} | TF:{tf_label} | {msg}")
 
         attempt += 1
         time.sleep(RETRY_DELAY)
 
-    log(f"[FAILED] {symbol:<12} after retries | TF:{tf_label}")
     log_error(symbol, tf_label, "Failed after retries")
 
-# =====================================================
-#    MASTER EXECUTION PARALLEL
-# =====================================================
+# ==============================
+# Runner
+# ==============================
 def run_all():
-    start = time.time()
     log("===== DOWNLOAD STARTED =====")
 
     tasks = []
-    for tf_label, interval in TIMEFRAMES.items():
-        for symbol in symbols:
-            tasks.append((symbol, tf_label, interval))
+    for tf_label, (interval, folder) in TIMEFRAMES.items():
+        for sym in symbols:
+            tasks.append((sym, tf_label, interval, folder))
 
-    # CPU parallel workers
-    with mp.Pool(processes=mp.cpu_count()) as pool:
+    workers = min(4, mp.cpu_count())
+    with mp.Pool(workers) as pool:
         pool.map(fetch_save, tasks)
 
-    log("\n===== DOWNLOAD FINISHED =====")
-    log(f"Time taken: {round(time.time()-start,2)} seconds")
+    log("===== DOWNLOAD FINISHED =====")
 
-# =====================================================
-#    ENTRY POINT
-# =====================================================
 if __name__ == "__main__":
     run_all()
-
-
