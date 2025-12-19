@@ -33,7 +33,7 @@ jobs:
 
       - name: Run fetch script
         run: |
-          python All_Data_Fetch.py
+          python All Data Fetch.py
 
       - name: Commit & Push fetched data
         run: |
