@@ -432,15 +432,18 @@ if run:
             sig = trend_alignment(df)
             if sig:
                 results.append({"Symbol": sym, "Trend": sig}
-        elif scanner == "Pullback to EMA":
-            sig = pullback_to_ema(df)
-            if sig:
-                results.append({"Symbol": sym, "Setup": sig})
 
+                               
         elif scanner == "High Probability Confluence":
             sig = confluence_setup(df)
             if sig:
                 results.append({"Symbol": sym, "Setup": sig})
+
+        elif scanner == "Trend Alignment (EMA)":
+            sig = trend_alignment(df)
+            if sig:
+                results.append({"Symbol": sym, "Trend": sig})
+
 
 
 
