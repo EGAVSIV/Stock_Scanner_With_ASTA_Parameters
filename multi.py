@@ -323,6 +323,187 @@ def confluence_setup(df):
 
     return None
 
+def macd_hook_up(df):
+    if len(df) < 35:
+        return None
+
+    macd, signal, hist = talib.MACD(df["close"], 12, 26, 9)
+
+    if (
+        macd.iloc[-1] > 0 and
+        macd.iloc[-2] < macd.iloc[-3] and
+        macd.iloc[-1] > macd.iloc[-2] and
+        hist.iloc[-1] > hist.iloc[-2]
+    ):
+        return "MACD Hook Up"
+
+    return None
+
+def macd_hook_down(df):
+    if len(df) < 35:
+        return None
+
+    macd, signal, hist = talib.MACD(df["close"], 12, 26, 9)
+
+    if (
+        macd.iloc[-1] < 0 and
+        macd.iloc[-2] > macd.iloc[-3] and
+        macd.iloc[-1] < macd.iloc[-2] and
+        hist.iloc[-1] < hist.iloc[-2]
+    ):
+        return "MACD Hook Down"
+
+    return None
+
+
+def macd_histogram_divergence(df):
+    if len(df) < 50:
+        return None
+
+    _, _, hist = talib.MACD(df["close"], 12, 26, 9)
+
+    price_low1 = df["low"].iloc[-40:-20].min()
+    price_low2 = df["low"].iloc[-20:].min()
+
+    hist_low1 = hist.iloc[-40:-20].min()
+    hist_low2 = hist.iloc[-20:].min()
+
+    if price_low2 < price_low1 and hist_low2 > hist_low1:
+        return "Bullish Histogram Divergence"
+
+    price_high1 = df["high"].iloc[-40:-20].max()
+    price_high2 = df["high"].iloc[-20:].max()
+
+    hist_high1 = hist.iloc[-40:-20].max()
+    hist_high2 = hist.iloc[-20:].max()
+
+    if price_high2 > price_high1 and hist_high2 < hist_high1:
+        return "Bearish Histogram Divergence"
+
+    return None
+
+def ema50_stoch_oversold(df):
+    if len(df) < 50:
+        return None
+
+    ema50 = talib.EMA(df["close"], 50)
+    slowk, slowd = talib.STOCH(
+        df["high"], df["low"], df["close"],
+        fastk_period=14, slowk_period=3, slowd_period=3
+    )
+
+    price = df["close"].iloc[-1]
+    ema_val = ema50.iloc[-1]
+
+    near_ema = abs(price - ema_val) / ema_val <= 0.005
+
+    stoch_cross = (
+        slowk.iloc[-2] < slowd.iloc[-2] and
+        slowk.iloc[-1] > slowd.iloc[-1] and
+        slowk.iloc[-1] < 20
+    )
+
+    if near_ema and stoch_cross:
+        return "EMA50 + Stoch Oversold Buy"
+
+    return None
+
+def dark_cloud_cover(df):
+    if len(df) < 2:
+        return None
+
+    prev = df.iloc[-2]
+    curr = df.iloc[-1]
+
+    # previous candle must be green
+    if prev["close"] <= prev["open"]:
+        return None
+
+    gap_up = curr["open"] >= prev["close"] * 1.01
+    close_below_prev_low = curr["close"] < prev["low"]
+
+    if gap_up and close_below_prev_low:
+        return "Dark Cloud Cover (Bearish)"
+
+    return None
+
+def morning_star_bottom(df):
+    if len(df) < 60:
+        return None
+
+    ema50 = talib.EMA(df["close"], 50)
+
+    # downtrend condition
+    if df["close"].iloc[-1] > ema50.iloc[-1]:
+        return None
+
+    pattern = talib.CDLMORNINGSTAR(
+        df["open"], df["high"], df["low"], df["close"]
+    ).iloc[-1]
+
+    if pattern > 0:
+        return "Morning Star (Bottom)"
+
+    return None
+
+def evening_star_top(df):
+    if len(df) < 60:
+        return None
+
+    ema50 = talib.EMA(df["close"], 50)
+
+    if df["close"].iloc[-1] < ema50.iloc[-1]:
+        return None
+
+    pattern = talib.CDLEVENINGSTAR(
+        df["open"], df["high"], df["low"], df["close"]
+    ).iloc[-1]
+
+    if pattern < 0:
+        return "Evening Star (Top)"
+
+    return None
+
+def bullish_gsas(df_tf, df_htf):
+    rsi = talib.RSI(df_tf["close"], 14)
+    adx = talib.ADX(df_tf["high"], df_tf["low"], df_tf["close"], 14)
+    ubb, _, _ = talib.BBANDS(df_tf["close"], 20)
+
+    macd_htf, sig_htf, _ = talib.MACD(df_htf["close"], 12, 26, 9)
+    ema20_htf = talib.EMA(df_htf["close"], 20)
+
+    if (
+        rsi.iloc[-1] > 60 and
+        ubb.iloc[-1] > ubb.iloc[-2] and
+        adx.iloc[-1] > adx.iloc[-2] and adx.iloc[-2] < adx.iloc[-3] and
+        macd_htf.iloc[-1] > sig_htf.iloc[-1] and
+        df_htf["close"].iloc[-1] > ema20_htf.iloc[-1]
+    ):
+        return "Bullish GSAS"
+
+    return None
+
+
+def bearish_gsas(df_tf, df_htf):
+    rsi = talib.RSI(df_tf["close"], 14)
+    adx = talib.ADX(df_tf["high"], df_tf["low"], df_tf["close"], 14)
+    _, _, lbb = talib.BBANDS(df_tf["close"], 20)
+
+    macd_htf, sig_htf, _ = talib.MACD(df_htf["close"], 12, 26, 9)
+    ema20_htf = talib.EMA(df_htf["close"], 20)
+
+    if (
+        rsi.iloc[-1] < 60 and
+        lbb.iloc[-1] < lbb.iloc[-2] and
+        adx.iloc[-1] > adx.iloc[-2] and adx.iloc[-2] < adx.iloc[-3] and
+        macd_htf.iloc[-1] < sig_htf.iloc[-1] and
+        df_htf["close"].iloc[-1] < ema20_htf.iloc[-1]
+    ):
+        return "Bearish GSAS"
+
+    return None
+
+
 
 
 # ==================================================
@@ -355,6 +536,15 @@ scanner = st.sidebar.selectbox(
         "Trend Alignment (EMA)",
         "Pullback to EMA",
         "High Probability Confluence",
+        "MACD Hook Up",
+        "MACD Hook Down",
+        "MACD Histogram Divergence",
+        "EMA50 + Stoch Oversold",
+        "Dark Cloud Cover",
+        "Morning Star (Bottom)",
+        "Evening Star (Top)",
+        "Bullish GSAS",
+        "Bearish GSAS",
 
     ]
 )
@@ -375,6 +565,22 @@ if run:
         st.stop()
 
     results = []
+
+    # === Higher Timeframe preload for GSAS ===
+    if scanner in ["Bullish GSAS", "Bearish GSAS"]:
+        htf_map = {
+            "15 Min": "1 Hour",
+            "1 Hour": "Daily",
+            "Daily": "Weekly"
+            "Weekly": "Monthly"
+    }
+
+    if tf not in htf_map:
+        st.warning("GSAS not supported for this timeframe")
+        st.stop()
+
+    data_htf = load_data(TIMEFRAMES[htf_map[tf]])
+
 
     # preload W/M if required
     if scanner == "RSI WM 60–40":
@@ -448,8 +654,35 @@ if run:
             if sig:
                 results.append({"Symbol": sym, "Trend": sig})
 
+        elif scanner == "MACD Hook Up":
+            sig = macd_hook_up(df)
+            if sig: 
+                results.append({"Symbol": sym, "Signal": sig})
 
+        elif scanner == "MACD Hook Down":
+            sig = macd_hook_down(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
 
+        elif scanner == "MACD Histogram Divergence":
+            sig = macd_histogram_divergence(df)
+            if sig: results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "EMA50 + Stoch Oversold":
+            sig = ema50_stoch_oversold(df)
+            if sig: results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "Dark Cloud Cover":
+            sig = dark_cloud_cover(df)
+            if sig: results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "Morning Star (Bottom)":
+            sig = morning_star_bottom(df)
+            if sig: results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "Evening Star (Top)":
+            sig = evening_star_top(df)
+            if sig: results.append({"Symbol": sym, "Signal": sig})
 
         elif scanner == "Breakaway Gaps":
             sig = breakaway_gap(df)
