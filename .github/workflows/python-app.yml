@@ -37,7 +37,7 @@ jobs:
       # 4️⃣ Run fetch script
       - name: Run fetch script
         run: |
-          python All_Data_Fetch.py
+          python All Data Fetch.py
 
       # 5️⃣ Commit & Push directly to MAIN
       - name: Commit & Push fetched data
