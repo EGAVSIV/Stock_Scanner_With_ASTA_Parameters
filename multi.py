@@ -230,6 +230,9 @@ def third_wave_finder(df):
 # ==================================================
 # SIDEBAR
 # ==================================================
+# ==================================================
+# SIDEBAR
+# ==================================================
 tf = st.sidebar.selectbox(
     "Timeframe",
     list(TIMEFRAMES.keys())
@@ -256,6 +259,9 @@ run = st.sidebar.button("▶ Run Scan")
 
 
 run = st.sidebar.button("▶ Run Scan")
+
+
+
 
 # ==================================================
 # MAIN EXECUTION
