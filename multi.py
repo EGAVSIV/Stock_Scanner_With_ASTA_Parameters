@@ -734,6 +734,13 @@ if run:
     st.success(f"Stocks Found: {len(df_res)}")
     st.dataframe(df_res, use_container_width=True)
 
+
+
+    if scanner == "RSI Market Pulse":
+        fig = px.histogram(df_res, x="Zone", title="RSI Zone Distribution")
+        st.plotly_chart(fig, use_container_width=True)
+
+
     st.markdown("""
 ---
 **Designed by:-  
@@ -743,7 +750,3 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
-
-    if scanner == "RSI Market Pulse":
-        fig = px.histogram(df_res, x="Zone", title="RSI Zone Distribution")
-        st.plotly_chart(fig, use_container_width=True)
