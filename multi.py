@@ -98,10 +98,26 @@ def volume_shocker(df):
 
 # --- NRB-7
 def nrb_7(df):
-    if len(df) < 20:
+    """
+    NRB-7 logic (as per image):
+    - 7th candle ago HIGH > max HIGH of next 6 candles
+    - 7th candle ago LOW  < min LOW of next 6 candles
+    """
+
+    if len(df) < 8:
         return False
-    ref = df.iloc[-8]
-    return ref["high"] > df["high"].iloc[-7:-1].max() and ref["low"] < df["low"].iloc[-7:-1].min()
+
+    # 7 days ago candle
+    ref = df.iloc[-7]
+
+    # Next 6 candles (after ref, before today)
+    recent = df.iloc[-6:]
+
+    cond_high = ref["high"] > recent["high"].max()
+    cond_low  = ref["low"]  < recent["low"].min()
+
+    return cond_high and cond_low
+
 
 # --- Counter Attack
 def counter_attack(df):
