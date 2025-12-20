@@ -31,7 +31,7 @@ if not st.session_state.authenticated:
 # ==================================================
 # STREAMLIT CONFIG
 # ==================================================
-st.set_page_config("Multi-Timeframe Stock Screener", layout="wide")
+st.set_page_config("Multi-Timeframe Stock Screener", layout="wide",page_icon="☀️")
 st.title("📊 Multi-Timeframe Stock Screener")
 
 # ==================================================
