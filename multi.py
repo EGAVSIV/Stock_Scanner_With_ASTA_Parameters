@@ -99,24 +99,47 @@ def volume_shocker(df):
 # --- NRB-7
 def nrb_7(df):
     """
-    NRB-7 logic (as per image):
-    - 7th candle ago HIGH > max HIGH of next 6 candles
-    - 7th candle ago LOW  < min LOW of next 6 candles
+    NRB-7 + Breakout confirmation + Volume filter
+    Returns:
+        None → no signal
+        String → Bullish / Bearish NRB breakout
     """
 
-    if len(df) < 8:
-        return False
+    if len(df) < 20:
+        return None
 
-    # 7 days ago candle
-    ref = df.iloc[-7]
+    # NRB reference candle (7th from last)
+    base = df.iloc[-7]
 
-    # Next 6 candles (after ref, before today)
-    recent = df.iloc[-6:]
+    # Next 6 candles (compression candles)
+    inside = df.iloc[-6:-1]
 
-    cond_high = ref["high"] > recent["high"].max()
-    cond_low  = ref["low"]  < recent["low"].min()
+    # Latest candle (breakout candle)
+    last = df.iloc[-1]
 
-    return cond_high and cond_low
+    # --- NRB-7 condition ---
+    is_nrb = (
+        base["high"] > inside["high"].max() and
+        base["low"]  < inside["low"].min()
+    )
+
+    if not is_nrb:
+        return None
+
+    # --- Volume filter ---
+    avg_vol = df["volume"].rolling(10).mean().iloc[-2]
+    if last["volume"] < 1.5 * avg_vol:
+        return None
+
+    # --- Breakout confirmation ---
+    if last["close"] > base["high"]:
+        return "NRB-7 Bullish Breakout + Volume"
+
+    if last["close"] < base["low"]:
+        return "NRB-7 Bearish Breakdown + Volume"
+
+    return None
+
 
 
 # --- Counter Attack
