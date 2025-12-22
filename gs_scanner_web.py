@@ -310,9 +310,13 @@ st.set_page_config(
     layout="wide",
 )
 
+# =====================================================
+# LAST CANDLE DATES PER TIMEFRAME (FROM SOURCE DATA)
+# =====================================================
 last_daily = get_last_candle_by_tf(FOLDERS["D"])
 last_15m   = get_last_candle_by_tf(FOLDERS["15m"])
-last_1h    = get_last_candle_by_tf(FOLDERS["1h"]
+last_1h    = get_last_candle_by_tf(FOLDERS["1h"])
+
 
 
 # ---- Top title area ----
@@ -476,6 +480,7 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
+
 
 
 
