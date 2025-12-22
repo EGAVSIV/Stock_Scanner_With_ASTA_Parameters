@@ -343,19 +343,15 @@ st.markdown(
 # =====================================================
 st.markdown(
     f"""
-    <div style="text-align:center; font-size:15px; color:{UI_COLORS['green']};
-                margin-bottom:10px;">
-
-        🗓 <strong>Daily</strong>: {last_daily.date() if last_daily else 'NA'}
-        &nbsp;&nbsp; | &nbsp;&nbsp;
-        ⏱ <strong>15 Min</strong>: {last_15m.strftime('%d %b %Y %H:%M IST') if last_15m else 'NA'}
-        &nbsp;&nbsp; | &nbsp;&nbsp;
-        ⏰ <strong>1 Hour</strong>: {last_1h.strftime('%d %b %Y %H:%M IST') if last_1h else 'NA'}
-
-    </div>
-    """,
-    unsafe_allow_html=True
+🗓 **Daily**: {last_daily.date() if last_daily else 'NA'}
+&nbsp;&nbsp; | &nbsp;&nbsp;
+⏱ **15 Min**: {last_15m.strftime('%d %b %Y %H:%M IST') if last_15m else 'NA'}
+&nbsp;&nbsp; | &nbsp;&nbsp;
+⏰ **1 Hour**: {last_1h.strftime('%d %b %Y %H:%M IST') if last_1h else 'NA'}
+""",
+    unsafe_allow_html=False
 )
+
 
 
 # =====================================================
@@ -490,6 +486,7 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
+
 
 
 
