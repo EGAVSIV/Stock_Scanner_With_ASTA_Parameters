@@ -28,11 +28,87 @@ if not st.session_state.authenticated:
 
     st.stop()
 
+
+def get_last_candle_by_tf(folder_path: str):
+    last_dt = None
+
+    if not os.path.isdir(folder_path):
+        return None
+
+    for f in os.listdir(folder_path):
+        if not f.endswith(".parquet"):
+            continue
+        try:
+            df = pd.read_parquet(os.path.join(folder_path, f))
+            if df.empty:
+                continue
+
+            if isinstance(df.index, pd.DatetimeIndex):
+                dt = df.index[-1]
+            elif "datetime" in df.columns:
+                dt = pd.to_datetime(df["datetime"]).iloc[-1]
+            else:
+                continue
+
+            # Assume UTC → convert to IST
+            if dt.tzinfo is None:
+                dt = dt.tz_localize("UTC")
+            else:
+                dt = dt.tz_convert("UTC")
+
+            dt = dt.tz_convert("Asia/Kolkata")
+
+            if last_dt is None or dt > last_dt:
+                last_dt = dt
+
+        except Exception:
+            continue
+
+    return last_dt
+
+
 # ==================================================
 # STREAMLIT CONFIG
 # ==================================================
 st.set_page_config("Multi-Timeframe Stock Screener", layout="wide",page_icon="🧮")
+
+
+# ==================================================
+# LAST CANDLE DATES (ALL TIMEFRAMES – IST)
+# ==================================================
+last_15m = get_last_candle_by_tf(TIMEFRAMES["15 Min"])
+last_1h  = get_last_candle_by_tf(TIMEFRAMES["1 Hour"])
+last_d   = get_last_candle_by_tf(TIMEFRAMES["Daily"])
+last_w   = get_last_candle_by_tf(TIMEFRAMES["Weekly"])
+last_m   = get_last_candle_by_tf(TIMEFRAMES["Monthly"])
+
 st.title("📊 Multi-Timeframe Stock Screener")
+# ==================================================
+# TOP DATA REFRESH + LAST CANDLE INFO
+# ==================================================
+col1, col2 = st.columns([1, 6])
+
+with col1:
+    if st.button("🔄 Refresh Data"):
+        st.cache_data.clear()
+        st.success("Fresh data loaded")
+        st.rerun()
+
+with col2:
+    st.markdown(
+        f"""
+🕯 **Last Candle (IST)**  
+⏱ **15 Min**: {last_15m.strftime('%d %b %Y %H:%M') if last_15m else 'NA'}  |  
+⏰ **1 Hour**: {last_1h.strftime('%d %b %Y %H:%M') if last_1h else 'NA'}  |  
+📅 **Daily**: {last_d.date() if last_d else 'NA'}  |  
+📆 **Weekly**: {last_w.date() if last_w else 'NA'}  |  
+🗓 **Monthly**: {last_m.date() if last_m else 'NA'}
+""",
+        unsafe_allow_html=False
+    )
+
+st.markdown("---")
+
 
 # ==================================================
 # TIMEFRAME → DATA FOLDER
