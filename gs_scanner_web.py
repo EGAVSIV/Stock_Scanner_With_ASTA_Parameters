@@ -30,34 +30,36 @@ if not st.session_state.authenticated:
     st.stop()
 
 
-def get_last_candle_date_from_folders(folders: dict):
-    dates = []
+def get_last_candle_by_tf(folder_path: str):
+    last_dt = None
 
-    for folder in folders.values():
-        if not os.path.isdir(folder):
-            continue
-
-        for f in os.listdir(folder):
-            if not f.endswith(".parquet"):
-                continue
-
-            try:
-                df = pd.read_parquet(os.path.join(folder, f))
-                if df.empty:
-                    continue
-
-                if isinstance(df.index, pd.DatetimeIndex):
-                    dates.append(df.index[-1])
-                elif "datetime" in df.columns:
-                    dates.append(pd.to_datetime(df["datetime"]).iloc[-1])
-
-            except Exception:
-                continue
-
-    if not dates:
+    if not os.path.isdir(folder_path):
         return None
 
-    return max(dates).date()
+    for f in os.listdir(folder_path):
+        if not f.endswith(".parquet"):
+            continue
+
+        try:
+            df = pd.read_parquet(os.path.join(folder_path, f))
+            if df.empty:
+                continue
+
+            if isinstance(df.index, pd.DatetimeIndex):
+                dt = df.index[-1]
+            elif "datetime" in df.columns:
+                dt = pd.to_datetime(df["datetime"]).iloc[-1]
+            else:
+                continue
+
+            if last_dt is None or dt > last_dt:
+                last_dt = dt
+
+        except Exception:
+            continue
+
+    return last_dt
+
 
 
 # =========================================================
@@ -308,6 +310,9 @@ st.set_page_config(
     layout="wide",
 )
 
+last_daily = get_last_candle_by_tf(FOLDERS["D"])
+last_15m   = get_last_candle_by_tf(FOLDERS["15m"])
+last_1h    = get_last_candle_by_tf(FOLDERS["1h"]
 
 
 # ---- Top title area ----
@@ -320,22 +325,23 @@ st.markdown(
     unsafe_allow_html=True,
 )
 # =====================================================
-# LAST CANDLE DATE (FROM DATA)
+# DISPLAY LAST CANDLE INFO
 # =====================================================
-last_candle_date = get_last_candle_date_from_folders(FOLDERS)
+st.markdown(
+    f"""
+    <div style="text-align:center; font-size:15px; color:{UI_COLORS['green']};
+                margin-bottom:10px;">
 
-if last_candle_date:
-    st.markdown(
-        f"""
-        <div style="text-align:center; font-size:16px; color:{UI_COLORS['green']};
-                    margin-bottom:10px;">
-            🕯 Last Candle Date: <b>{last_candle_date}</b>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-else:
-    st.warning("⚠️ Unable to detect last candle date from data folders")
+        🗓 <b>Daily</b>: {last_daily.date() if last_daily else 'NA'}
+        &nbsp;&nbsp; | &nbsp;&nbsp;
+        ⏱ <b>15 Min</b>: {last_15m.strftime('%d %b %Y %H:%M') if last_15m else 'NA'}
+        &nbsp;&nbsp; | &nbsp;&nbsp;
+        ⏰ <b>1 Hour</b>: {last_1h.strftime('%d %b %Y %H:%M') if last_1h else 'NA'}
+
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 # =====================================================
@@ -470,6 +476,7 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
+
 
 
 
