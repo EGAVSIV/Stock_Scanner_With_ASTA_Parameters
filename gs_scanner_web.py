@@ -346,15 +346,15 @@ st.markdown(
     <div style="text-align:center; font-size:15px; color:{UI_COLORS['green']};
                 margin-bottom:10px;">
 
-        🗓 <b>Daily</b>: {last_daily.date() if last_daily else 'NA'}
+        🗓 <strong>Daily</strong>: {last_daily.date() if last_daily else 'NA'}
         &nbsp;&nbsp; | &nbsp;&nbsp;
-        ⏱ <b>15 Min</b>: {last_15m.strftime('%d %b %Y %H:%M') if last_15m else 'NA'}
+        ⏱ <strong>15 Min</strong>: {last_15m.strftime('%d %b %Y %H:%M IST') if last_15m else 'NA'}
         &nbsp;&nbsp; | &nbsp;&nbsp;
-        ⏰ <b>1 Hour</b>: {last_1h.strftime('%d %b %Y %H:%M') if last_1h else 'NA'}
+        ⏰ <strong>1 Hour</strong>: {last_1h.strftime('%d %b %Y %H:%M IST') if last_1h else 'NA'}
 
     </div>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
 
 
@@ -490,6 +490,7 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
+
 
 
 
