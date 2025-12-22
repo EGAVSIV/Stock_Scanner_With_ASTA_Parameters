@@ -265,7 +265,7 @@ def rsi_adx(df):
     if adx > 50 and rsi < 20:
         return "Bullish Reversal"
     if adx > 50 and rsi > 80:
-        return "Bearish Reversal"
+        return "Probabale Bearish Reversal"
     return None
 
 # --- RSI WM 60–40 (Multi-TF)
