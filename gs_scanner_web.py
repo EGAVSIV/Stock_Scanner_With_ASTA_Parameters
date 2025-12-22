@@ -293,10 +293,10 @@ st.markdown(
 )
 
 # =====================================================
-# TOP DATA REFRESH CONTROL (IST)
 # =====================================================
-ist = pytz.timezone("Asia/Kolkata")
-ist_now = datetime.now(ist)
+# TOP DATA REFRESH CONTROL (IST - SAFE)
+# =====================================================
+ist_now = pd.Timestamp.now(tz="Asia/Kolkata")
 
 col1, col2 = st.columns([1, 4])
 
@@ -424,6 +424,7 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
+
 
 
 
