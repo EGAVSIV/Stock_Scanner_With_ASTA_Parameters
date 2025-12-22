@@ -122,6 +122,16 @@ TIMEFRAMES = {
 }
 
 # ==================================================
+# LAST CANDLE DATES (ALL TIMEFRAMES – IST)
+# ==================================================
+last_15m = get_last_candle_by_tf(TIMEFRAMES["15 Min"])
+last_1h  = get_last_candle_by_tf(TIMEFRAMES["1 Hour"])
+last_d   = get_last_candle_by_tf(TIMEFRAMES["Daily"])
+last_w   = get_last_candle_by_tf(TIMEFRAMES["Weekly"])
+last_m   = get_last_candle_by_tf(TIMEFRAMES["Monthly"])
+
+
+# ==================================================
 # DATA LOADER
 # ==================================================
 @st.cache_data(show_spinner=False)
