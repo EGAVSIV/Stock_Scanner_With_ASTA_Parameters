@@ -30,6 +30,34 @@ if not st.session_state.authenticated:
     st.stop()
 
 
+def get_last_candle_date_from_folders(folders: dict):
+    dates = []
+
+    for folder in folders.values():
+        if not os.path.isdir(folder):
+            continue
+
+        for f in os.listdir(folder):
+            if not f.endswith(".parquet"):
+                continue
+
+            try:
+                df = pd.read_parquet(os.path.join(folder, f))
+                if df.empty:
+                    continue
+
+                if isinstance(df.index, pd.DatetimeIndex):
+                    dates.append(df.index[-1])
+                elif "datetime" in df.columns:
+                    dates.append(pd.to_datetime(df["datetime"]).iloc[-1])
+
+            except Exception:
+                continue
+
+    if not dates:
+        return None
+
+    return max(dates).date()
 
 
 # =========================================================
@@ -291,6 +319,24 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+# =====================================================
+# LAST CANDLE DATE (FROM DATA)
+# =====================================================
+last_candle_date = get_last_candle_date_from_folders(FOLDERS)
+
+if last_candle_date:
+    st.markdown(
+        f"""
+        <div style="text-align:center; font-size:16px; color:{UI_COLORS['green']};
+                    margin-bottom:10px;">
+            🕯 Last Candle Date: <b>{last_candle_date}</b>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+else:
+    st.warning("⚠️ Unable to detect last candle date from data folders")
+
 
 # =====================================================
 # =====================================================
@@ -424,6 +470,7 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
+
 
 
 
