@@ -45,6 +45,7 @@ def get_last_candle_by_tf(folder_path: str):
             if df.empty:
                 continue
 
+            # --- Extract datetime (assumed GMT/UTC) ---
             if isinstance(df.index, pd.DatetimeIndex):
                 dt = df.index[-1]
             elif "datetime" in df.columns:
@@ -52,8 +53,17 @@ def get_last_candle_by_tf(folder_path: str):
             else:
                 continue
 
-            if last_dt is None or dt > last_dt:
-                last_dt = dt
+            # --- Ensure UTC ---
+            if dt.tzinfo is None:
+                dt = dt.tz_localize("UTC")
+            else:
+                dt = dt.tz_convert("UTC")
+
+            # --- Convert to IST ---
+            dt_ist = dt.tz_convert("Asia/Kolkata")
+
+            if last_dt is None or dt_ist > last_dt:
+                last_dt = dt_ist
 
         except Exception:
             continue
@@ -480,6 +490,7 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
+
 
 
 
