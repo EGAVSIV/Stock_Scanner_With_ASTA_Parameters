@@ -30,20 +30,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 
-# =====================================================
-# TOP DATA REFRESH CONTROL
-# =====================================================
-col1, col2 = st.columns([1, 5])
 
-with col1:
-    if st.button("🔄 Refresh Data"):
-        st.cache_data.clear()
-        st.success("Fresh data loaded from GitHub.")
-        st.rerun()
-
-with col2:
-    ist_time = pd.Timestamp.now(tz="Asia/Kolkata")
-    st.caption(f"🕒 Last refresh (IST): {ist_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
 # =========================================================
 # CONFIG
@@ -305,6 +292,26 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# =====================================================
+# TOP DATA REFRESH CONTROL (IST)
+# =====================================================
+ist = pytz.timezone("Asia/Kolkata")
+ist_now = datetime.now(ist)
+
+col1, col2 = st.columns([1, 4])
+
+with col1:
+    if st.button("🔄 Refresh Data"):
+        st.cache_data.clear()
+        st.success("Fresh data loaded from GitHub.")
+        st.rerun()
+
+with col2:
+    st.caption(
+        f"🕒 Last refresh (IST): {ist_now.strftime('%d %b %Y, %I:%M:%S %p')}"
+    )
+
+
 st.markdown(
     f"""
     <div style="text-align:right; color:{UI_COLORS['blue']};
@@ -417,6 +424,7 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
+
 
 
 
