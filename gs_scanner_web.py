@@ -29,6 +29,22 @@ if not st.session_state.authenticated:
 
     st.stop()
 
+
+# =====================================================
+# TOP DATA REFRESH CONTROL
+# =====================================================
+col1, col2 = st.columns([1, 5])
+
+with col1:
+    if st.button("🔄 Refresh Data"):
+        st.cache_data.clear()
+        st.success("Fresh data loaded from GitHub.")
+        st.rerun()
+
+with col2:
+    ist_time = pd.Timestamp.now(tz="Asia/Kolkata")
+    st.caption(f"🕒 Last refresh (IST): {ist_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
 # =========================================================
 # CONFIG
 # =========================================================
@@ -401,6 +417,7 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
+
 
 
 
