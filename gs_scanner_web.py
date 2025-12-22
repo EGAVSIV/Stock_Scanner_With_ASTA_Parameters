@@ -363,7 +363,7 @@ with st.sidebar:
 
 # ---- Reset logic (just reload page in Streamlit world) ----
 if reset_btn:
-    st.experimental_rerun()
+    st.rerun()
 
 # ---- Main area ----
 result_placeholder = st.empty()
@@ -424,6 +424,7 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
+
 
 
 
