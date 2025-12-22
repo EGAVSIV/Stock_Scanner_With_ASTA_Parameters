@@ -72,6 +72,26 @@ def get_last_candle_by_tf(folder_path: str):
 # ==================================================
 st.set_page_config("Multi-Timeframe Stock Screener", layout="wide",page_icon="🧮")
 
+# ==================================================
+# TIMEFRAME → DATA FOLDER
+# ==================================================
+TIMEFRAMES = {
+    "15 Min": "stock_data_15",
+    "1 Hour": "stock_data_1H",
+    "Daily": "stock_data_D",
+    "Weekly": "stock_data_W",
+    "Monthly": "stock_data_M",
+}
+
+# ==================================================
+# LAST CANDLE DATES (ALL TIMEFRAMES – IST)
+# ==================================================
+last_15m = get_last_candle_by_tf(TIMEFRAMES["15 Min"])
+last_1h  = get_last_candle_by_tf(TIMEFRAMES["1 Hour"])
+last_d   = get_last_candle_by_tf(TIMEFRAMES["Daily"])
+last_w   = get_last_candle_by_tf(TIMEFRAMES["Weekly"])
+last_m   = get_last_candle_by_tf(TIMEFRAMES["Monthly"])
+
 
 st.title("📊 Multi-Timeframe Stock Screener")
 # ==================================================
@@ -101,25 +121,7 @@ with col2:
 st.markdown("---")
 
 
-# ==================================================
-# TIMEFRAME → DATA FOLDER
-# ==================================================
-TIMEFRAMES = {
-    "15 Min": "stock_data_15",
-    "1 Hour": "stock_data_1H",
-    "Daily": "stock_data_D",
-    "Weekly": "stock_data_W",
-    "Monthly": "stock_data_M",
-}
 
-# ==================================================
-# LAST CANDLE DATES (ALL TIMEFRAMES – IST)
-# ==================================================
-last_15m = get_last_candle_by_tf(TIMEFRAMES["15 Min"])
-last_1h  = get_last_candle_by_tf(TIMEFRAMES["1 Hour"])
-last_d   = get_last_candle_by_tf(TIMEFRAMES["Daily"])
-last_w   = get_last_candle_by_tf(TIMEFRAMES["Weekly"])
-last_m   = get_last_candle_by_tf(TIMEFRAMES["Monthly"])
 
 
 # ==================================================
