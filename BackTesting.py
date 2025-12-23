@@ -116,7 +116,7 @@ def hourly_run(df):
         return False, 0
 
     return (
-        pct_move >= 2 and
+        pct_move >= 1 and
         macd_last > macd_hist.iloc[-2] and
         rsi_last > 55 and
         adx_last > adx.iloc[-2]
