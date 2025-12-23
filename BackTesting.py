@@ -54,7 +54,6 @@ def detect_events(df):
 
 # =====================================================
 # INDICATOR SNAPSHOT
-# =====================================================
 def snapshot(df, i):
     close = df["close"]
 
@@ -64,13 +63,29 @@ def snapshot(df, i):
     ema20 = talib.EMA(close, 20)
     bb_u, bb_m, bb_l = talib.BBANDS(close, 20)
 
+    # Convert i to positional index safely
+    if i < 0:
+        i = len(df) + i
+
+    # Guard against insufficient data
+    if i < 0 or i >= len(df):
+        return None
+
+    if pd.isna(rsi.iloc[i]) or pd.isna(adx.iloc[i]):
+        return None
+
     return {
-        "RSI": rsi[i],
-        "ADX": adx[i],
-        "MACD": "Bullish" if macd[i] > signal[i] else "Bearish",
-        "Price>EMA20": close[i] > ema20[i],
-        "BB": "Upper" if close[i] > bb_u[i] else "Lower" if close[i] < bb_l[i] else "Middle"
+        "RSI": float(rsi.iloc[i]),
+        "ADX": float(adx.iloc[i]),
+        "MACD": "Bullish" if macd.iloc[i] > signal.iloc[i] else "Bearish",
+        "Price>EMA20": bool(close.iloc[i] > ema20.iloc[i]),
+        "BB": (
+            "Upper" if close.iloc[i] > bb_u.iloc[i]
+            else "Lower" if close.iloc[i] < bb_l.iloc[i]
+            else "Middle"
+        )
     }
+
 
 # =====================================================
 # HIGHER TF SNAPSHOT (LATEST)
@@ -156,7 +171,9 @@ if st.button("🚀 Run Behavioral Intelligence"):
         verdict = build_verdict(hist_df)
 
         # Current market snapshot
-        latest = snapshot(df_d, -1)
+        latest = snapshot(df_d, len(df_d) - 1)
+        if latest is None:
+            continue
         latest["Daily_RSI"] = latest["RSI"]
         latest["Daily_ADX"] = latest["ADX"]
         latest["Daily_MACD"] = latest["MACD"]
