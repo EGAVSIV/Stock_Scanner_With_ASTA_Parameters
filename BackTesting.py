@@ -8,7 +8,7 @@ import talib
 # STREAMLIT CONFIG
 # =====================================================
 st.set_page_config(
-    page_title="Multi-Timeframe RUN Stock Analyzer",
+    page_title="Back Testing Multi-Timeframe RUN Stock Analyzer",
     layout="wide",
     page_icon="🚀"
 )
