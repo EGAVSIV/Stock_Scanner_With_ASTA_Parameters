@@ -13,7 +13,7 @@ st.set_page_config(
     page_icon="🚀"
 )
 
-st.title("🚀 Multi-Timeframe Stock RUN Analyzer")
+st.title("🚀Back Testing Multi-Timeframe Stock RUN Analyzer")
 st.caption("Hourly Momentum + Daily & Weekly Confirmation")
 
 # =====================================================
