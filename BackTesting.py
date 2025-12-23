@@ -14,7 +14,6 @@ st.set_page_config(
 )
 
 st.title("🚀 Multi-Timeframe Stock RUN Analyzer")
-st.caption("Hourly Momentum + Daily & Weekly Confirmation")
 
 # =====================================================
 # DATA PATHS
@@ -24,7 +23,7 @@ DATA_D  = "stock_data_D"
 DATA_W  = "stock_data_W"
 
 # =====================================================
-# SAFE DATA LOADER
+# SAFE & BULLETPROOF DATA LOADER
 # =====================================================
 @st.cache_data(show_spinner=False)
 def load_stock(folder, symbol):
@@ -34,58 +33,57 @@ def load_stock(folder, symbol):
 
     df = pd.read_parquet(path)
 
-    # -------- Detect datetime column or index ----------
-    possible_cols = ["Datetime", "datetime", "Date", "date", "Timestamp", "timestamp"]
-    dt_col = None
+    # -------- Normalize column names --------
+    df.columns = [c.strip().lower() for c in df.columns]
 
-    for c in possible_cols:
-        if c in df.columns:
-            dt_col = c
-            break
+    # -------- Detect datetime --------
+    dt_candidates = ["datetime", "date", "timestamp"]
+    dt_col = next((c for c in dt_candidates if c in df.columns), None)
 
-    if dt_col is None and isinstance(df.index, pd.DatetimeIndex):
-        df = df.reset_index()
-        dt_col = df.columns[0]
+    if dt_col:
+        df[dt_col] = pd.to_datetime(df[dt_col])
+        df = df.sort_values(dt_col)
+    elif isinstance(df.index, pd.DatetimeIndex):
+        df = df.sort_index()
+        df = df.reset_index(drop=True)
+    else:
+        # No datetime → create synthetic index (safe fallback)
+        df["synthetic_dt"] = pd.RangeIndex(len(df))
+        df = df.sort_values("synthetic_dt")
 
-    if dt_col is None:
-        raise ValueError(f"No Datetime column found in {symbol}")
+    # -------- Validate OHLC --------
+    required_cols = {"open", "high", "low", "close"}
+    if not required_cols.issubset(df.columns):
+        return None
 
-    df[dt_col] = pd.to_datetime(df[dt_col])
-    df = df.sort_values(dt_col).reset_index(drop=True)
-
-    return df
+    return df.reset_index(drop=True)
 
 # =====================================================
-# BEST MA SELECTOR (STOCK-SPECIFIC)
+# BEST MA SELECTOR
 # =====================================================
-def select_best_ma(df):
-    ma_map = {
-        "EMA20": talib.EMA(df["Close"], 20),
-        "EMA50": talib.EMA(df["Close"], 50),
-        "SMA20": talib.SMA(df["Close"], 20),
-        "SMA50": talib.SMA(df["Close"], 50),
+def best_ma(df):
+    mas = {
+        "EMA20": talib.EMA(df["close"], 20),
+        "EMA50": talib.EMA(df["close"], 50),
+        "SMA20": talib.SMA(df["close"], 20),
+        "SMA50": talib.SMA(df["close"], 50),
     }
 
-    slopes = {}
-    for k, v in ma_map.items():
-        if v.isna().all():
-            slopes[k] = -999
-        else:
-            slopes[k] = v.diff().iloc[-1]
-
+    slopes = {k: v.diff().iloc[-1] if not v.isna().all() else -999 for k, v in mas.items()}
     best = max(slopes, key=slopes.get)
-    return best, ma_map[best]
+
+    return best, mas[best]
 
 # =====================================================
-# HOURLY RUN DETECTION (TRIGGER)
+# HOURLY RUN DETECTION
 # =====================================================
-def detect_hourly_run(df):
-    if len(df) < 10:
-        return False, None
+def hourly_run(df):
+    if len(df) < 6:
+        return False, 0
 
-    close = df["Close"]
-    high  = df["High"]
-    low   = df["Low"]
+    close = df["close"]
+    high  = df["high"]
+    low   = df["low"]
 
     pct_move = (close.iloc[-1] - close.iloc[-5]) / close.iloc[-5] * 100
 
@@ -93,41 +91,35 @@ def detect_hourly_run(df):
     rsi = talib.RSI(close, 14)
     adx = talib.ADX(high, low, close, 14)
 
-    bb_upper, bb_mid, bb_lower = talib.BBANDS(close, 20)
-    bb_expanding = (bb_upper.iloc[-1] - bb_lower.iloc[-1]) > \
-                   (bb_upper.iloc[-5] - bb_lower.iloc[-5])
+    if macd_hist.isna().iloc[-1] or adx.isna().iloc[-1]:
+        return False, 0
 
-    condition = (
+    return (
         pct_move >= 4 and
         macd_hist.iloc[-1] > macd_hist.iloc[-2] and
         rsi.iloc[-1] > 55 and
-        adx.iloc[-1] > adx.iloc[-2] and
-        bb_expanding
-    )
-
-    return condition, round(pct_move, 2)
+        adx.iloc[-1] > adx.iloc[-2]
+    ), round(pct_move, 2)
 
 # =====================================================
 # DAILY CONFIRMATION
 # =====================================================
-def daily_confirmation(df):
-    best_ma_name, best_ma = select_best_ma(df)
-    rsi = talib.RSI(df["Close"], 14)
+def daily_confirm(df):
+    ma_name, ma = best_ma(df)
+    rsi = talib.RSI(df["close"], 14)
 
-    confirmed = (
-        df["Close"].iloc[-1] > best_ma.iloc[-1] and
+    return (
+        df["close"].iloc[-1] > ma.iloc[-1] and
         rsi.iloc[-1] > 50
-    )
-
-    return confirmed, best_ma_name
+    ), ma_name
 
 # =====================================================
 # WEEKLY CONFIRMATION
 # =====================================================
-def weekly_confirmation(df):
-    ema20 = talib.EMA(df["Close"], 20)
-    ema50 = talib.EMA(df["Close"], 50)
-    adx   = talib.ADX(df["High"], df["Low"], df["Close"], 14)
+def weekly_confirm(df):
+    ema20 = talib.EMA(df["close"], 20)
+    ema50 = talib.EMA(df["close"], 50)
+    adx = talib.ADX(df["high"], df["low"], df["close"], 14)
 
     return (
         ema20.iloc[-1] > ema50.iloc[-1] and
@@ -135,7 +127,7 @@ def weekly_confirmation(df):
     )
 
 # =====================================================
-# STOCK SELECTION
+# STOCK LIST
 # =====================================================
 symbols = sorted([
     f.replace(".parquet", "")
@@ -143,19 +135,15 @@ symbols = sorted([
     if f.endswith(".parquet")
 ])
 
-selected_stocks = st.multiselect(
-    "📌 Select Stocks",
-    symbols,
-    default=symbols[:15]
-)
+selected = st.multiselect("📌 Select Stocks", symbols, default=symbols[:10])
 
 # =====================================================
-# SCAN BUTTON
+# RUN SCAN
 # =====================================================
 if st.button("🔍 Scan RUN Stocks"):
     results = []
 
-    for sym in selected_stocks:
+    for sym in selected:
         df1h = load_stock(DATA_1H, sym)
         dfd  = load_stock(DATA_D, sym)
         dfw  = load_stock(DATA_W, sym)
@@ -163,24 +151,22 @@ if st.button("🔍 Scan RUN Stocks"):
         if df1h is None or dfd is None or dfw is None:
             continue
 
-        run_ok, move = detect_hourly_run(df1h)
-        daily_ok, ma_used = daily_confirmation(dfd)
-        weekly_ok = weekly_confirmation(dfw)
+        run_ok, move = hourly_run(df1h)
+        d_ok, ma_used = daily_confirm(dfd)
+        w_ok = weekly_confirm(dfw)
 
-        if run_ok and daily_ok and weekly_ok:
+        if run_ok and d_ok and w_ok:
             results.append({
                 "Stock": sym,
                 "Hourly Move %": move,
-                "Daily MA Used": ma_used,
-                "Hourly Trigger": "✔ Momentum Burst",
-                "Daily Trend": "✔ Confirmed",
-                "Weekly Trend": "✔ Confirmed",
-                "Reason": "4–5% move in ≤5 candles with HTF alignment"
+                "Daily MA": ma_used,
+                "Daily Trend": "✔",
+                "Weekly Trend": "✔",
+                "Reason": "Hourly momentum + HTF alignment"
             })
 
     if results:
-        df_out = pd.DataFrame(results)
-        st.success(f"🔥 {len(df_out)} RUN candidates found")
-        st.dataframe(df_out, use_container_width=True)
+        st.success(f"🔥 {len(results)} RUN stocks found")
+        st.dataframe(pd.DataFrame(results), use_container_width=True)
     else:
-        st.warning("No RUN stocks found with current conditions")
+        st.warning("No RUN stocks detected")
