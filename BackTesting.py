@@ -132,8 +132,30 @@ def confidence(verdict, daily_now, weekly_now, monthly_now):
 # =====================================================
 # UI
 # =====================================================
+# =====================================================
+# STOCK SELECTION (WITH SELECT ALL)
+# =====================================================
 symbols = sorted([f.replace(".parquet", "") for f in os.listdir(DATA_D)])
-sel = st.multiselect("Select Stocks", symbols, default=symbols[:5])
+
+col1, col2 = st.columns([1, 5])
+
+with col1:
+    select_all = st.checkbox("✅ Select All")
+
+with col2:
+    if select_all:
+        selected_symbols = st.multiselect(
+            "📌 Selected Stocks",
+            symbols,
+            default=symbols
+        )
+    else:
+        selected_symbols = st.multiselect(
+            "📌 Selected Stocks",
+            symbols,
+            default=symbols[:5]
+        )
+
 
 if st.button("Run Behavioral Backtest"):
     output = []
