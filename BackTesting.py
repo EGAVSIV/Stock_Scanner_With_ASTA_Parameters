@@ -202,3 +202,13 @@ if st.button("Run Behavioral Backtest"):
         st.dataframe(pd.DataFrame(output), use_container_width=True)
     else:
         st.warning("No strong behavioral alignment found")
+
+st.markdown("""
+---
+**Designed by:-  
+Gaurav Singh Yadav**   
+🩷💛🩵💙🩶💜🤍🤎💖  Built With Love 🫶  
+Energy | Commodity | Quant Intelligence 📶  
+📱 +91-8003994518 〽️   
+📧 yadav.gauravsingh@gmail.com ™️
+""")
