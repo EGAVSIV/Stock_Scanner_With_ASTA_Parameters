@@ -33,7 +33,7 @@ if not st.session_state.authenticated:
 # CONFIG
 # =====================================================
 st.set_page_config("Behavioral Stock Intelligence", layout="wide", page_icon="🧠")
-st.title("🧠 Multi-Timeframe Behavioral Stock Intelligence")
+st.title("🧠 Multi-Timeframe Stock Behavioral Intelligence")
 
 DATA_D = "stock_data_D"
 DATA_W = "stock_data_W"
