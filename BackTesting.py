@@ -14,16 +14,36 @@ DATA_1H = "stock_data_1H"
 DATA_D = "stock_data_D"
 DATA_W = "stock_data_W"
 
-# ==========================
-# DATA LOADER
-# ==========================
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_stock(folder, symbol):
     path = os.path.join(folder, f"{symbol}.parquet")
     if not os.path.exists(path):
         return None
+
     df = pd.read_parquet(path)
-    df = df.sort_values("Datetime")
+
+    # -----------------------------
+    # HANDLE DATETIME COLUMN SAFELY
+    # -----------------------------
+    possible_dt_cols = ["Datetime", "datetime", "Date", "date", "Timestamp", "timestamp"]
+
+    dt_col = None
+    for c in possible_dt_cols:
+        if c in df.columns:
+            dt_col = c
+            break
+
+    # If datetime is index, reset
+    if dt_col is None and isinstance(df.index, pd.DatetimeIndex):
+        df = df.reset_index()
+        dt_col = df.columns[0]
+
+    if dt_col is None:
+        raise ValueError(f"❌ No Datetime column found in {symbol}.parquet")
+
+    df[dt_col] = pd.to_datetime(df[dt_col])
+    df = df.sort_values(dt_col)
+
     return df.reset_index(drop=True)
 
 # ==========================
