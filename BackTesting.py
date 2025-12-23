@@ -160,7 +160,8 @@ with col2:
 if st.button("Run Behavioral Backtest"):
     output = []
 
-    for s in sel:
+    for s in selected_symbols:
+
         d = load_stock(DATA_D, s)
         w = load_stock(DATA_W, s)
         m = load_stock(DATA_M, s)
