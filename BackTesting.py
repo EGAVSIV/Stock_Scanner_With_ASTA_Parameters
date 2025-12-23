@@ -8,13 +8,13 @@ import talib
 # STREAMLIT CONFIG
 # =====================================================
 st.set_page_config(
-    page_title="Stock Personality Backtest Engine",
+    page_title="Stock Behavioral Intelligence Engine",
     layout="wide",
     page_icon="🧠"
 )
 
-st.title("🧠 Stock Personality Backtest Engine")
-st.caption("Learn WHY stocks run – from historical behavior")
+st.title("🧠 Stock Behavioral Intelligence Engine")
+st.caption("Behavioral backtesting → verdict → confidence → alert")
 
 # =====================================================
 # DATA PATHS
@@ -34,13 +34,13 @@ def load_stock(folder, symbol):
     df = pd.read_parquet(path)
     df.columns = [c.lower() for c in df.columns]
 
-    dt_col = next((c for c in ["datetime", "date", "timestamp"] if c in df.columns), None)
-    if dt_col:
-        df[dt_col] = pd.to_datetime(df[dt_col])
-        df = df.sort_values(dt_col)
+    dt = next((c for c in ["date", "datetime", "timestamp"] if c in df.columns), None)
+    if dt:
+        df[dt] = pd.to_datetime(df[dt])
+        df = df.sort_values(dt)
 
-    for col in ["open", "high", "low", "close"]:
-        if col not in df.columns:
+    for c in ["open", "high", "low", "close"]:
+        if c not in df.columns:
             return None
 
     return df.reset_index(drop=True)
@@ -49,55 +49,79 @@ def load_stock(folder, symbol):
 # EVENT DETECTION (4% in next 3 days)
 # =====================================================
 def detect_events(df):
-    close = df["close"]
-    future_move = (close.shift(-3) - close) / close * 100
+    future_move = (df["close"].shift(-3) - df["close"]) / df["close"] * 100
     return df[future_move >= 4].index
 
 # =====================================================
-# DAILY CONDITION SNAPSHOT
+# INDICATOR SNAPSHOT
 # =====================================================
-def daily_snapshot(df, i):
+def snapshot(df, i):
     close = df["close"]
 
     rsi = talib.RSI(close, 14)
     adx = talib.ADX(df["high"], df["low"], close, 14)
     macd, signal, _ = talib.MACD(close)
-
     ema20 = talib.EMA(close, 20)
-    sma20 = talib.SMA(close, 20)
     bb_u, bb_m, bb_l = talib.BBANDS(close, 20)
 
     return {
-        "Daily_RSI": round(rsi[i], 2),
-        "Daily_ADX": round(adx[i], 2),
-        "Daily_MACD": "Bullish" if macd[i] > signal[i] else "Bearish",
+        "RSI": rsi[i],
+        "ADX": adx[i],
+        "MACD": "Bullish" if macd[i] > signal[i] else "Bearish",
         "Price>EMA20": close[i] > ema20[i],
-        "Price>SMA20": close[i] > sma20[i],
-        "BB_Position":
-            "Upper" if close[i] > bb_u[i] else
-            "Lower" if close[i] < bb_l[i] else
-            "Middle"
+        "BB": "Upper" if close[i] > bb_u[i] else "Lower" if close[i] < bb_l[i] else "Middle"
     }
 
 # =====================================================
-# WEEKLY & MONTHLY SNAPSHOT
+# HIGHER TF SNAPSHOT (LATEST)
 # =====================================================
-def higher_tf_snapshot(df, label):
+def latest_tf_state(df, label):
     close = df["close"]
-
-    rsi = talib.RSI(close, 14)
-    adx = talib.ADX(df["high"], df["low"], close, 14)
+    rsi = talib.RSI(close, 14).iloc[-1]
     macd, signal, _ = talib.MACD(close)
-
     ema20 = talib.EMA(close, 20)
     ema50 = talib.EMA(close, 50)
 
     return {
-        f"{label}_RSI": round(rsi.iloc[-1], 2),
-        f"{label}_ADX": round(adx.iloc[-1], 2),
+        f"{label}_RSI": rsi,
         f"{label}_MACD": "Bullish" if macd.iloc[-1] > signal.iloc[-1] else "Bearish",
         f"{label}_Trend": "Up" if ema20.iloc[-1] > ema50.iloc[-1] else "Down"
     }
+
+# =====================================================
+# BUILD FINAL VERDICT
+# =====================================================
+def build_verdict(df):
+    verdict = []
+
+    if df["RSI"].mean() >= 60:
+        verdict.append("RSI>60")
+    if df["ADX"].mean() >= 25:
+        verdict.append("ADX>25")
+    if df["Price>EMA20"].mean() >= 0.65:
+        verdict.append("Price>EMA20")
+    if (df["MACD"] == "Bullish").mean() >= 0.65:
+        verdict.append("Daily MACD Bullish")
+
+    return verdict
+
+# =====================================================
+# CONFIDENCE SCORE
+# =====================================================
+def confidence_score(verdict, current):
+    matched = 0
+
+    for rule in verdict:
+        if rule == "RSI>60" and current["Daily_RSI"] > 60:
+            matched += 1
+        elif rule == "ADX>25" and current["Daily_ADX"] > 25:
+            matched += 1
+        elif rule == "Price>EMA20" and current["Price>EMA20"]:
+            matched += 1
+        elif rule == "Daily MACD Bullish" and current["Daily_MACD"] == "Bullish":
+            matched += 1
+
+    return int((matched / len(verdict)) * 100) if verdict else 0
 
 # =====================================================
 # STOCK SELECTION
@@ -106,10 +130,10 @@ symbols = sorted([f.replace(".parquet", "") for f in os.listdir(DATA_D)])
 selected = st.multiselect("📌 Select Stocks", symbols, default=symbols[:5])
 
 # =====================================================
-# RUN BACKTEST
+# RUN ENGINE
 # =====================================================
-if st.button("🔍 Learn Stock Behavior"):
-    all_events = []
+if st.button("🚀 Run Behavioral Intelligence"):
+    alerts = []
 
     for sym in selected:
         df_d = load_stock(DATA_D, sym)
@@ -120,50 +144,34 @@ if st.button("🔍 Learn Stock Behavior"):
             continue
 
         events = detect_events(df_d)
+        if len(events) < 3:
+            continue
 
+        rows = []
         for i in events:
-            row = {
+            s = snapshot(df_d, i)
+            rows.append(s)
+
+        hist_df = pd.DataFrame(rows)
+        verdict = build_verdict(hist_df)
+
+        # Current market snapshot
+        latest = snapshot(df_d, -1)
+        latest["Daily_RSI"] = latest["RSI"]
+        latest["Daily_ADX"] = latest["ADX"]
+        latest["Daily_MACD"] = latest["MACD"]
+
+        score = confidence_score(verdict, latest)
+
+        if score >= 70:
+            alerts.append({
                 "Stock": sym,
-                "Event_Date": df_d.iloc[i]["date"] if "date" in df_d.columns else i
-            }
-            row.update(daily_snapshot(df_d, i))
-            row.update(higher_tf_snapshot(df_w, "Weekly"))
-            row.update(higher_tf_snapshot(df_m, "Monthly"))
+                "Confidence %": score,
+                "Verdict": ", ".join(verdict)
+            })
 
-            all_events.append(row)
-
-    if not all_events:
-        st.warning("No historical RUN events found")
-        st.stop()
-
-    events_df = pd.DataFrame(all_events)
-
-    # =================================================
-    # STOCK PERSONALITY SUMMARY
-    # =================================================
-    summary = events_df.groupby("Stock").agg({
-        "Daily_RSI": "mean",
-        "Daily_ADX": "mean",
-        "Price>EMA20": "mean",
-        "Weekly_Trend": lambda x: (x == "Up").mean(),
-        "Monthly_Trend": lambda x: (x == "Up").mean()
-    }).reset_index()
-
-    summary.rename(columns={
-        "Daily_RSI": "Avg_RSI",
-        "Daily_ADX": "Avg_ADX",
-        "Price>EMA20": "EMA20_Above_%"
-    }, inplace=True)
-
-    # =================================================
-    # UI TABS
-    # =================================================
-    tab1, tab2 = st.tabs(["📊 Stock Personality", "🧾 Raw Events"])
-
-    with tab1:
-        st.subheader("📊 Learned Stock Behavior")
-        st.dataframe(summary, use_container_width=True)
-
-    with tab2:
-        st.subheader("🧾 Historical RUN Events")
-        st.dataframe(events_df, use_container_width=True)
+    if alerts:
+        st.success("🔥 High-Confidence Behavioral Matches")
+        st.dataframe(pd.DataFrame(alerts), use_container_width=True)
+    else:
+        st.warning("No stocks with ≥70% behavioral alignment")
