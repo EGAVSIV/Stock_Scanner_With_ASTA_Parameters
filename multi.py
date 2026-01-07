@@ -338,18 +338,36 @@ def macd_normal_divergence(df, lookback=30):
 
 
 
-def macd_rd(df):
-    if len(df) < 60:
+
+
+def macd_rd(df, df_weekly):
+    if len(df) < 60 or len(df_weekly) < 35:
         return None
 
-    macd, _, _ = talib.MACD(df["close"], 12, 26, 9)
+    # -------- DAILY MACD --------
+    macd, signal, _ = talib.MACD(df["close"], 12, 26, 9)
     latest = macd.iloc[-1]
+    prev   = macd.iloc[-2]
     latest_signal = signal.iloc[-1]
     max60 = macd.rolling(60).max().iloc[-1]
 
-    if latest > prev and latest > 0 and max60 > 0:
-        if (latest / max60) < 0.25:
-            return "MACD RD (Compression)"
+    # -------- WEEKLY MACD --------
+    w_macd, w_signal, _ = talib.MACD(df_weekly["close"], 12, 26, 9)
+    weekly_ok = (
+        w_macd.iloc[-1] > 0 and
+        w_macd.iloc[-1] > w_signal.iloc[-1]
+    )
+
+    # -------- FINAL LOGIC --------
+    if (
+        weekly_ok and
+        latest > prev and
+        latest > 0 and
+        latest > latest_signal and
+        max60 > 0 and
+        (latest / max60) < 0.25
+    ):
+        return "MACD RD (Weekly Support)"
 
     return None
 
