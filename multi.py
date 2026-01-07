@@ -338,69 +338,18 @@ def macd_normal_divergence(df, lookback=30):
 
 
 
-
-
-
-
-
-import talib
-
-def macd_rd(df_daily, df_weekly=None):
-    # ================= SAFETY =================
-    if df_daily is None or len(df_daily) < 60:
+def macd_rd(df):
+    if len(df) < 60:
         return None
 
-    # ================= DAILY MACD =================
-    d_macd, d_signal, _ = talib.MACD(
-        df_daily["close"],
-        fastperiod=12,
-        slowperiod=26,
-        signalperiod=9
-    )
+    macd, _, _ = talib.MACD(df["close"], 12, 26, 9)
+    latest = macd.iloc[-1]
+    latest_signal = signal.iloc[-1]
+    max60 = macd.rolling(60).max().iloc[-1]
 
-    if d_macd.isna().iloc[-1] or d_signal.isna().iloc[-1]:
-        return None
-
-    latest_macd   = d_macd.iloc[-1]
-    prev_macd     = d_macd.iloc[-2]
-    latest_signal = d_signal.iloc[-1]
-    max60         = d_macd.rolling(60).max().iloc[-1]
-
-    # ================= WEEKLY FILTER =================
-    weekly_ok = True  # ✅ default
-
-    if df_weekly is not None:
-        if len(df_weekly) < 35:
-            return None
-
-        w_macd, w_signal, _ = talib.MACD(
-            df_weekly["close"],
-            fastperiod=12,
-            slowperiod=26,
-            signalperiod=9
-        )
-
-        if w_macd.isna().iloc[-1] or w_signal.isna().iloc[-1]:
-            return None
-
-        weekly_ok = (
-            w_macd.iloc[-1] > 0 and
-            w_macd.iloc[-1] > w_signal.iloc[-1]
-        )
-
-        if not weekly_ok:
-            return None
-
-    # ================= FINAL DAILY LOGIC =================
-    if (
-        latest_macd > prev_macd and
-        latest_macd > 0 and
-        latest_macd > latest_signal and
-        weekly_ok and
-        max60 > 0 and
-        (latest_macd / max60) < 0.25
-    ):
-        return "MACD RD (Weekly +Support)"
+    if latest > prev and latest > 0 and max60 > 0:
+        if (latest / max60) < 0.25:
+            return "MACD RD (Compression)"
 
     return None
 
