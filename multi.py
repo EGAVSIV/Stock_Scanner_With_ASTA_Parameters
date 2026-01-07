@@ -344,9 +344,10 @@ def macd_rd(df):
     macd, _, _ = talib.MACD(df["close"], 12, 26, 9)
     latest = macd.iloc[-1]
     prev = macd.iloc[-2]
+    latest_signal = signal.iloc[-1]
     max60 = macd.rolling(60).max().iloc[-1]
 
-    if latest > prev and latest > 0 and max60 > 0:
+    if latest > prev and latest > 0 and max60 > 0 and latest > latest_signal:
         if (latest / max60) < 0.25:
             return "MACD RD (Compression)"
 
