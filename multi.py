@@ -343,6 +343,8 @@ def macd_normal_divergence(df, lookback=30):
 
 
 
+import talib
+
 def macd_rd(df_daily, df_weekly=None):
     # ================= SAFETY =================
     if df_daily is None or len(df_daily) < 60:
@@ -365,6 +367,8 @@ def macd_rd(df_daily, df_weekly=None):
     max60         = d_macd.rolling(60).max().iloc[-1]
 
     # ================= WEEKLY FILTER =================
+    weekly_ok = True  # ✅ default
+
     if df_weekly is not None:
         if len(df_weekly) < 35:
             return None
@@ -391,12 +395,12 @@ def macd_rd(df_daily, df_weekly=None):
     if (
         latest_macd > prev_macd and
         latest_macd > 0 and
-        weekly_ok and
         latest_macd > latest_signal and
+        weekly_ok and
         max60 > 0 and
         (latest_macd / max60) < 0.25
     ):
-        return "MACD RD (Weekly Support)"
+        return "MACD RD (Weekly +Support)"
 
     return None
 
