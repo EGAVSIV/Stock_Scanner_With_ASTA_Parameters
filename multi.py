@@ -391,11 +391,12 @@ def macd_rd(df_daily, df_weekly=None):
     if (
         latest_macd > prev_macd and
         latest_macd > 0 and
+        weekly_ok and
         latest_macd > latest_signal and
         max60 > 0 and
         (latest_macd / max60) < 0.25
     ):
-        return "MACD RD (Compression + Weekly Support)"
+        return "MACD RD (Weekly Support)"
 
     return None
 
