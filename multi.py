@@ -337,21 +337,42 @@ def macd_normal_divergence(df, lookback=30):
     return None
 
 
+
+
+
+
 def macd_rd(df):
     if len(df) < 60:
         return None
 
-    macd, _, _ = talib.MACD(df["close"], 12, 26, 9)
-    latest = macd.iloc[-1]
-    prev = macd.iloc[-2]
-    latest_signal = signal.iloc[-1]
-    max60 = macd.rolling(60).max().iloc[-1]
+    macd_line, signal_line, hist = talib.MACD(
+        df["close"],
+        fastperiod=12,
+        slowperiod=26,
+        signalperiod=9
+    )
 
-    if latest > prev and latest > 0 and max60 > 0 and latest > latest_signal:
-        if (latest / max60) < 0.25:
-            return "MACD RD (Compression)"
+    # Safety check
+    if macd_line.isna().iloc[-1] or signal_line.isna().iloc[-1]:
+        return None
+
+    latest_macd   = macd_line.iloc[-1]
+    prev_macd     = macd_line.iloc[-2]
+    latest_signal = signal_line.iloc[-1]
+
+    max60 = macd_line.rolling(60).max().iloc[-1]
+
+    if (
+        latest_macd > prev_macd and
+        latest_macd > 0 and
+        latest_macd > latest_signal and   # ✅ MACD > Signal
+        max60 > 0 and
+        (latest_macd / max60) < 0.25
+    ):
+        return "MACD RD (Compression)"
 
     return None
+
 
 
 def third_wave_finder(df):
