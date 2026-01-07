@@ -868,3 +868,4 @@ Gaurav Singh Yadav**
 Energy | Commodity | Quant Intelligence 📶  
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
+""")
