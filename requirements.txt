@@ -1,4 +1,3 @@
-
 tradingview-datafeed
 pyarrow
 numpy<2.0
