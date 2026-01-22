@@ -1,3 +1,4 @@
+python_version < "3.12"
 tradingview-datafeed
 pyarrow
 numpy
@@ -10,6 +11,18 @@ streamlit
 ta-lib
 ta-lib
 plotly
+
+
+
+
+streamlit==1.31.1
+altair==4.2.2
+pandas>=1.5,<2.2
+plotly>=5.18
+numpy<2.0
+ta-lib
+pyarrow
+
 
 
 
