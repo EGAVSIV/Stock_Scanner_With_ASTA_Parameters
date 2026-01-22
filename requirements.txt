@@ -12,34 +12,19 @@ ta-lib
 ta-lib
 plotly
 
-
-
-
-
-# --- Python constraint (MOST IMPORTANT)
+# Force supported Python
 python_version < "3.12"
 
-# --- Core
 streamlit==1.31.1
 altair==4.2.2
 
-# --- Data stack
 pandas>=1.5,<2.2
 numpy<2.0
 pyarrow
 
-# --- Charts
 plotly>=5.18
-
-# --- TA
 ta-lib
 
-# --- UI deps (lock to avoid conflicts)
+# Prevent rich / markdown churn
 rich==13.9.4
 markdown-it-py<4
-
-
-
-
-
-
