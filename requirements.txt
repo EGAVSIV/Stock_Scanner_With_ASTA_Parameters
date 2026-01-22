@@ -15,14 +15,28 @@ plotly
 
 
 
+
+# --- Python constraint (MOST IMPORTANT)
+python_version < "3.12"
+
+# --- Core
 streamlit==1.31.1
 altair==4.2.2
+
+# --- Data stack
 pandas>=1.5,<2.2
-plotly>=5.18
 numpy<2.0
-ta-lib
 pyarrow
 
+# --- Charts
+plotly>=5.18
+
+# --- TA
+ta-lib
+
+# --- UI deps (lock to avoid conflicts)
+rich==13.9.4
+markdown-it-py<4
 
 
 
