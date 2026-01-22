@@ -1,17 +1,31 @@
 tradingview-datafeed
-pyarrow
+#pyarrow
+#numpy<2.0
+#pandas>=1.5,<2.2
+#scipy
+#matplotlib
+#requests
+#openpyxl
+#streamlit==1.31.1
+#ta-lib
+#plotly>=5.18
+#altair==4.2.2
+#rich==13.9.4
+#markdown-it-py<4
+
+streamlit==1.31.1
+altair==4.2.2
 numpy<2.0
 pandas>=1.5,<2.2
-scipy
-matplotlib
-requests
-openpyxl
-streamlit==1.31.1
-ta-lib
 plotly>=5.18
-altair==4.2.2
+pyarrow
 rich==13.9.4
 markdown-it-py<4
+requests
+openpyxl
+matplotlib
+scipy
+
 
 
 
