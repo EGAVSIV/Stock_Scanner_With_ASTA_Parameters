@@ -1,4 +1,4 @@
-python_version < "3.12"
+
 tradingview-datafeed
 pyarrow
 numpy<2.0
