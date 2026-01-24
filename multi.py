@@ -787,6 +787,7 @@ if run:
             if c_wave_finder(df):
                 results.append({"Symbol": sym})
 
+
         elif scanner == "MACD Bearish Peak Divergence":
             sig = macd_peak_bearish_divergence(df)
             if sig:
