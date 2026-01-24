@@ -23,6 +23,7 @@ requests
 openpyxl
 matplotlib
 scipy
+talib
 
 
 
