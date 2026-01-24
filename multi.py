@@ -381,17 +381,19 @@ def c_wave_finder(df):
 
     ema20 = talib.EMA(df["close"], 20)
     ema50 = talib.EMA(df["close"], 50)
+    rsi = talib.RSI(df["close"], 14)
 
-    # Bearish EMA crossover
+    # fresh bearish crossover
     if ema20.iloc[-1] < ema50.iloc[-1] and ema20.iloc[-2] > ema50.iloc[-2]:
         high1 = df["high"].iloc[-30:].max()
         high2 = df["high"].iloc[-60:-30].max()
 
-        # Lower high confirmation
-        if high1 < high2:
+        # lower high
+        if high1 < high2 and rsi.iloc[-1] > 40:
             return True
 
     return False
+
 
 
 def macd_peak_bearish_divergence(df):
