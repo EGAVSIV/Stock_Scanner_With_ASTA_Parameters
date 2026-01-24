@@ -592,8 +592,8 @@ def dark_cloud_cover(df):
     if prev["close"] <= prev["open"]:
         return None
 
-    gap_up = curr["open"] >= prev["close"] * 1.01
-    close_below_prev_low = curr["close"] < prev["low"]
+    gap_up = curr["open"] >= prev["close"] 
+    close_below_prev_low = curr["close"] < prev["open"]
 
     if gap_up and close_below_prev_low:
         return "Dark Cloud Cover (Bearish)"
