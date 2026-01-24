@@ -589,7 +589,7 @@ def dark_cloud_cover(df):
     curr = df.iloc[-1]
 
     # previous candle must be green
-    if prev["close"] <= prev["open"]:
+    if prev["close"] > prev["open"]:
         return None
 
     gap_up = curr["open"] >= prev["close"] 
