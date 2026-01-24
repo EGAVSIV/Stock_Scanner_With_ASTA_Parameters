@@ -883,6 +883,10 @@ if run:
         st.stop()
 
     df_res = pd.DataFrame(results)
+    df_res = df_res.replace([np.inf, -np.inf], "")
+    df_res = df_res.fillna("")
+    for c in df_res.columns:
+        df_res[c] = df_res[c].astype(str)
     st.success(f"Stocks Found: {len(df_res)}")
     st.dataframe(df_res, use_container_width=True)
 
