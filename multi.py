@@ -375,6 +375,25 @@ def third_wave_finder(df):
 
     return False
 
+def c_wave_finder(df):
+    if len(df) < 60:
+        return False
+
+    ema20 = talib.EMA(df["close"], 20)
+    ema50 = talib.EMA(df["close"], 50)
+
+    # Bearish EMA crossover
+    if ema20.iloc[-1] < ema50.iloc[-1] and ema20.iloc[-2] > ema50.iloc[-2]:
+        high1 = df["high"].iloc[-30:].max()
+        high2 = df["high"].iloc[-60:-30].max()
+
+        # Lower high confirmation
+        if high1 < high2:
+            return True
+
+    return False
+
+
 def macd_peak_bearish_divergence(df):
     if len(df) < 80:
         return None
@@ -675,6 +694,7 @@ scanner = st.sidebar.selectbox(
         "MACD Normal Divergence",
         "MACD RD (4th Wave)",
         "Probable 3rd Wave",
+        "Probable C Wave",
         "MACD Bearish Peak Divergence",
         "MACD Bullish Base Divergence",
         "Trend Alignment (EMA)",
@@ -761,6 +781,10 @@ if run:
 
         elif scanner == "Probable 3rd Wave":
             if third_wave_finder(df):
+                results.append({"Symbol": sym})
+                
+        elif scanner == "Probable C Wave":
+            if c_wave_finder(df):
                 results.append({"Symbol": sym})
 
         elif scanner == "MACD Bearish Peak Divergence":
