@@ -15,12 +15,10 @@ tradingview-datafeed
 
 streamlit==1.31.1
 altair==4.2.2
-numpy<2.0
-pandas>=1.5,<2.2
-plotly>=5.18
+numpy
+pandas
+plotly
 pyarrow
-rich==13.9.4
-markdown-it-py<4
 requests
 openpyxl
 matplotlib
