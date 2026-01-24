@@ -1,5 +1,11 @@
 import os
 import pandas as pd
+import sys
+if sys.version_info >= (3, 13):
+    import types
+    imghdr = types.ModuleType("imghdr")
+    imghdr.what = lambda *args, **kwargs: None
+    sys.modules["imghdr"] = imghdr
 import streamlit as st
 import talib
 import plotly.express as px
