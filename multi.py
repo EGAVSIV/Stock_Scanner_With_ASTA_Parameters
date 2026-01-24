@@ -598,7 +598,7 @@ def dark_cloud_cover(df):
         return None
 
     # Gap up
-    gap_up = curr["open"] >= prev["close"]
+    gap_up = curr["open"] > prev["close"]
 
     # Close below 50% of previous candle body
     mid = (prev["open"] + prev["close"]) / 2
