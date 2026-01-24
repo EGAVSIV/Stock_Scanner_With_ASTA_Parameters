@@ -582,23 +582,33 @@ def ema50_stoch_oversold(df):
     return None
 
 def dark_cloud_cover(df):
-    if len(df) < 2:
+    if len(df) < 15:  # RSI needs at least 14 candles
         return None
 
     prev = df.iloc[-2]
     curr = df.iloc[-1]
 
-    # previous candle must be green
-    if prev["close"] > prev["open"]:
+    # Previous candle must be bullish
+    if prev["close"] <= prev["open"]:
         return None
 
-    gap_up = curr["open"] >= prev["close"] 
-    close_below_prev_low = curr["close"] < prev["open"]
+    # Previous RSI condition
+    rsi = talib.RSI(df["close"], 14)
+    if rsi.iloc[-2] <= 60:
+        return None
 
-    if gap_up and close_below_prev_low:
-        return "Dark Cloud Cover (Bearish)"
+    # Gap up
+    gap_up = curr["open"] >= prev["close"]
+
+    # Close below 50% of previous candle body
+    mid = (prev["open"] + prev["close"]) / 2
+    close_below_mid = curr["close"] < mid
+
+    if gap_up and close_below_mid:
+        return "Dark Cloud Cover (Bearish | RSI>60)"
 
     return None
+
 
 def morning_star_bottom(df):
     if len(df) < 60:
