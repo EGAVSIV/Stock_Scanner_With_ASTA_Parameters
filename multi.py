@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 import sys
 if sys.version_info >= (3, 13):
     import types
@@ -10,7 +11,7 @@ import streamlit as st
 import talib
 import plotly.express as px
 import hashlib
-import numpy as np
+
 
 def hash_pwd(pwd):
     return hashlib.sha256(pwd.encode()).hexdigest()
