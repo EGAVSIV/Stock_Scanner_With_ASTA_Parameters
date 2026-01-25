@@ -137,6 +137,10 @@ analysis_date = st.sidebar.date_input(
     "Select Analysis Date",
     value=last_d.date() if last_d else None
 )
+st.sidebar.info(
+    f"Backtest Mode Active\nData cutoff: {analysis_date}"
+)
+
 
 st.sidebar.caption(
     f"Scans will run as of: {analysis_date}"
@@ -156,7 +160,7 @@ def trim_df_to_date(df, anchor_date):
     elif "datetime" in df.columns:
         df = df[df["datetime"].dt.date <= anchor_date]
 
-    if len(df) < 5:
+    if len(df) < 120:
         return None
 
     return df
