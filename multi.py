@@ -1005,7 +1005,31 @@ if run:
             st.metric("🔴 Bearish Weakness", f"{bear_pct}%")
             st.metric("⚖️ Neutral", f"{100 - bull_pct - bear_pct}%")
 
+if scanner == "MACD Market Pulse" and not df_res.empty:
 
+    st.markdown("### 📈 MACD Trend Strength Overview")
+
+    state_counts = df_res["State"].value_counts().reset_index()
+    state_counts.columns = ["State", "Count"]
+
+    # --- Horizontal Bar ---
+    fig = px.bar(
+        state_counts,
+        x="Count",
+        y="State",
+        orientation="h",
+        title="MACD Trend States Distribution",
+        text="Count"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # --- Momentum Score ---
+    strong_bull = state_counts[state_counts["State"] == "Strong Bullish"]["Count"].sum()
+    strong_bear = state_counts[state_counts["State"] == "Strong Bearish"]["Count"].sum()
+
+    col1, col2 = st.columns(2)
+    col1.metric("🚀 Strong Bullish Stocks", strong_bull)
+    col2.metric("🧨 Strong Bearish Stocks", strong_bear)
 
     
 
