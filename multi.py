@@ -456,23 +456,44 @@ def third_wave_finder(df):
 
 
 def c_wave_finder(df):
-    if len(df) < 60:
+    if len(df) < 100:
         return False
 
+    # EMA calculation
     ema20 = talib.EMA(df["close"], 20)
     ema50 = talib.EMA(df["close"], 50)
-    rsi = talib.RSI(df["close"], 14)
 
-    # fresh bearish crossover
-    if ema20.iloc[-1] < ema50.iloc[-1] and ema20.iloc[-2] > ema50.iloc[-2]:
-        high1 = df["high"].iloc[-30:].max()
-        high2 = df["high"].iloc[-60:-30].max()
+    # 1️⃣ Bearish EMA 20 / EMA 50 crossover
+    if not (
+        ema20.iloc[-1] < ema50.iloc[-1] and
+        ema20.iloc[-2] > ema50.iloc[-2]
+    ):
+        return False
 
-        # lower high
-        if high1 < high2 and rsi.iloc[-1] > 40:
-            return True
+    # 2️⃣ Find HIGH before crossover (Wave-B high)
+    pre_crossover_high = df["high"].iloc[-60:-30].max()
+
+    # 3️⃣ Find LOW after crossover (Wave-A low)
+    post_crossover_low = df["low"].iloc[-30:].min()
+
+    # Safety check
+    if post_crossover_low >= pre_crossover_high:
+        return False
+
+    # 4️⃣ Measure impulse move
+    move = pre_crossover_high - post_crossover_low
+
+    # 5️⃣ 50% retracement level (pullback upward)
+    retrace_50 = post_crossover_low + (move * 0.5)
+
+    # 6️⃣ Check if price retraced near 50%
+    current_price = df["close"].iloc[-1]
+
+    if retrace_50 * 0.95 <= current_price <= retrace_50 * 1.05:
+        return True
 
     return False
+
 
 
 
