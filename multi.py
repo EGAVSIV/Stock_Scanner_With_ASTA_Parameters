@@ -792,7 +792,8 @@ if run:
     results = []
 
     # === Higher Timeframe preload for GSAS ===
-    if scanner in ["Bullish GSAS", "Bearish GSAS"]:
+    if scanner in ["Bullish GSAS", "Bearish GSAS", "MACD RD (4th Wave)"]:
+
         htf_map = {
             "15 Min": "1 Hour",
             "1 Hour": "Daily",
