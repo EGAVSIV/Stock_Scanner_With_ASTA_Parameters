@@ -282,6 +282,7 @@ def counter_attack(df):
 def breakaway_gap(df):
     if len(df) < 50:
         return None
+    df = df.copy()
     df["EMA20"] = talib.EMA(df["close"], 20)
     df["EMA50"] = talib.EMA(df["close"], 50)
 
@@ -912,7 +913,8 @@ if run:
         elif scanner == "RSI WM 60–40":
             if sym in data_w and sym in data_m:
                 df_wt = trim_df_to_date(data_w[sym], analysis_date)
-                df_mt = trim_df_to_date(data_m[sym], analysis_date
+                df_mt = trim_df_to_date(data_m[sym], analysis_date)
+                
                 if df_wt is None or df_mt is None:
                     continue
                 sig = rsi_wm(df, df_wt, df_mt)
@@ -921,7 +923,10 @@ if run:
 
         elif scanner == "Bullish GSAS":
             if data_htf is not None and sym in data_htf:
-                sig = bullish_gsas(df, data_htf[sym])
+                df_htf = trim_df_to_date(data_htf[sym], analysis_date)
+                if df_htf is None:
+                    continue
+                sig = bullish_gsas(df, df_htf)
                 if sig:
                     results.append({"Symbol": sym, "Signal": sig})
 
@@ -930,7 +935,8 @@ if run:
                 df_htf = trim_df_to_date(data_htf[sym], analysis_date)
                 if df_htf is None:
                     continue
-                sig = bearish_gsas(df, data_htf[sym])
+                sig = bearish_gsas(df, df_htf)
+
                 if sig:
                     results.append({"Symbol": sym, "Signal": sig})
 
