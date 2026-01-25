@@ -1049,8 +1049,10 @@ with pulse_container:
         bull = (df_res["Zone"] == "RSI > 60").sum()
         bear = (df_res["Zone"] == "RSI < 40").sum()
 
-        bull_pct = round((bull / total) * 100, 1)
-        bear_pct = round((bear / total) * 100, 1)
+        bull_pct = f"{(bull / total) * 100:.2f}%"
+        bear_pct = f"{(bear / total) * 100:.2f}%"
+        neutral_pct = f"{100 - ((bull + bear) / total) * 100:.2f}%"
+
 
         colB.metric("🟢 Bullish Strength", f"{bull_pct}%")
         colB.metric("🔴 Bearish Weakness", f"{bear_pct}%")
