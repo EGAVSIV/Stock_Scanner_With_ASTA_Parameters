@@ -1068,7 +1068,11 @@ with pulse_container:
         )
 
         fig.update_traces(textinfo="percent+label")
-        colA.plotly_chart(fig, use_container_width=True, key="rsi_pie")
+        colA.plotly_chart(
+            fig,
+            use_container_width=True,
+            key=f"rsi_pie_{analysis_date}_{len(df_res)}"
+        )
 
         # --- Breadth Metrics ---
         total = len(df_res)
