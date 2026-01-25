@@ -1075,7 +1075,7 @@ with pulse_container:
         
 
 
-        colA.plotly_chart(fig_rsi, use_container_width=True, key="rsi_pie")
+        colA.plotly_chart(fig, use_container_width=True, key="rsi_pie")
 
         # --- Breadth Metrics ---
         total = len(df_res)
