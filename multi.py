@@ -1043,7 +1043,6 @@ with pulse_container:
         colA, colB = st.columns(2)
 
         # --- Donut Chart ---
-        # --- Donut Chart (BULLETPROOF) ---
         bull = (df_res["Zone"] == "RSI > 60").sum()
         neutral = (df_res["Zone"] == "RSI 40–60").sum()
         bear = (df_res["Zone"] == "RSI < 40").sum()
@@ -1068,11 +1067,9 @@ with pulse_container:
         )
 
         fig.update_traces(textinfo="percent+label")
-        colA.plotly_chart(
-            fig,
-            use_container_width=True,
-            key=f"rsi_pie_{analysis_date}_{len(df_res)}"
-        )
+
+# ✅ NO STATIC KEY
+        colA.plotly_chart(fig, use_container_width=True)
 
         # --- Breadth Metrics ---
         total = len(df_res)
