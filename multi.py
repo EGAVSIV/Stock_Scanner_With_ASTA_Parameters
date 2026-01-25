@@ -978,11 +978,6 @@ if run:
     st.dataframe(df_res, use_container_width=True)
 
 
-
-    if scanner == "RSI Market Pulse":
-        fig = px.histogram(df_res, x="Zone", title="RSI Zone Distribution")
-        st.plotly_chart(fig, use_container_width=True)
-
     if scanner == "RSI Market Pulse" and not df_res.empty:
 
     colA, colB = st.columns(2)
