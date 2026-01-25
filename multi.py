@@ -384,21 +384,34 @@ def macd_normal_divergence(df, lookback=30):
     return None
 
 
-def macd_rd(df):
-    if len(df) < 60:
+def macd_rd(df, df_htf):
+    if len(df) < 60 or len(df_htf) < 30:
         return None
 
-    macd, _, _ = talib.MACD(df["close"], 12, 26, 9)
+    # --- LTF MACD ---
+    macd, signal, _ = talib.MACD(df["close"], 12, 26, 9)
     latest = macd.iloc[-1]
     prev = macd.iloc[-2]
+    sig = signal.iloc[-1]
 
     max60 = macd.rolling(60).max().iloc[-1]
 
-    if latest > prev and latest > 0 and max60 > 0:
-        if (latest / max60) < 0.25:
-            return "MACD RD (Compression)"
+    # --- HTF MACD ---
+    macd_htf, _, _ = talib.MACD(df_htf["close"], 12, 26, 9)
+    macd_htf_val = macd_htf.iloc[-1]
+
+    if (
+        latest > prev and
+        latest > 0 and
+        sig < latest and              # ✅ MACD > Signal
+        macd_htf_val > 0 and           # ✅ HTF trend filter
+        max60 > 0 and
+        (latest / max60) < 0.25
+    ):
+        return "MACD RD (Compression + Trend Aligned)"
 
     return None
+
 
 
 def third_wave_finder(df):
