@@ -1043,20 +1043,20 @@ with pulse_container:
         colA, colB = st.columns(2)
 
         # --- Donut Chart ---
-        zone_order = ["RSI > 60", "RSI 40–60", "RSI < 40"]
+        # --- Donut Chart (BULLETPROOF) ---
+        bull = (df_res["Zone"] == "RSI > 60").sum()
+        neutral = (df_res["Zone"] == "RSI 40–60").sum()
+        bear = (df_res["Zone"] == "RSI < 40").sum()
 
-        df_pie = (
-            df_res["Zone"]
-            .value_counts()
-            .reindex(zone_order, fill_value=0)
-            .reset_index()
-        )
-        df_pie.columns = ["Zone", "Count"]
+        df_pie = pd.DataFrame({
+            "Zone": ["RSI > 60", "RSI 40–60", "RSI < 40"],
+            "Count": [bull, neutral, bear]
+        })
 
         fig = px.pie(
             df_pie,
             names="Zone",
-            values="Count",   # 🔥 THIS IS CRITICAL
+            values="Count",
             hole=0.55,
             color="Zone",
             color_discrete_map={
