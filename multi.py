@@ -415,19 +415,45 @@ def macd_rd(df, df_htf):
 
 
 def third_wave_finder(df):
-    if len(df) < 60:
+    if len(df) < 100:
         return False
 
+    # EMA calculation
     ema20 = talib.EMA(df["close"], 20)
     ema50 = talib.EMA(df["close"], 50)
 
-    if ema20.iloc[-1] > ema50.iloc[-1] and ema20.iloc[-2] < ema50.iloc[-2]:
-        low1 = df["low"].iloc[-30:].min()
-        low2 = df["low"].iloc[-60:-30].min()
-        if low1 > low2:
-            return True
+    # 1️⃣ Bullish EMA 20 / EMA 50 crossover (PCO)
+    if not (
+        ema20.iloc[-1] > ema50.iloc[-1] and
+        ema20.iloc[-2] < ema50.iloc[-2]
+    ):
+        return False
+
+    # 2️⃣ Find LOW before the crossover (Wave-2 low)
+    # Using candles before the crossover zone
+    pre_crossover_low = df["low"].iloc[-60:-30].min()
+
+    # 3️⃣ Find HIGH after crossover (Wave-1 high / pivot high)
+    post_crossover_high = df["high"].iloc[-30:].max()
+
+    # Safety check
+    if post_crossover_high <= pre_crossover_low:
+        return False
+
+    # 4️⃣ Measure impulse move
+    move = post_crossover_high - pre_crossover_low
+
+    # 5️⃣ 50% retracement level
+    retrace_50 = pre_crossover_low + (move * 0.5)
+
+    # 6️⃣ Check if price retraced near 50% (Wave-2 pullback)
+    current_price = df["close"].iloc[-1]
+
+    if retrace_50 * 0.95 <= current_price <= retrace_50 * 1.05:
+        return True
 
     return False
+
 
 def c_wave_finder(df):
     if len(df) < 60:
