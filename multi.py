@@ -980,30 +980,30 @@ if run:
 
     if scanner == "RSI Market Pulse" and not df_res.empty:
 
-    colA, colB = st.columns(2)
+        colA, colB = st.columns(2)
 
     # --- Donut Chart ---
-    with colA:
-        fig = px.pie(
-            df_res,
-            names="Zone",
-            hole=0.55,
-            title="📊 RSI Market Breadth"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        with colA:
+            fig = px.pie(
+                df_res,
+                names="Zone",
+                hole=0.55,
+                title="📊 RSI Market Breadth"
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
     # --- Breadth % ---
-    with colB:
-        total = len(df_res)
-        bull = (df_res["Zone"] == "RSI > 60").sum()
-        bear = (df_res["Zone"] == "RSI < 40").sum()
+        with colB:
+            total = len(df_res)
+            bull = (df_res["Zone"] == "RSI > 60").sum()
+            bear = (df_res["Zone"] == "RSI < 40").sum()
 
-        bull_pct = round((bull / total) * 100, 1)
-        bear_pct = round((bear / total) * 100, 1)
+            bull_pct = round((bull / total) * 100, 1)
+            bear_pct = round((bear / total) * 100, 1)
 
-        st.metric("🟢 Bullish Strength", f"{bull_pct}%")
-        st.metric("🔴 Bearish Weakness", f"{bear_pct}%")
-        st.metric("⚖️ Neutral", f"{100 - bull_pct - bear_pct}%")
+            st.metric("🟢 Bullish Strength", f"{bull_pct}%")
+            st.metric("🔴 Bearish Weakness", f"{bear_pct}%")
+            st.metric("⚖️ Neutral", f"{100 - bull_pct - bear_pct}%")
 
 
 
