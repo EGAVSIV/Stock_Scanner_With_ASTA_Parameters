@@ -1035,12 +1035,45 @@ with pulse_container:
         colA, colB = st.columns(2)
 
         # --- Donut Chart ---
-        fig_rsi = px.pie(
-            df_res,
+        zone_order = ["RSI > 60", "RSI 40–60", "RSI < 40"]
+        df_pie = (
+            df_res["Zone"]
+            .value_counts()
+            .reindex(zone_order)
+            .fillna(0)
+            .reset_index()
+        )
+        df_pie.columns = ["Zone", "Count"]
+
+        zone_colors = {
+            "RSI > 60": "#2ecc71",   # Green
+            "RSI 40–60": "#95a5a6",  # Grey
+            "RSI < 40": "#e74c3c",   # Red
+        }
+
+        fig = px.pie(
+            df_pie,
             names="Zone",
+            values="Count",
             hole=0.55,
+            color="Zone",
+            color_discrete_map=zone_colors,
             title="📊 RSI Market Breadth"
         )
+
+        fig.update_traces(
+            textinfo="percent",
+            textfont_size=13
+        )
+
+        fig.update_layout(
+            showlegend=True,
+            legend_title_text="RSI Zones"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        
+        
+
 
         colA.plotly_chart(fig_rsi, use_container_width=True, key="rsi_pie")
 
