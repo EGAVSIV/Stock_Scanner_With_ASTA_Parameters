@@ -128,6 +128,40 @@ with col2:
 
 st.markdown("---")
 
+# ==================================================
+# BACKTEST DATE SELECTION
+# ==================================================
+st.sidebar.markdown("### 📅 Backtest Date")
+
+analysis_date = st.sidebar.date_input(
+    "Select Analysis Date",
+    value=last_d.date() if last_d else None
+)
+
+st.sidebar.caption(
+    f"Scans will run as of: {analysis_date}"
+)
+
+def trim_df_to_date(df, anchor_date):
+    """
+    Cuts dataframe so that the last candle <= anchor_date
+    """
+    if df is None or df.empty:
+        return None
+
+    df = df.copy()
+
+    if isinstance(df.index, pd.DatetimeIndex):
+        df = df[df.index.date <= anchor_date]
+    elif "datetime" in df.columns:
+        df = df[df["datetime"].dt.date <= anchor_date]
+
+    if len(df) < 5:
+        return None
+
+    return df
+
+
 
 
 
@@ -761,6 +795,9 @@ if run:
         data_m = load_data(TIMEFRAMES["Monthly"])
 
     for sym, df in data.items():
+        df = trim_df_to_date(df, analysis_date)
+        if df is None:
+            continue
 
         if scanner == "RSI Market Pulse":
             r = rsi_market_pulse(df)
@@ -874,7 +911,11 @@ if run:
 
         elif scanner == "RSI WM 60–40":
             if sym in data_w and sym in data_m:
-                sig = rsi_wm(df, data_w[sym], data_m[sym])
+                df_wt = trim_df_to_date(data_w[sym], analysis_date)
+                df_mt = trim_df_to_date(data_m[sym], analysis_date
+                if df_wt is None or df_mt is None:
+                    continue
+                sig = rsi_wm(df, df_wt, df_mt)
                 if sig:
                     results.append({"Symbol": sym, "Signal": sig})
 
@@ -886,6 +927,9 @@ if run:
 
         elif scanner == "Bearish GSAS":
             if data_htf is not None and sym in data_htf:
+                df_htf = trim_df_to_date(data_htf[sym], analysis_date)
+                if df_htf is None:
+                    continue
                 sig = bearish_gsas(df, data_htf[sym])
                 if sig:
                     results.append({"Symbol": sym, "Signal": sig})
