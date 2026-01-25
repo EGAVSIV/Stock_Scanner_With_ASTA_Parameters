@@ -1025,42 +1025,51 @@ if run:
     st.dataframe(df_res, use_container_width=True)
 
 
+# =============================
+# MARKET PULSE DASHBOARD AREA
+# =============================
+pulse_container = st.container()
+with pulse_container:
     if scanner == "RSI Market Pulse" and not df_res.empty:
 
         colA, colB = st.columns(2)
 
-    # --- Donut Chart ---
-        with colA:
-            fig = px.pie(
-                df_res,
-                names="Zone",
-                hole=0.55,
-                title="📊 RSI Market Breadth"
-            )
-            st.plotly_chart(fig, use_container_width=True)
+        # --- Donut Chart ---
+        fig_rsi = px.pie(
+            df_res,
+            names="Zone",
+            hole=0.55,
+            title="📊 RSI Market Breadth"
+        )
 
-    # --- Breadth % ---
-        with colB:
-            total = len(df_res)
-            bull = (df_res["Zone"] == "RSI > 60").sum()
-            bear = (df_res["Zone"] == "RSI < 40").sum()
+        colA.plotly_chart(fig_rsi, use_container_width=True, key="rsi_pie")
 
-            bull_pct = round((bull / total) * 100, 1)
-            bear_pct = round((bear / total) * 100, 1)
+        # --- Breadth Metrics ---
+        total = len(df_res)
+        bull = (df_res["Zone"] == "RSI > 60").sum()
+        bear = (df_res["Zone"] == "RSI < 40").sum()
 
-            st.metric("🟢 Bullish Strength", f"{bull_pct}%")
-            st.metric("🔴 Bearish Weakness", f"{bear_pct}%")
-            st.metric("⚖️ Neutral", f"{100 - bull_pct - bear_pct}%")
+        bull_pct = round((bull / total) * 100, 1)
+        bear_pct = round((bear / total) * 100, 1)
 
+        colB.metric("🟢 Bullish Strength", f"{bull_pct}%")
+        colB.metric("🔴 Bearish Weakness", f"{bear_pct}%")
+        colB.metric("⚖️ Neutral", f"{100 - bull_pct - bear_pct}%")
+
+with pulse_container:
     if scanner == "MACD Market Pulse" and not df_res.empty:
 
         st.markdown("### 📈 MACD Trend Strength Overview")
 
-        state_counts = df_res["State"].value_counts().reset_index()
+        state_counts = (
+            df_res["State"]
+            .replace("", "No Signal")
+            .value_counts()
+            .reset_index()
+        )
         state_counts.columns = ["State", "Count"]
 
-    # --- Horizontal Bar ---
-        fig = px.bar(
+        fig_macd = px.bar(
             state_counts,
             x="Count",
             y="State",
@@ -1068,15 +1077,17 @@ if run:
             title="MACD Trend States Distribution",
             text="Count"
         )
-        st.plotly_chart(fig, use_container_width=True)
 
-    # --- Momentum Score ---
+        st.plotly_chart(fig_macd, use_container_width=True, key="macd_bar")
+
+        col1, col2 = st.columns(2)
+
         strong_bull = state_counts[state_counts["State"] == "Strong Bullish"]["Count"].sum()
         strong_bear = state_counts[state_counts["State"] == "Strong Bearish"]["Count"].sum()
 
-        col1, col2 = st.columns(2)
         col1.metric("🚀 Strong Bullish Stocks", strong_bull)
         col2.metric("🧨 Strong Bearish Stocks", strong_bear)
+
 
     
 
