@@ -1047,7 +1047,7 @@ with pulse_container:
 
         zone_colors = {
             "RSI > 60": "#2ecc71",   # Green
-            "RSI 40–60": "#95a5a6",  # Grey
+            "RSI 40–60": "#deaf68",  # Grey
             "RSI < 40": "#e74c3c",   # Red
         }
 
