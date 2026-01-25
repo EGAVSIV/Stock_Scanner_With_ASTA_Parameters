@@ -1015,15 +1015,22 @@ if run:
         st.stop()
 
     df_res = pd.DataFrame(results)
+
     ALL_COLS = ["Symbol", "Signal", "Trend", "State", "Setup", "Divergence", "RSI", "Zone"]
     for c in ALL_COLS:
         if c not in df_res.columns:
             df_res[c] = ""
+
     df_res = df_res[ALL_COLS]
     df_res = df_res.replace([np.inf, -np.inf], "")
     df_res = df_res.fillna("")
-    df_res = df_res.astype(str)
-    st.dataframe(df_res, use_container_width=True)
+
+    # 🔹 Use numeric df_res for charts
+    # 🔹 Create string-only copy for table
+    df_display = df_res.copy().astype(str)
+
+    st.dataframe(df_display, use_container_width=True)
+
 
 
 # =============================
@@ -1037,45 +1044,30 @@ with pulse_container:
 
         # --- Donut Chart ---
         zone_order = ["RSI > 60", "RSI 40–60", "RSI < 40"]
+
         df_pie = (
             df_res["Zone"]
             .value_counts()
-            .reindex(zone_order)
-            .fillna(0)
+            .reindex(zone_order, fill_value=0)
             .reset_index()
         )
         df_pie.columns = ["Zone", "Count"]
 
-        zone_colors = {
-            "RSI > 60": "#2ecc71",   # Green
-            "RSI 40–60": "#deaf68",  # Grey
-            "RSI < 40": "#e74c3c",   # Red
-        }
-
         fig = px.pie(
             df_pie,
             names="Zone",
-            values="Count",
+            values="Count",   # 🔥 THIS IS CRITICAL
             hole=0.55,
             color="Zone",
-            color_discrete_map=zone_colors,
+            color_discrete_map={
+                "RSI > 60": "#2ecc71",
+                "RSI 40–60": "#deaf68",
+                "RSI < 40": "#e74c3c",
+            },
             title="📊 RSI Market Breadth"
         )
 
-        fig.update_traces(
-            textinfo="percent",
-            textfont_size=13
-        )
-
-        fig.update_layout(
-            showlegend=True,
-            legend_title_text="RSI Zones"
-        )
-        
-        
-        
-
-
+        fig.update_traces(textinfo="percent+label")
         colA.plotly_chart(fig, use_container_width=True, key="rsi_pie")
 
         # --- Breadth Metrics ---
