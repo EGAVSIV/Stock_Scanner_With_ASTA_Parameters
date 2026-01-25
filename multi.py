@@ -830,6 +830,7 @@ run = st.sidebar.button("▶ Run Scan")
 # ==================================================
 # MAIN EXECUTION
 # ==================================================
+df_res = pd.DataFrame()  # 👈 SAFE DEFAULT
 if run:
     data = load_data(TIMEFRAMES[tf])
     if not data:
@@ -1070,7 +1071,7 @@ with pulse_container:
             showlegend=True,
             legend_title_text="RSI Zones"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        
         
         
 
@@ -1082,14 +1083,14 @@ with pulse_container:
         bull = (df_res["Zone"] == "RSI > 60").sum()
         bear = (df_res["Zone"] == "RSI < 40").sum()
 
-        bull_pct = f"{(bull / total) * 100:.2f}%"
-        bear_pct = f"{(bear / total) * 100:.2f}%"
-        neutral_pct = f"{100 - ((bull + bear) / total) * 100:.2f}%"
+        bull_pct = (bull / total) * 100
+        bear_pct = (bear / total) * 100
+        neutral_pct = 100 - bull_pct - bear_pct
 
+        colB.metric("🟢 Bullish Strength", f"{bull_pct:.2f}%")
+        colB.metric("🔴 Bearish Weakness", f"{bear_pct:.2f}%")
+        colB.metric("⚖️ Neutral", f"{neutral_pct:.2f}%")
 
-        colB.metric("🟢 Bullish Strength", f"{bull_pct}%")
-        colB.metric("🔴 Bearish Weakness", f"{bear_pct}%")
-        colB.metric("⚖️ Neutral", f"{100 - bull_pct - bear_pct}%")
 
 with pulse_container:
     if scanner == "MACD Market Pulse" and not df_res.empty:
