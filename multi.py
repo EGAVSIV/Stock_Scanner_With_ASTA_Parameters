@@ -275,10 +275,10 @@ def counter_attack(df):
     mid = (prev["open"] + prev["close"]) / 2
 
     if prev["close"] < prev["open"] and curr["close"] > curr["open"]:
-        if curr["open"] < prev["close"] * 0.97 and curr["close"] >= mid:
+        if curr["open"] < prev["close"] and curr["close"] >= mid:
             return "Bullish"
     if prev["close"] > prev["open"] and curr["close"] < curr["open"]:
-        if curr["open"] > prev["close"] * 1.03 and curr["close"] <= mid:
+        if curr["open"] > prev["close"] and curr["close"] <= mid:
             return "Bearish"
     return None
 
