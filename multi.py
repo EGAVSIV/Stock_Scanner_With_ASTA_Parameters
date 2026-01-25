@@ -844,9 +844,13 @@ if run:
                 results.append({"Symbol": sym, "Divergence": sig})
 
         elif scanner == "MACD RD (4th Wave)":
-            sig = macd_rd(df)
-            if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+            if data_htf is not None and sym in data_htf:
+                df_htf = trim_df_to_date(data_htf[sym], analysis_date)
+                if df_htf is None:
+                    continue
+                sig = macd_rd(df, df_htf)
+                if sig:
+                    results.append({"Symbol": sym, "Signal": sig})
 
         elif scanner == "Probable 3rd Wave":
             if third_wave_finder(df):
