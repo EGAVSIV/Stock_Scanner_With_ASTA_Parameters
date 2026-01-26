@@ -1042,16 +1042,16 @@ with pulse_container:
 
         colA, colB = st.columns(2)
 
-        # --- Donut Chart ---
+        # --- RSI Zones count (एक बार ही) ---
         bull = (df_res["Zone"] == "RSI > 60").sum()
         neutral = (df_res["Zone"] == "RSI 40–60").sum()
         bear = (df_res["Zone"] == "RSI < 40").sum()
 
+        # --- Donut Chart ---
         df_pie = pd.DataFrame({
             "Zone": ["RSI > 60", "RSI 40–60", "RSI < 40"],
             "Count": [bull, neutral, bear]
         })
-
 
         fig = px.pie(
             df_pie,
@@ -1066,51 +1066,35 @@ with pulse_container:
             },
             title="📊 RSI Market Breadth"
         )
+        # यहां percent + label दोनों दिखेंगे
+        fig.update_traces(textinfo="percent+label")
 
-        fig.update_traces(textinfo="label")
-
-    
-
-# ✅ NO STATIC KEY
         colA.plotly_chart(fig, use_container_width=True)
 
         # --- Breadth Metrics ---
-        # --- Breadth Metrics ---
         total_stocks = len(df_res)
-
-        bull = (df_res["Zone"] == "RSI > 60").sum()
-        neutral = (df_res["Zone"] == "RSI 40–60").sum()
-        bear = (df_res["Zone"] == "RSI < 40").sum()
-
         zone_total = bull + neutral + bear
 
         if zone_total == 0:
             st.warning("No valid RSI zones for sentiment calculation")
             st.stop()
 
-        # Percentages (stock participation)
         bull_pct = (bull / total_stocks) * 100
         bear_pct = (bear / total_stocks) * 100
         neutral_pct = (neutral / total_stocks) * 100
 
-        # Market Sentiment Index (balance)
         msi = (bull - bear) / zone_total
         msi_pct = msi * 100
 
-
-
-        # Arrow + color logic
         if msi > 0.2:
             delta = msi_pct
-            delta_color = "normal"   # green ↑
+            delta_color = "normal"
         elif msi < -0.2:
             delta = msi_pct
-            delta_color = "inverse"  # red ↓
+            delta_color = "inverse"
         else:
             delta = 0
-            delta_color = "off"      # yellow / neutral
-
-
+            delta_color = "off"
 
         colB.metric("🟢 Bullish Strength", f"{bull_pct:.2f}%")
         colB.metric("🔴 Bearish Weakness", f"{bear_pct:.2f}%")
@@ -1121,6 +1105,7 @@ with pulse_container:
             delta=delta,
             delta_color=delta_color
         )
+
 
 
 
