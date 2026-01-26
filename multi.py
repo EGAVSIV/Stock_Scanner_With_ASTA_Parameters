@@ -1049,7 +1049,7 @@ with pulse_container:
 
         df_pie = pd.DataFrame({
             "Zone": ["RSI > 60", "RSI 40–60", "RSI < 40"],
-            "Count": [bull, neutral, bear]
+            "Count": [bull_pct, neutral_pct, bear_pct]
         })
 
         fig = px.pie(
