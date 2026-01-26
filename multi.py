@@ -1079,10 +1079,27 @@ with pulse_container:
         bull_pct = (bull / total) * 100
         bear_pct = (bear / total) * 100
         neutral_pct = 100 - bull_pct - bear_pct
+        total = bull + neutral + bear
+        msi = (bull - bear) / total
+        msi_pct = msi * 100
+
+        if msi >= 0.6:
+            regime = "🚀 Strong Bullish"
+        elif msi >= 0.2:
+            regime = "📈 Bullish"
+        elif msi > -0.2:
+            regime = "⚖️ Neutral"
+        elif msi > -0.6:
+            regime = "📉 Bearish"
+        else:
+            regime = "🧨 Strong Bearish"
+
 
         colB.metric("🟢 Bullish Strength", f"{bull_pct:.2f}%")
         colB.metric("🔴 Bearish Weakness", f"{bear_pct:.2f}%")
         colB.metric("⚖️ Neutral", f"{neutral_pct:.2f}%")
+        colB.metric("🧠 Market Sentiment Index", f"{msi_pct:.2f}%", regime)
+
 
 
 with pulse_container:
