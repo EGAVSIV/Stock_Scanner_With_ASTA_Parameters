@@ -101,7 +101,7 @@ def get_last_candle_by_tf(folder_path: str):
 # STREAMLIT CONFIG
 # ==================================================
 st.set_page_config("Multi-Timeframe Stock Screener", layout="wide",page_icon="🧮")
-set_bg_image("Assets/BG1.png")
+set_bg_image("Assets/BG2.png")
 
 # ==================================================
 # TIMEFRAME → DATA FOLDER
