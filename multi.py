@@ -12,6 +12,7 @@ if sys.version_info >= (3, 13):
 import talib
 import plotly.express as px
 import hashlib
+import base64
 
 
 def hash_pwd(pwd):
@@ -80,6 +81,7 @@ def get_last_candle_by_tf(folder_path: str):
 # STREAMLIT CONFIG
 # ==================================================
 st.set_page_config("Multi-Timeframe Stock Screener", layout="wide",page_icon="🧮")
+set_bg_image("Assets/BG1.png")
 
 # ==================================================
 # TIMEFRAME → DATA FOLDER
@@ -169,6 +171,24 @@ def trim_df_to_date(df, anchor_date):
     return df
 
 
+def set_bg_image(image_path):
+    with open(image_path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/png;base64,{encoded}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 
