@@ -1049,8 +1049,9 @@ with pulse_container:
 
         df_pie = pd.DataFrame({
             "Zone": ["RSI > 60", "RSI 40–60", "RSI < 40"],
-            "Count": [bull_pct, neutral_pct, bear_pct]
+            "Count": [bull, neutral, bear]
         })
+
 
         fig = px.pie(
             df_pie,
@@ -1066,7 +1067,7 @@ with pulse_container:
             title="📊 RSI Market Breadth"
         )
 
-        fig.update_traces(textinfo="label+percent")
+        fig.update_traces(textinfo="label")
 
     
 
