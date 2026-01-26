@@ -1083,9 +1083,10 @@ with pulse_container:
             st.warning("No valid RSI zones for sentiment calculation")
             st.stop()
 
-        bull_pct = (bull / total_stocks) * 100
-        bear_pct = (bear / total_stocks) * 100
-        neutral_pct = (neutral / total_stocks) * 100
+        bull_pct = (bull / zone_total) * 100
+        bear_pct = (bear / zone_total) * 100
+        neutral_pct = (neutral / zone_total) * 100
+
 
 
         msi = (bull - bear) / zone_total
@@ -1102,7 +1103,13 @@ with pulse_container:
             delta_color = "off"
 
         colB.metric("🟢 Bullish Strength", f"{bull_pct:.2f}%")
-        colB.metric("🔴 Bearish Weakness", f"{bear_pct:.2f}%")
+        colB.metric(
+            "🔴 Bearish Weakness",
+            f"{bear_pct:.2f}%",
+            delta=-bear_pct,
+            delta_color="inverse"
+        )
+
         colB.metric("⚖️ Neutral", f"{neutral_pct:.2f}%")
         colB.metric(
             "🧠 Market Sentiment Index",
