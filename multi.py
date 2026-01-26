@@ -1,3 +1,4 @@
+import streamlit as st
 import os
 import pandas as pd
 import numpy as np
@@ -7,7 +8,7 @@ if sys.version_info >= (3, 13):
     imghdr = types.ModuleType("imghdr")
     imghdr.what = lambda *args, **kwargs: None
     sys.modules["imghdr"] = imghdr
-import streamlit as st
+
 import talib
 import plotly.express as px
 import hashlib
@@ -111,6 +112,7 @@ with col1:
     if st.button("🔄 Refresh Data"):
         st.cache_data.clear()
         st.success("Fresh data loaded")
+        st.session_state.clear()
         st.rerun()
 
 with col2:
@@ -135,8 +137,9 @@ st.sidebar.markdown("### 📅 Backtest Date")
 
 analysis_date = st.sidebar.date_input(
     "Select Analysis Date",
-    value=last_d.date() if last_d else None
+    value=last_d.date() if last_d else pd.Timestamp.today().date()
 )
+
 st.sidebar.info(
     f"Backtest Mode Active\nData cutoff: {analysis_date}"
 )
@@ -1012,7 +1015,10 @@ if run:
 
     if not results:
         st.info("No stocks matched.")
-        st.stop()
+        df_res = pd.DataFrame()
+    else:
+        df_res = pd.DataFrame(results)
+
 
     df_res = pd.DataFrame(results)
 
