@@ -1087,6 +1087,7 @@ with pulse_container:
         bear_pct = (bear / total_stocks) * 100
         neutral_pct = (neutral / total_stocks) * 100
 
+
         msi = (bull - bear) / zone_total
         msi_pct = msi * 100
 
