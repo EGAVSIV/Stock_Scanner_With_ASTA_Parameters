@@ -1066,7 +1066,8 @@ with pulse_container:
             title="📊 RSI Market Breadth"
         )
 
-        fig.update_traces(textinfo="label")
+        fig.update_traces(textinfo="label+percent")
+
     
 
 # ✅ NO STATIC KEY
@@ -1097,22 +1098,29 @@ with pulse_container:
 
 
 
-        if msi >= 0.6:
-            regime = "🚀 Strong Bullish"
-        elif msi >= 0.2:
-            regime = "📈 Bullish"
-        elif msi > -0.2:
-            regime = "⚖️ Neutral"
-        elif msi > -0.6:
-            regime = "📉 Bearish"
+        # Arrow + color logic
+        if msi > 0.2:
+            delta = msi_pct
+            delta_color = "normal"   # green ↑
+        elif msi < -0.2:
+            delta = msi_pct
+            delta_color = "inverse"  # red ↓
         else:
-            regime = "🧨 Strong Bearish"
+            delta = 0
+            delta_color = "off"      # yellow / neutral
+
 
 
         colB.metric("🟢 Bullish Strength", f"{bull_pct:.2f}%")
         colB.metric("🔴 Bearish Weakness", f"{bear_pct:.2f}%")
         colB.metric("⚖️ Neutral", f"{neutral_pct:.2f}%")
-        colB.metric("🧠 Market Sentiment Index", f"{msi_pct:.2f}%", regime)
+        colB.metric(
+            "🧠 Market Sentiment Index",
+            f"{msi_pct:.2f}%",
+            delta=delta,
+            delta_color=delta_color
+        )
+
 
 
 
