@@ -1067,7 +1067,11 @@ with pulse_container:
             title="📊 RSI Market Breadth"
         )
         # यहां percent + label दोनों दिखेंगे
-        fig.update_traces(textinfo="percent+label")
+        fig.update_traces(
+            textinfo="percent+label",
+            texttemplate="%{percent:.1%} %{label}"
+        )
+
 
         colA.plotly_chart(fig, use_container_width=True)
 
