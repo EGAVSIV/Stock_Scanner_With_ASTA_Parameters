@@ -1076,7 +1076,6 @@ with pulse_container:
         colA.plotly_chart(fig, use_container_width=True)
 
         # --- Breadth Metrics ---
-        total_stocks = len(df_res)
         zone_total = bull + neutral + bear
 
         if zone_total == 0:
@@ -1103,10 +1102,12 @@ with pulse_container:
             delta_color = "off"
 
         colB.metric("🟢 Bullish Strength", f"{bull_pct:.2f}%")
+
+        bear_delta = -bear_pct
         colB.metric(
             "🔴 Bearish Weakness",
             f"{bear_pct:.2f}%",
-            delta=-bear_pct,
+            delta=bear_delta,
             delta_color="inverse"
         )
 
@@ -1117,6 +1118,7 @@ with pulse_container:
             delta=delta,
             delta_color=delta_color
         )
+
 
 
 
