@@ -1066,20 +1066,26 @@ with pulse_container:
             title="📊 RSI Market Breadth"
         )
 
-        fig.update_traces(textinfo="percent+label")
+        fig.update_traces(textinfo="label")
+    
 
 # ✅ NO STATIC KEY
         colA.plotly_chart(fig, use_container_width=True)
 
         # --- Breadth Metrics ---
-        total = len(df_res)
+        total_stocks = len(df_res)
+        zone_total = bull + neutral + bear
         bull = (df_res["Zone"] == "RSI > 60").sum()
         bear = (df_res["Zone"] == "RSI < 40").sum()
 
         bull_pct = (bull / total) * 100
         bear_pct = (bear / total) * 100
         neutral_pct = 100 - bull_pct - bear_pct
-        total = bull + neutral + bear
+        
+        if zone_total == 0:
+            st.warning("No valid RSI zones for sentiment calculation")
+            st.stop()
+
         msi = (bull - bear) / total
         msi_pct = msi * 100
 
