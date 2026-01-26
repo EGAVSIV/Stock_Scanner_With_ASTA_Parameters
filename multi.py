@@ -1073,14 +1073,28 @@ with pulse_container:
         colA.plotly_chart(fig, use_container_width=True)
 
         # --- Breadth Metrics ---
+        # --- Breadth Metrics ---
         total_stocks = len(df_res)
-        zone_total = bull + neutral + bear
+
         bull = (df_res["Zone"] == "RSI > 60").sum()
+        neutral = (df_res["Zone"] == "RSI 40–60").sum()
         bear = (df_res["Zone"] == "RSI < 40").sum()
 
-        bull_pct = (bull / total) * 100
-        bear_pct = (bear / total) * 100
-        neutral_pct = 100 - bull_pct - bear_pct
+        zone_total = bull + neutral + bear
+
+        if zone_total == 0:
+            st.warning("No valid RSI zones for sentiment calculation")
+            st.stop()
+
+        # Percentages (stock participation)
+        bull_pct = (bull / total_stocks) * 100
+        bear_pct = (bear / total_stocks) * 100
+        neutral_pct = (neutral / total_stocks) * 100
+
+        # Market Sentiment Index (balance)
+        msi = (bull - bear) / zone_total
+        msi_pct = msi * 100
+
         
         if zone_total == 0:
             st.warning("No valid RSI zones for sentiment calculation")
