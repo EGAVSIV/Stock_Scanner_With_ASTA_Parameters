@@ -1095,13 +1095,7 @@ with pulse_container:
         msi = (bull - bear) / zone_total
         msi_pct = msi * 100
 
-        
-        if zone_total == 0:
-            st.warning("No valid RSI zones for sentiment calculation")
-            st.stop()
 
-        msi = (bull - bear) / total
-        msi_pct = msi * 100
 
         if msi >= 0.6:
             regime = "🚀 Strong Bullish"
