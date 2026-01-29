@@ -810,6 +810,58 @@ def bearish_gsas(df_tf, df_htf):
 
     return None
 
+# --- 50 EMA Fake Breakdown (Bullish Trap below EMA50)
+def ema50_fake_breakdown(df):
+    if len(df) < 55:
+        return None
+
+    df = df.copy()
+    df["EMA20"] = talib.EMA(df["close"], 20)
+    df["EMA50"] = talib.EMA(df["close"], 50)
+
+    prev = df.iloc[-2]
+    curr = df.iloc[-1]
+
+    # Condition:
+    # Current close > EMA50
+    # Previous close < EMA50
+    # EMA20 > EMA50 (bullish structure)
+    if (
+        curr["close"] > curr["EMA50"] and
+        prev["close"] < prev["EMA50"] and
+        curr["EMA20"] > curr["EMA50"]
+    ):
+        return "50 EMA Fake Breakdown"
+
+    return None
+
+
+# --- 50 EMA Fake Breakout (Bearish Trap above EMA50)
+def ema50_fake_breakout(df):
+    if len(df) < 55:
+        return None
+
+    df = df.copy()
+    df["EMA20"] = talib.EMA(df["close"], 20)
+    df["EMA50"] = talib.EMA(df["close"], 50)
+
+    prev = df.iloc[-2]
+    curr = df.iloc[-1]
+
+    # Condition:
+    # Current close < EMA50
+    # Previous close > EMA50
+    # EMA20 < EMA50 (bearish structure)
+    if (
+        curr["close"] < curr["EMA50"] and
+        prev["close"] > prev["EMA50"] and
+        curr["EMA20"] < curr["EMA50"]
+    ):
+        return "50 EMA Fake Breakout"
+
+    return None
+
+
 # ==================================================
 # SIDEBAR
 # ==================================================
@@ -847,6 +899,9 @@ scanner = st.sidebar.selectbox(
         "Evening Star (Top)",
         "Bullish GSAS",
         "Bearish GSAS",
+        "50 EMA Fake Breakdown",
+        "50 EMA Fake Breakout",
+
     ]
 )
 
@@ -1034,6 +1089,17 @@ if run:
 
                 if sig:
                     results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "50 EMA Fake Breakdown":
+            sig = ema50_fake_breakdown(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "50 EMA Fake Breakout":
+            sig = ema50_fake_breakout(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
 
     if not results:
         st.info("No stocks matched.")
