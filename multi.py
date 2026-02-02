@@ -1106,7 +1106,11 @@ if run:
         elif scanner == "MACD Histogram Divergence":
             sig = macd_histogram_divergence(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                results.append({
+                    "Symbol": sym,
+                    "Divergence": sig
+                })
+
 
         elif scanner == "EMA50 + Stoch Oversold":
             sig = ema50_stoch_oversold(df)
