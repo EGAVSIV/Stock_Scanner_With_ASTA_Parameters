@@ -14,6 +14,12 @@ import plotly.express as px
 import hashlib
 import base64
 
+SAFE_COLS = ["Symbol", "Signal", "Trend", "State", "Setup", "Divergence", "RSI", "Zone"]
+
+def empty_result_df():
+    return pd.DataFrame({c: [] for c in SAFE_COLS})
+
+
 def set_bg_image(image_path):
     with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
@@ -134,8 +140,8 @@ with col1:
     if st.button("🔄 Refresh Data"):
         st.cache_data.clear()
         st.success("Fresh data loaded")
-        st.session_state.clear()
         st.rerun()
+
 
 with col2:
     st.markdown(
@@ -976,10 +982,13 @@ scanner = st.sidebar.selectbox(
 
 run = st.sidebar.button("▶ Run Scan")
 
+df_res = empty_result_df()   # 👈 ADD THIS LINE
+
+
 # ==================================================
 # MAIN EXECUTION
 # ==================================================
-df_res = pd.DataFrame()  # 👈 SAFE DEFAULT
+
 if run:
     data = load_data(TIMEFRAMES[tf])
     if not data:
@@ -1182,27 +1191,38 @@ if run:
 
     if not results:
         st.info("No stocks matched.")
-        df_res = pd.DataFrame()
+        df_res = empty_result_df()
     else:
         df_res = pd.DataFrame(results)
 
+        for c in SAFE_COLS:
+            if c not in df_res.columns:
+                df_res[c] = ""
 
-    df_res = pd.DataFrame(results)
+        df_res = df_res[SAFE_COLS]
+        df_res = df_res.replace([np.inf, -np.inf], "")
+        df_res = df_res.fillna("")
 
-    ALL_COLS = ["Symbol", "Signal", "Trend", "State", "Setup", "Divergence", "RSI", "Zone"]
-    for c in ALL_COLS:
-        if c not in df_res.columns:
-            df_res[c] = ""
 
-    df_res = df_res[ALL_COLS]
-    df_res = df_res.replace([np.inf, -np.inf], "")
-    df_res = df_res.fillna("")
+
+
+
 
     # 🔹 Use numeric df_res for charts
     # 🔹 Create string-only copy for table
-    df_display = df_res.copy().astype(str)
+    df_display = df_res.astype(str)  # UI-safe string dataframe
 
-    st.dataframe(df_display, use_container_width=True)
+
+    st.dataframe(
+        df_display,
+        use_container_width=True,
+        hide_index=True
+    )
+    # ⛔ STOP UI IF NO RESULTS (PREVENTS REACT CRASH)
+    if df_res.empty:
+        st.stop()
+
+
 
 
 
