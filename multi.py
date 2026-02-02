@@ -862,6 +862,73 @@ def ema50_fake_breakout(df):
     return None
 
 
+# ===============================
+# KDJ CALCULATION (Pine → Python)
+# ===============================
+def kdj(df, period=9, signal=3):
+    """
+    Returns pK, pD, pJ series
+    """
+    low_min  = df["low"].rolling(period).min()
+    high_max = df["high"].rolling(period).max()
+
+    rsv = 100 * (df["close"] - low_min) / (high_max - low_min)
+
+    # bcwsma equivalent
+    def bcwsma(series, length, m=1):
+        out = []
+        for i, val in enumerate(series):
+            if i == 0 or np.isnan(val):
+                out.append(val)
+            else:
+                out.append((m * val + (length - m) * out[i-1]) / length)
+        return pd.Series(out, index=series.index)
+
+    pK = bcwsma(rsv, signal, 1)
+    pD = bcwsma(pK, signal, 1)
+    pJ = 3 * pK - 2 * pD
+
+    return pK, pD, pJ
+
+def kdj_buy(df):
+    if len(df) < 15:
+        return None
+
+    pK, pD, pJ = kdj(df)
+
+    # Cross condition
+    crossed_up = (
+        pJ.iloc[-2] < pD.iloc[-2] and
+        pJ.iloc[-1] > pD.iloc[-1]
+    )
+
+    oversold = pD.iloc[-1] < 20 and pJ.iloc[-1] < 20
+
+    if crossed_up and oversold:
+        return "KDJ BUY (J↑D below 20)"
+
+    return None
+
+def kdj_sell(df):
+    if len(df) < 15:
+        return None
+
+    pK, pD, pJ = kdj(df)
+
+    crossed_down = (
+        pJ.iloc[-2] > pD.iloc[-2] and
+        pJ.iloc[-1] < pD.iloc[-1]
+    )
+
+    overbought = pD.iloc[-1] > 80 and pJ.iloc[-1] > 80
+
+    if crossed_down and overbought:
+        return "KDJ SELL (J↓D above 80)"
+
+    return None
+
+
+
 # ==================================================
 # SIDEBAR
 # ==================================================
@@ -901,6 +968,8 @@ scanner = st.sidebar.selectbox(
         "Bearish GSAS",
         "50 EMA Fake Breakdown",
         "50 EMA Fake Breakout",
+        "KDJ BUY (Oversold)",
+        "KDJ SELL (Overbought)",
 
     ]
 )
@@ -1097,6 +1166,16 @@ if run:
 
         elif scanner == "50 EMA Fake Breakout":
             sig = ema50_fake_breakout(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "KDJ BUY (Oversold)":
+            sig = kdj_buy(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "KDJ SELL (Overbought)":
+            sig = kdj_sell(df)
             if sig:
                 results.append({"Symbol": sym, "Signal": sig})
 
