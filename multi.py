@@ -431,13 +431,25 @@ def macd_rd(df, df_htf):
     macd_htf, _, _ = talib.MACD(df_htf["close"], 12, 26, 9)
     macd_htf_val = macd_htf.iloc[-1]
 
+    ema50_ltf = talib.EMA(df["close"], timeperiod=50).iloc[-1]
+    ema50_htf = talib.EMA(df_htf["close"], timeperiod=50).iloc[-1]
+
+    close_ltf = df["close"].iloc[-1]
+    close_htf = df_htf["close"].iloc[-1]
+
+    ema_condition = (
+        close_ltf > ema50_ltf and
+        close_htf > ema50_htf
+    )
+
     if (
         latest > prev and
         latest > 0 and
         sig < latest and              # ✅ MACD > Signal
         macd_htf_val > 0 and           # ✅ HTF trend filter
         max60 > 0 and
-        (latest / max60) < 0.25
+        (latest / max60) < 0.25 and
+        ema_condition
     ):
         return "MACD RD (Compression + Trend Aligned)"
 
