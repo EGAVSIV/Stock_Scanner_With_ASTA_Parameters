@@ -20,7 +20,7 @@ TIMEFRAMES = {
     "1H": (Interval.in_1_hour,  "stock_data_1H"),
 }
 
-BARS = 2000
+BARS = 4000
 RETRY_DELAY = 3
 MAX_RETRY = 5
 
@@ -118,5 +118,6 @@ def run_all():
 
 if __name__ == "__main__":
     run_all()
+
 
 
