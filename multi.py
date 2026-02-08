@@ -478,9 +478,7 @@ def macd_rd(df, df_htf):
         return "MACD RD (Compression + Trend Aligned)"
 
     return None
-
-
-
+    
 def third_wave_finder(df):
     if len(df) < 100:
         return False
@@ -1143,7 +1141,6 @@ def failed_breakout_breakdown(df, lookback=20):
 
     return None
 
-
 def ema_compression_expansion(df):
     if len(df) < 60:
         return None
@@ -1201,26 +1198,16 @@ def calculate_confluence(row):
 
     if abs_score >= 4:
         prob = "High"
-        elif abs_score >= 3:
-            prob = "Medium"
-        else:
-            prob = "Low"
+    elif abs_score >= 3:
+        prob = "Medium"
+    else:
+        prob = "Low"
+
 
 
     return score, bias, prob
 
-
-
-
-
-
-
-
-
-
-# ==================================================
 # SIDEBAR
-# ==================================================
 tf = st.sidebar.selectbox(
     "Timeframe",
     list(TIMEFRAMES.keys())
@@ -1267,9 +1254,6 @@ scanner = st.sidebar.selectbox(
         "Range Expansion Day",
         "Failed Breakout / Breakdown",
         "EMA Compression → Expansion",
-
-
-
     ]
 )
 
@@ -1277,11 +1261,7 @@ run = st.sidebar.button("▶ Run Scan")
 
 df_res = empty_result_df()   # 👈 ADD THIS LINE
 
-
-# ==================================================
 # MAIN EXECUTION
-# ==================================================
-
 if run:
     data = load_data(TIMEFRAMES[tf])
     if not data:
@@ -1538,15 +1518,6 @@ if run:
             if sig:
                 results.append({"Symbol": sym, "Signal": sig})
 
-
-
-
-
-
-
-    
-
-
     if not results:
         st.info("No stocks matched.")
         df_res = empty_result_df()
@@ -1569,16 +1540,12 @@ if run:
             ascending=[False, True]
         )
 
-
-
-
         for i, row in df_res.iterrows():
             score, bias, prob = calculate_confluence(row)
             df_res.at[i, "Confluence"] = score
             df_res.at[i, "Bias"] = bias
             df_res.at[i, "Probability"] = prob
-
-
+            
         for c in SAFE_COLS:
             if c not in df_res.columns:
                 df_res[c] = ""
@@ -1588,12 +1555,6 @@ if run:
         df_res = df_res.fillna("")
 
 
-
-
-
-
-    # 🔹 Use numeric df_res for charts
-    # 🔹 Create string-only copy for table
     df_display = df_res.astype(str)  # UI-safe string dataframe
 
 
@@ -1631,14 +1592,7 @@ if run:
     if df_res.empty:
         st.info("No results to visualize.")
 
-
-
-
-
-
-# =============================
 # MARKET PULSE DASHBOARD AREA
-# =============================
 pulse_container = st.container()
 with pulse_container:
     if scanner == "RSI Market Pulse" and not df_res.empty:
@@ -1689,8 +1643,6 @@ with pulse_container:
         bear_pct = (bear / zone_total) * 100
         neutral_pct = (neutral / zone_total) * 100
 
-
-
         msi = (bull - bear) / zone_total
         msi_pct = msi * 100
 
@@ -1721,11 +1673,6 @@ with pulse_container:
             delta=delta,
             delta_color=delta_color
         )
-
-
-
-
-
 
 with pulse_container:
     if scanner == "MACD Market Pulse" and not df_res.empty:
