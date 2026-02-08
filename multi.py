@@ -1053,6 +1053,106 @@ def cpr_breakout(df):
 
     return None
 
+def inside_bar_breakout(df):
+    if len(df) < 3:
+        return None
+
+    mother = df.iloc[-3]
+    inside = df.iloc[-2]
+    curr = df.iloc[-1]
+
+    # Inside bar condition
+    if inside["high"] < mother["high"] and inside["low"] > mother["low"]:
+        if curr["close"] > mother["high"]:
+            return "Bullish Inside Bar Breakout"
+        if curr["close"] < mother["low"]:
+            return "Bearish Inside Bar Breakdown"
+
+    return None
+
+
+def adx_expansion(df):
+    if len(df) < 30:
+        return None
+
+    adx = talib.ADX(df["high"], df["low"], df["close"], 14)
+    ema20 = talib.EMA(df["close"], 20)
+
+    if adx.iloc[-2] < 20 and adx.iloc[-1] > 25:
+        if df["close"].iloc[-1] > ema20.iloc[-1]:
+            return "Bullish ADX Expansion"
+        if df["close"].iloc[-1] < ema20.iloc[-1]:
+            return "Bearish ADX Expansion"
+
+    return None
+
+
+def range_expansion_day(df, lookback=5):
+    if len(df) < lookback + 2:
+        return None
+
+    today = df.iloc[-1]
+    avg_range = (df["high"] - df["low"]).iloc[-lookback-1:-1].mean()
+    today_range = today["high"] - today["low"]
+
+    if today_range > 1.5 * avg_range:
+        if today["close"] > today["open"]:
+            return "Bullish Range Expansion Day"
+        else:
+            return "Bearish Range Expansion Day"
+
+    return None
+
+def failed_breakout_breakdown(df, lookback=20):
+    if len(df) < lookback + 2:
+        return None
+
+    recent_high = df["high"].iloc[-lookback:-1].max()
+    recent_low  = df["low"].iloc[-lookback:-1].min()
+
+    prev = df.iloc[-2]
+    curr = df.iloc[-1]
+
+    # Failed breakout → Bearish
+    if prev["high"] > recent_high and curr["close"] < recent_high:
+        return "Failed Breakout (Bearish)"
+
+    # Failed breakdown → Bullish
+    if prev["low"] < recent_low and curr["close"] > recent_low:
+        return "Failed Breakdown (Bullish)"
+
+    return None
+
+
+def ema_compression_expansion(df):
+    if len(df) < 60:
+        return None
+
+    ema20 = talib.EMA(df["close"], 20)
+    ema50 = talib.EMA(df["close"], 50)
+    ema100 = talib.EMA(df["close"], 100)
+
+    # Compression check (EMAs very close)
+    compression = (
+        abs(ema20.iloc[-2] - ema50.iloc[-2]) / ema50.iloc[-2] < 0.003 and
+        abs(ema50.iloc[-2] - ema100.iloc[-2]) / ema100.iloc[-2] < 0.003
+    )
+
+    if not compression:
+        return None
+
+    # Expansion direction
+    if ema20.iloc[-1] > ema50.iloc[-1] > ema100.iloc[-1]:
+        return "Bullish EMA Compression Break"
+    if ema20.iloc[-1] < ema50.iloc[-1] < ema100.iloc[-1]:
+        return "Bearish EMA Compression Break"
+
+    return None
+
+
+
+
+
 
 
 
@@ -1101,6 +1201,12 @@ scanner = st.sidebar.selectbox(
         "Probable Momentum (Consecutive Close)",
         "Camarilla Breakout / Breakdown",
         "CPR Breakout / Breakdown",
+        "Inside Bar Breakout",
+        "ADX Expansion (Trend Ignition)",
+        "Range Expansion Day",
+        "Failed Breakout / Breakdown",
+        "EMA Compression → Expansion",
+
 
 
     ]
@@ -1344,6 +1450,33 @@ if run:
                     "Symbol": sym,
                     "Signal": sig
                 })
+
+        elif scanner == "Inside Bar Breakout":
+            sig = inside_bar_breakout(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+
+        elif scanner == "ADX Expansion (Trend Ignition)":
+            sig = adx_expansion(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "Range Expansion Day":
+            sig = range_expansion_day(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "Failed Breakout / Breakdown":
+            sig = failed_breakout_breakdown(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "EMA Compression → Expansion":
+            sig = ema_compression_expansion(df)
+            if sig:
+                results.append({"Symbol": sym, "Signal": sig})
+
 
 
 
