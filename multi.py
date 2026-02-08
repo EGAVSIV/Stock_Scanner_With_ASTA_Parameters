@@ -1535,16 +1535,15 @@ if run:
             df_res.at[i, "Probability"] = prob
 
 # --- THEN sort by strength ---
-        df_res = df_res.sort_values(
-            by=["Confluence", "Bias"],
-            ascending=[False, True]
-        )
+        bias_rank = {"Bullish": 0, "Neutral": 1, "Bearish": 2}
+        df_res["_bias_rank"] = df_res["Bias"].map(bias_rank)
 
-        for i, row in df_res.iterrows():
-            score, bias, prob = calculate_confluence(row)
-            df_res.at[i, "Confluence"] = score
-            df_res.at[i, "Bias"] = bias
-            df_res.at[i, "Probability"] = prob
+        df_res = df_res.sort_values(
+            by=["Confluence", "_bias_rank"],
+            ascending=[False, True]
+        ).drop(columns="_bias_rank")
+
+
             
         for c in SAFE_COLS:
             if c not in df_res.columns:
