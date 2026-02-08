@@ -1241,7 +1241,8 @@ if run:
     )
     # ⛔ STOP UI IF NO RESULTS (PREVENTS REACT CRASH)
     if df_res.empty:
-        st.stop()
+        st.info("No results to visualize.")
+
 
 
 
