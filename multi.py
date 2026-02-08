@@ -1020,6 +1020,7 @@ if run:
             "15 Min": "1 Hour",
             "1 Hour": "Daily",
             "Daily": "Weekly",
+            "Weekly": "Monthly",
         }
 
         if tf not in htf_map:
