@@ -14,7 +14,27 @@ import plotly.express as px
 import hashlib
 import base64
 
-SAFE_COLS = ["Symbol", "Signal", "Trend", "State", "Setup", "Divergence", "RSI", "Zone"]
+SAFE_COLS = [
+    "Symbol",
+    "Signal",
+    "Trend",
+    "State",
+    "Setup",
+    "Divergence",
+    "RSI",
+    "Zone",
+    "Confluence",
+    "Bias",
+    "Probability"
+]
+BULL_KEYWORDS = [
+    "Bullish", "BUY", "Breakout", "Uptrend", "Momentum"
+]
+
+BEAR_KEYWORDS = [
+    "Bearish", "SELL", "Breakdown", "Downtrend"
+]
+
 
 def empty_result_df():
     return pd.DataFrame({c: [] for c in SAFE_COLS})
@@ -1149,6 +1169,45 @@ def ema_compression_expansion(df):
 
     return None
 
+def calculate_confluence(row):
+    score = 0
+    text = " ".join([
+        str(row.get("Signal", "")),
+        str(row.get("Trend", "")),
+        str(row.get("State", "")),
+        str(row.get("Setup", "")),
+        str(row.get("Divergence", ""))
+    ])
+
+    for k in BULL_KEYWORDS:
+        if k in text:
+            score += 1
+
+    for k in BEAR_KEYWORDS:
+        if k in text:
+            score -= 1
+
+    score = max(min(score, 5), -5)
+
+    if score > 0:
+        bias = "Bullish"
+    elif score < 0:
+        bias = "Bearish"
+    else:
+        bias = "Neutral"
+
+    abs_score = abs(score)
+
+    if abs_score >= 4:
+        prob = "High"
+    elif abs_score >= 2:
+        prob = "Medium"
+    else:
+        prob = "Low"
+
+    return score, bias, prob
+
+
 
 
 
@@ -1491,6 +1550,22 @@ if run:
         df_res = empty_result_df()
     else:
         df_res = pd.DataFrame(results)
+        df_res["Confluence"] = 0
+        df_res["Bias"] = ""
+        df_res["Probability"] = ""
+
+        df_res = df_res.sort_values(
+            by="Confluence",
+            ascending=False
+        )
+
+
+        for i, row in df_res.iterrows():
+            score, bias, prob = calculate_confluence(row)
+            df_res.at[i, "Confluence"] = score
+            df_res.at[i, "Bias"] = bias
+            df_res.at[i, "Probability"] = prob
+
 
         for c in SAFE_COLS:
             if c not in df_res.columns:
@@ -1515,6 +1590,31 @@ if run:
         use_container_width=True,
         hide_index=True
     )
+
+
+    st.markdown("## 🧠 Master Momentum Dashboard")
+
+    col1, col2, col3 = st.columns(3)
+
+    bulls = df_res[df_res["Bias"] == "Bullish"]
+    bears = df_res[df_res["Bias"] == "Bearish"]
+    high_prob = df_res[df_res["Probability"] == "High"]
+
+    col1.metric("🟢 Bullish Stocks", len(bulls))
+    col2.metric("🔴 Bearish Stocks", len(bears))
+    col3.metric("🔥 High Probability Setups", len(high_prob))
+
+    st.markdown("### 🚀 Top High-Conviction Momentum Stocks")
+
+    top_momentum = df_res[df_res["Probability"] == "High"].head(10)
+
+    st.dataframe(
+        top_momentum[["Symbol", "Bias", "Confluence", "Probability"]],
+        use_container_width=True,
+        hide_index=True
+    )
+
+
     # ⛔ STOP UI IF NO RESULTS (PREVENTS REACT CRASH)
     if df_res.empty:
         st.info("No results to visualize.")
