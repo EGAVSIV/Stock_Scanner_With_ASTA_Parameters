@@ -952,9 +952,9 @@ def kdj_sell(df):
 
 def consecutive_close_momentum(df, min_count=3):
     """
-    Counts consecutive higher-close or lower-close candles.
-    Returns:
-        ("Bull", count) or ("Bear", count) or None
+    Trading-intuitive logic:
+    Today close > Yesterday close = Day 1
+    Count stops immediately on first failure
     """
 
     if len(df) < min_count + 1:
@@ -962,29 +962,31 @@ def consecutive_close_momentum(df, min_count=3):
 
     closes = df["close"].values
 
-    bull_count = 0
-    bear_count = 0
+    # Decide direction from latest candle
+    if closes[-1] > closes[-2]:
+        direction = "Bull"
+    elif closes[-1] < closes[-2]:
+        direction = "Bear"
+    else:
+        return None
 
-    # Traverse backwards
-    for i in range(len(closes) - 1, 0, -1):
-        if closes[i] > closes[i - 1]:
-            bull_count += 1
-            bear_count = 0
-        elif closes[i] < closes[i - 1]:
-            bear_count += 1
-            bull_count = 0
-        else:
-            break
+    count = 1  # ✅ Today vs yesterday = 1 day
 
-        # stop once both reset logic breaks
-        if bull_count == 0 and bear_count == 0:
-            break
+    # Walk backwards day-by-day
+    for i in range(len(closes) - 2, 0, -1):
+        if direction == "Bull":
+            if closes[i] > closes[i - 1]:
+                count += 1
+            else:
+                break
+        else:  # Bear
+            if closes[i] < closes[i - 1]:
+                count += 1
+            else:
+                break
 
-    if bull_count >= min_count:
-        return "Bull", bull_count
-
-    if bear_count >= min_count:
-        return "Bear", bear_count
+    if count >= min_count:
+        return direction, count
 
     return None
 
