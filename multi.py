@@ -60,7 +60,6 @@ def set_bg_image(image_path):
     )
 
 
-
 def hash_pwd(pwd):
     return hashlib.sha256(pwd.encode()).hexdigest()
 
@@ -126,7 +125,7 @@ def get_last_candle_by_tf(folder_path: str):
 # ==================================================
 # STREAMLIT CONFIG
 # ==================================================
-st.set_page_config("Multi-Timeframe Stock Screener", layout="wide",page_icon="🧮")
+st.set_page_config("Multi-Timeframe Stock Screener", layout="wide", page_icon="🧮")
 set_bg_image("Assets/BG1.jpeg")
 
 # ==================================================
@@ -144,11 +143,10 @@ TIMEFRAMES = {
 # LAST CANDLE DATES (ALL TIMEFRAMES – IST)
 # ==================================================
 last_15m = get_last_candle_by_tf(TIMEFRAMES["15 Min"])
-last_1h  = get_last_candle_by_tf(TIMEFRAMES["1 Hour"])
-last_d   = get_last_candle_by_tf(TIMEFRAMES["Daily"])
-last_w   = get_last_candle_by_tf(TIMEFRAMES["Weekly"])
-last_m   = get_last_candle_by_tf(TIMEFRAMES["Monthly"])
-
+last_1h = get_last_candle_by_tf(TIMEFRAMES["1 Hour"])
+last_d = get_last_candle_by_tf(TIMEFRAMES["Daily"])
+last_w = get_last_candle_by_tf(TIMEFRAMES["Weekly"])
+last_m = get_last_candle_by_tf(TIMEFRAMES["Monthly"])
 
 st.title("📊 Multi-Timeframe Stock Screener")
 # ==================================================
@@ -161,7 +159,6 @@ with col1:
         st.cache_data.clear()
         st.success("Fresh data loaded")
         st.rerun()
-
 
 with col2:
     st.markdown(
@@ -192,10 +189,10 @@ st.sidebar.info(
     f"Backtest Mode Active\nData cutoff: {analysis_date}"
 )
 
-
 st.sidebar.caption(
     f"Scans will run as of: {analysis_date}"
 )
+
 
 def trim_df_to_date(df, anchor_date):
     """
@@ -215,11 +212,6 @@ def trim_df_to_date(df, anchor_date):
         return None
 
     return df
-
-
-
-
-
 
 # ==================================================
 # DATA LOADER
@@ -242,7 +234,7 @@ def load_data(folder):
                 df["datetime"] = pd.to_datetime(df["datetime"])
                 df = df.sort_values("datetime").set_index("datetime")
 
-            needed = {"open","high","low","close","volume"}
+            needed = {"open", "high", "low", "close", "volume"}
             if not needed.issubset(df.columns):
                 continue
 
@@ -259,10 +251,13 @@ def rsi_market_pulse(df):
     if len(df) < 14:
         return None
     rsi = talib.RSI(df["close"], 14).iloc[-1]
-    if rsi > 60: zone = "RSI > 60"
-    elif rsi < 40: zone = "RSI < 40"
-    else: zone = "RSI 40–60"
-    return round(rsi,2), zone
+    if rsi > 60:
+        zone = "RSI > 60"
+    elif rsi < 40:
+        zone = "RSI < 40"
+    else:
+        zone = "RSI 40–60"
+    return round(rsi, 2), zone
 
 # --- Volume Shocker
 def volume_shocker(df):
@@ -270,7 +265,7 @@ def volume_shocker(df):
         return False
     vol_sma = df["volume"].rolling(10).mean()
     last, prev = df.iloc[-1], df.iloc[-2]
-    return last["volume"] > 2 * vol_sma.iloc[-1] and prev["close"]*0.95 <= last["close"] <= prev["close"]*1.05
+    return last["volume"] > 2 * vol_sma.iloc[-1] and prev["close"] * 0.95 <= last["close"] <= prev["close"] * 1.05
 
 # --- NRB-7
 def nrb_7(df):
@@ -296,7 +291,7 @@ def nrb_7(df):
     # --- NRB-7 condition ---
     is_nrb = (
         base["high"] > inside["high"].max() and
-        base["low"]  < inside["low"].min()
+        base["low"] < inside["low"].min()
     )
 
     if not is_nrb:
@@ -315,8 +310,6 @@ def nrb_7(df):
         return "NRB-7 Bearish Breakdown + Volume"
 
     return None
-
-
 
 # --- Counter Attack
 def counter_attack(df):
@@ -357,8 +350,8 @@ def breakaway_gap(df):
 def rsi_adx(df):
     if len(df) < 20:
         return None
-    rsi = talib.RSI(df["close"],14).iloc[-1]
-    adx = talib.ADX(df["high"],df["low"],df["close"],14).iloc[-1]
+    rsi = talib.RSI(df["close"], 14).iloc[-1]
+    adx = talib.ADX(df["high"], df["low"], df["close"], 14).iloc[-1]
 
     if adx > 50 and rsi < 20:
         return "Bullish Reversal"
@@ -368,9 +361,9 @@ def rsi_adx(df):
 
 # --- RSI WM 60–40 (Multi-TF)
 def rsi_wm(df_tf, df_w, df_m):
-    r_tf = talib.RSI(df_tf["close"],14).iloc[-1]
-    r_w  = talib.RSI(df_w["close"],14).iloc[-1]
-    r_m  = talib.RSI(df_m["close"],14).iloc[-1]
+    r_tf = talib.RSI(df_tf["close"], 14).iloc[-1]
+    r_w = talib.RSI(df_w["close"], 14).iloc[-1]
+    r_m = talib.RSI(df_m["close"], 14).iloc[-1]
 
     if r_w > 60 and r_m > 60 and r_tf < 40:
         return "Bullish WM Reversal"
@@ -450,8 +443,8 @@ def macd_rd(df, df_htf):
     # --- HTF MACD ---
     macd_htf, _, _ = talib.MACD(df_htf["close"], 12, 26, 9)
     macd_htf_val = macd_htf.iloc[-1]
-    macd_htf_now  = macd_htf.iloc[-1]
-    macd_htf_prev = macd_htf.iloc[-2] 
+    macd_htf_now = macd_htf.iloc[-1]
+    macd_htf_prev = macd_htf.iloc[-2]
     macd_htf_uptick = macd_htf_now > macd_htf_prev
 
     ema50_ltf = talib.EMA(df["close"], timeperiod=50).iloc[-1]
@@ -478,7 +471,7 @@ def macd_rd(df, df_htf):
         return "MACD RD (Compression + Trend Aligned)"
 
     return None
-    
+
 def third_wave_finder(df):
     if len(df) < 100:
         return False
@@ -519,7 +512,6 @@ def third_wave_finder(df):
 
     return False
 
-
 def c_wave_finder(df):
     if len(df) < 100:
         return False
@@ -558,9 +550,6 @@ def c_wave_finder(df):
         return True
 
     return False
-
-
-
 
 def macd_peak_bearish_divergence(df):
     if len(df) < 80:
@@ -773,7 +762,6 @@ def dark_cloud_cover(df):
 
     return None
 
-
 def morning_star_bottom(df):
     if len(df) < 60:
         return None
@@ -829,7 +817,6 @@ def bullish_gsas(df_tf, df_htf):
         return "Bullish GSAS"
 
     return None
-
 
 def bearish_gsas(df_tf, df_htf):
     rsi = talib.RSI(df_tf["close"], 14)
@@ -909,7 +896,7 @@ def kdj(df, period=9, signal=3):
     """
     Returns pK, pD, pJ series
     """
-    low_min  = df["low"].rolling(period).min()
+    low_min = df["low"].rolling(period).min()
     high_max = df["high"].rolling(period).max()
 
     rsv = 100 * (df["close"] - low_min) / (high_max - low_min)
@@ -921,7 +908,7 @@ def kdj(df, period=9, signal=3):
             if i == 0 or np.isnan(val):
                 out.append(val)
             else:
-                out.append((m * val + (length - m) * out[i-1]) / length)
+                out.append((m * val + (length - m) * out[i - 1]) / length)
         return pd.Series(out, index=series.index)
 
     pK = bcwsma(rsv, signal, 1)
@@ -1021,7 +1008,7 @@ def camarilla_breakout(df):
     curr = df.iloc[-1]
 
     high = prev["high"]
-    low  = prev["low"]
+    low = prev["low"]
     close = prev["close"]
 
     range_ = high - low
@@ -1038,7 +1025,6 @@ def camarilla_breakout(df):
 
     return None
 
-
 def cpr_breakout(df):
     """
     CPR Breakout / Breakdown
@@ -1052,7 +1038,7 @@ def cpr_breakout(df):
     curr = df.iloc[-1]
 
     high = prev["high"]
-    low  = prev["low"]
+    low = prev["low"]
     close = prev["close"]
 
     pivot = (high + low + close) / 3
@@ -1110,7 +1096,7 @@ def range_expansion_day(df, lookback=5):
         return None
 
     today = df.iloc[-1]
-    avg_range = (df["high"] - df["low"]).iloc[-lookback-1:-1].mean()
+    avg_range = (df["high"] - df["low"]).iloc[-lookback - 1:-1].mean()
     today_range = today["high"] - today["low"]
 
     if today_range > 1.5 * avg_range:
@@ -1126,7 +1112,7 @@ def failed_breakout_breakdown(df, lookback=20):
         return None
 
     recent_high = df["high"].iloc[-lookback:-1].max()
-    recent_low  = df["low"].iloc[-lookback:-1].min()
+    recent_low = df["low"].iloc[-lookback:-1].min()
 
     prev = df.iloc[-2]
     curr = df.iloc[-1]
@@ -1195,7 +1181,6 @@ def calculate_confluence(row):
 
     abs_score = abs(score)
 
-
     if abs_score >= 4:
         prob = "High"
     elif abs_score >= 3:
@@ -1203,63 +1188,117 @@ def calculate_confluence(row):
     else:
         prob = "Low"
 
-
-
     return score, bias, prob
 
-# SIDEBAR
+# ==================================================
+# SIDEBAR: TIMEFRAME ONLY
+# ==================================================
 tf = st.sidebar.selectbox(
     "Timeframe",
     list(TIMEFRAMES.keys())
 )
 
-scanner = st.sidebar.selectbox(
-    "Scanner",
-    [
-        "RSI Market Pulse",
-        "Volume Shocker",
-        "NRB-7 Breakout",
-        "Counter Attack",
-        "Breakaway Gaps",
-        "RSI + ADX",
-        "RSI WM 60–40",
-        "MACD Market Pulse",
-        "MACD Normal Divergence",
-        "MACD RD (4th Wave)",
-        "Probable 3rd Wave",
-        "Probable C Wave",
-        "MACD Bearish Peak Divergence",
-        "MACD Bullish Base Divergence",
-        "Trend Alignment (EMA)",
-        "Pullback to EMA",
-        "High Probability Confluence",
-        "MACD Hook Up",
-        "MACD Hook Down",
-        "MACD Histogram Divergence",
-        "EMA50 + Stoch Oversold",
-        "Dark Cloud Cover",
-        "Morning Star (Bottom)",
-        "Evening Star (Top)",
-        "Bullish GSAS",
-        "Bearish GSAS",
-        "50 EMA Fake Breakdown",
-        "50 EMA Fake Breakout",
-        "KDJ BUY (Oversold)",
-        "KDJ SELL (Overbought)",
-        "Probable Momentum (Consecutive Close)",
-        "Camarilla Breakout / Breakdown",
-        "CPR Breakout / Breakdown",
-        "Inside Bar Breakout",
-        "ADX Expansion (Trend Ignition)",
-        "Range Expansion Day",
-        "Failed Breakout / Breakdown",
-        "EMA Compression → Expansion",
-    ]
+# ==================================================
+# SCANNER TILES CONFIG (HOME PAGE)
+# ==================================================
+SCANNERS = [
+    {"name": "RSI Market Pulse", "color": "#1abc9c"},
+    {"name": "Volume Shocker", "color": "#e67e22"},
+    {"name": "NRB-7 Breakout", "color": "#f1c40f"},
+    {"name": "Counter Attack", "color": "#3498db"},
+    {"name": "Breakaway Gaps", "color": "#9b59b6"},
+    {"name": "RSI + ADX", "color": "#e74c3c"},
+    {"name": "RSI WM 60–40", "color": "#16a085"},
+    {"name": "MACD Market Pulse", "color": "#2ecc71"},
+    {"name": "MACD Normal Divergence", "color": "#8e44ad"},
+    {"name": "MACD RD (4th Wave)", "color": "#2980b9"},
+    {"name": "Probable 3rd Wave", "color": "#d35400"},
+    {"name": "Probable C Wave", "color": "#c0392b"},
+    {"name": "MACD Bearish Peak Divergence", "color": "#7f8c8d"},
+    {"name": "MACD Bullish Base Divergence", "color": "#27ae60"},
+    {"name": "Trend Alignment (EMA)", "color": "#34495e"},
+    {"name": "Pullback to EMA", "color": "#f39c12"},
+    {"name": "High Probability Confluence", "color": "#e84393"},
+    {"name": "MACD Hook Up", "color": "#16a085"},
+    {"name": "MACD Hook Down", "color": "#c0392b"},
+    {"name": "MACD Histogram Divergence", "color": "#8e44ad"},
+    {"name": "EMA50 + Stoch Oversold", "color": "#2ecc71"},
+    {"name": "Dark Cloud Cover", "color": "#e74c3c"},
+    {"name": "Morning Star (Bottom)", "color": "#f1c40f"},
+    {"name": "Evening Star (Top)", "color": "#9b59b6"},
+    {"name": "Bullish GSAS", "color": "#27ae60"},
+    {"name": "Bearish GSAS", "color": "#e74c3c"},
+    {"name": "50 EMA Fake Breakdown", "color": "#2980b9"},
+    {"name": "50 EMA Fake Breakout", "color": "#d35400"},
+    {"name": "KDJ BUY (Oversold)", "color": "#16a085"},
+    {"name": "KDJ SELL (Overbought)", "color": "#c0392b"},
+    {"name": "Probable Momentum (Consecutive Close)", "color": "#f39c12"},
+    {"name": "Camarilla Breakout / Breakdown", "color": "#8e44ad"},
+    {"name": "CPR Breakout / Breakdown", "color": "#2ecc71"},
+    {"name": "Inside Bar Breakout", "color": "#e67e22"},
+    {"name": "ADX Expansion (Trend Ignition)", "color": "#1abc9c"},
+    {"name": "Range Expansion Day", "color": "#9b59b6"},
+    {"name": "Failed Breakout / Breakdown", "color": "#34495e"},
+    {"name": "EMA Compression → Expansion", "color": "#e84393"},
+]
+
+if "scanner" not in st.session_state:
+    st.session_state["scanner"] = SCANNERS[0]["name"]
+
+st.markdown("### 🎯 Select Scanner")
+
+cols_per_row = 4
+clicked_scanner = None
+
+for i in range(0, len(SCANNERS), cols_per_row):
+    row = SCANNERS[i:i + cols_per_row]
+    cols = st.columns(len(row))
+    for col, sc in zip(cols, row):
+        with col:
+            is_active = (st.session_state["scanner"] == sc["name"])
+            bg = sc["color"]
+            border = "#ffffff" if not is_active else "#000000"
+            opacity = "1.0" if is_active else "0.85"
+
+            st.markdown(
+                f"""
+                <div style="
+                    border-radius: 12px;
+                    padding: 14px 10px;
+                    text-align: center;
+                    background: {bg};
+                    border: 3px solid {border};
+                    box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+                    opacity: {opacity};
+                    margin-bottom: 6px;
+                ">
+                    <span style="
+                        font-weight: 700;
+                        font-size: 14px;
+                        color: white;
+                    ">
+                        {sc["name"]}
+                    </span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            if st.button(f"Scan: {sc['name']}", key=f"btn_{sc['name']}"):
+                clicked_scanner = sc["name"]
+
+if clicked_scanner is not None:
+    st.session_state["scanner"] = clicked_scanner
+
+scanner = st.session_state["scanner"]
+
+st.markdown(
+    f"**Active Scanner:** `{scanner}`  |  **Timeframe:** `{tf}`"
 )
 
-run = st.sidebar.button("▶ Run Scan")
+# Auto-run when user clicks a tile
+run = clicked_scanner is not None
 
-df_res = empty_result_df()   # 👈 ADD THIS LINE
+df_res = empty_result_df()
 
 # MAIN EXECUTION
 if run:
@@ -1270,7 +1309,7 @@ if run:
 
     results = []
 
-    # === Higher Timeframe preload for GSAS ===
+    # === Higher Timeframe preload for GSAS / MACD RD ===
     if scanner in ["Bullish GSAS", "Bearish GSAS", "MACD RD (4th Wave)"]:
 
         htf_map = {
@@ -1336,11 +1375,10 @@ if run:
         elif scanner == "Probable 3rd Wave":
             if third_wave_finder(df):
                 results.append({"Symbol": sym})
-                
+
         elif scanner == "Probable C Wave":
             if c_wave_finder(df):
                 results.append({"Symbol": sym})
-
 
         elif scanner == "MACD Bearish Peak Divergence":
             sig = macd_peak_bearish_divergence(df)
@@ -1385,7 +1423,6 @@ if run:
                     "Divergence": sig
                 })
 
-
         elif scanner == "EMA50 + Stoch Oversold":
             sig = ema50_stoch_oversold(df)
             if sig:
@@ -1420,7 +1457,7 @@ if run:
             if sym in data_w and sym in data_m:
                 df_wt = trim_df_to_date(data_w[sym], analysis_date)
                 df_mt = trim_df_to_date(data_m[sym], analysis_date)
-                
+
                 if df_wt is None or df_mt is None:
                     continue
                 sig = rsi_wm(df, df_wt, df_mt)
@@ -1497,7 +1534,6 @@ if run:
             if sig:
                 results.append({"Symbol": sym, "Signal": sig})
 
-
         elif scanner == "ADX Expansion (Trend Ignition)":
             sig = adx_expansion(df)
             if sig:
@@ -1527,14 +1563,14 @@ if run:
         df_res["Bias"] = ""
         df_res["Probability"] = ""
 
-# --- calculate confluence FIRST ---
+        # --- calculate confluence FIRST ---
         for i, row in df_res.iterrows():
             score, bias, prob = calculate_confluence(row)
             df_res.at[i, "Confluence"] = score
             df_res.at[i, "Bias"] = bias
             df_res.at[i, "Probability"] = prob
 
-# --- THEN sort by strength ---
+        # --- THEN sort by strength ---
         bias_rank = {"Bullish": 0, "Neutral": 1, "Bearish": 2}
         df_res["_bias_rank"] = df_res["Bias"].map(bias_rank)
 
@@ -1543,8 +1579,6 @@ if run:
             ascending=[False, True]
         ).drop(columns="_bias_rank")
 
-
-            
         for c in SAFE_COLS:
             if c not in df_res.columns:
                 df_res[c] = ""
@@ -1553,43 +1587,38 @@ if run:
         df_res = df_res.replace([np.inf, -np.inf], "")
         df_res = df_res.fillna("")
 
+        df_display = df_res.astype(str)
 
-    df_display = df_res.astype(str)  # UI-safe string dataframe
+        st.dataframe(
+            df_display,
+            use_container_width=True,
+            hide_index=True
+        )
 
+        st.markdown("## 🧠 Master Momentum Dashboard")
 
-    st.dataframe(
-        df_display,
-        use_container_width=True,
-        hide_index=True
-    )
+        col1, col2, col3 = st.columns(3)
 
+        bulls = df_res[df_res["Bias"] == "Bullish"]
+        bears = df_res[df_res["Bias"] == "Bearish"]
+        high_prob = df_res[df_res["Probability"] == "High"]
 
-    st.markdown("## 🧠 Master Momentum Dashboard")
+        col1.metric("🟢 Bullish Stocks", len(bulls))
+        col2.metric("🔴 Bearish Stocks", len(bears))
+        col3.metric("🔥 High Probability Setups", len(high_prob))
 
-    col1, col2, col3 = st.columns(3)
+        st.markdown("### 🚀 Top High-Conviction Momentum Stocks")
 
-    bulls = df_res[df_res["Bias"] == "Bullish"]
-    bears = df_res[df_res["Bias"] == "Bearish"]
-    high_prob = df_res[df_res["Probability"] == "High"]
+        top_momentum = df_res[df_res["Probability"] == "High"].head(10)
 
-    col1.metric("🟢 Bullish Stocks", len(bulls))
-    col2.metric("🔴 Bearish Stocks", len(bears))
-    col3.metric("🔥 High Probability Setups", len(high_prob))
+        st.dataframe(
+            top_momentum[["Symbol", "Bias", "Confluence", "Probability"]],
+            use_container_width=True,
+            hide_index=True
+        )
 
-    st.markdown("### 🚀 Top High-Conviction Momentum Stocks")
-
-    top_momentum = df_res[df_res["Probability"] == "High"].head(10)
-
-    st.dataframe(
-        top_momentum[["Symbol", "Bias", "Confluence", "Probability"]],
-        use_container_width=True,
-        hide_index=True
-    )
-
-
-    # ⛔ STOP UI IF NO RESULTS (PREVENTS REACT CRASH)
-    if df_res.empty:
-        st.info("No results to visualize.")
+        if df_res.empty:
+            st.info("No results to visualize.")
 
 # MARKET PULSE DASHBOARD AREA
 pulse_container = st.container()
@@ -1598,7 +1627,7 @@ with pulse_container:
 
         colA, colB = st.columns(2)
 
-        # --- RSI Zones count (एक बार ही) ---
+        # --- RSI Zones count ---
         bull = (df_res["Zone"] == "RSI > 60").sum()
         neutral = (df_res["Zone"] == "RSI 40–60").sum()
         bear = (df_res["Zone"] == "RSI < 40").sum()
@@ -1622,13 +1651,10 @@ with pulse_container:
             },
             title="📊 RSI Market Breadth"
         )
-        # यहां percent + label दोनों दिखेंगे
         fig.update_traces(
             textinfo="percent+label",
             texttemplate="%{percent:.1%} %{label}"
         )
-
-
         colA.plotly_chart(fig, use_container_width=True)
 
         # --- Breadth Metrics ---
@@ -1705,16 +1731,12 @@ with pulse_container:
         col1.metric("🚀 Strong Bullish Stocks", strong_bull)
         col2.metric("🧨 Strong Bearish Stocks", strong_bear)
 
-
-    
-
-
 st.markdown("""
 ---
 **Designed by:-  
 Gaurav Singh Yadav**   
 🩷💛🩵💙🩶💜🤍🤎💖  Built With Love 🫶  
 Energy | Commodity | Quant Intelligence 📶  
-📱 +91-8003994518 〽️   
+📱 +91-8003994518 〽️  
 📧 yadav.gauravsingh@gmail.com ™️
 """)
