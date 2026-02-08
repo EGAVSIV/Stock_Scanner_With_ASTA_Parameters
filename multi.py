@@ -1408,31 +1408,63 @@ if run:
         if df is None:
             continue
 
+        # base row with all SAFE_COLS (default values)
+        base_row = {
+            "Symbol": sym,
+            "Signal": "",
+            "Trend": "",
+            "State": "",
+            "Setup": "",
+            "Divergence": "",
+            "RSI": "",
+            "Zone": "",
+            "Confluence": 0,
+            "Bias": "",
+            "Probability": "",
+        }
+
+        # अब हर scanner में वही base_row copy करके सिर्फ ज़रूरी fields भरते हैं
+
         if scanner == "RSI Market Pulse":
             r = rsi_market_pulse(df)
             if r:
-                results.append({"Symbol": sym, "RSI": r[0], "Zone": r[1]})
+                row = base_row.copy()
+                row["RSI"] = r[0]
+                row["Zone"] = r[1]
+                results.append(row)
 
         elif scanner == "Volume Shocker" and volume_shocker(df):
-            results.append({"Symbol": sym})
+            row = base_row.copy()
+            row["Signal"] = "Volume Shocker"
+            results.append(row)
 
-        elif scanner == "NRB-7 Breakout" and nrb_7(df):
-            results.append({"Symbol": sym})
+        elif scanner == "NRB-7 Breakout":
+            sig = nrb_7(df)
+            if sig:
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "Counter Attack":
             sig = counter_attack(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "MACD Market Pulse":
             sig = macd_market_pulse(df)
             if sig:
-                results.append({"Symbol": sym, "State": sig})
+                row = base_row.copy()
+                row["State"] = sig
+                results.append(row)
 
         elif scanner == "MACD Normal Divergence":
             sig = macd_normal_divergence(df)
             if sig:
-                results.append({"Symbol": sym, "Divergence": sig})
+                row = base_row.copy()
+                row["Divergence"] = sig
+                results.append(row)
 
         elif scanner == "MACD RD (4th Wave)":
             if data_htf is not None and sym in data_htf:
@@ -1441,99 +1473,133 @@ if run:
                     continue
                 sig = macd_rd(df, df_htf)
                 if sig:
-                    results.append({"Symbol": sym, "Signal": sig})
+                    row = base_row.copy()
+                    row["Signal"] = sig
+                    results.append(row)
 
         elif scanner == "Probable 3rd Wave":
             if third_wave_finder(df):
-                results.append({"Symbol": sym})
+                row = base_row.copy()
+                row["Signal"] = "Probable 3rd Wave"
+                results.append(row)
 
         elif scanner == "Probable C Wave":
             if c_wave_finder(df):
-                results.append({"Symbol": sym})
+                row = base_row.copy()
+                row["Signal"] = "Probable C Wave"
+                results.append(row)
 
         elif scanner == "MACD Bearish Peak Divergence":
             sig = macd_peak_bearish_divergence(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                row["Divergence"] = sig
+                results.append(row)
 
         elif scanner == "MACD Bullish Base Divergence":
             sig = macd_base_bullish_divergence(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                row["Divergence"] = sig
+                results.append(row)
 
         elif scanner == "Trend Alignment (EMA)":
             sig = trend_alignment(df)
             if sig:
-                results.append({"Symbol": sym, "Trend": sig})
+                row = base_row.copy()
+                row["Trend"] = sig
+                results.append(row)
 
         elif scanner == "Pullback to EMA":
             sig = pullback_to_ema(df)
             if sig:
-                results.append({"Symbol": sym, "Setup": sig})
+                row = base_row.copy()
+                row["Setup"] = sig
+                results.append(row)
 
         elif scanner == "High Probability Confluence":
             sig = confluence_setup(df)
             if sig:
-                results.append({"Symbol": sym, "Setup": sig})
+                row = base_row.copy()
+                row["Setup"] = sig
+                results.append(row)
 
         elif scanner == "MACD Hook Up":
             sig = macd_hook_up(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "MACD Hook Down":
             sig = macd_hook_down(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "MACD Histogram Divergence":
             sig = macd_histogram_divergence(df)
             if sig:
-                results.append({
-                    "Symbol": sym,
-                    "Divergence": sig
-                })
+                row = base_row.copy()
+                row["Divergence"] = sig
+                results.append(row)
 
         elif scanner == "EMA50 + Stoch Oversold":
             sig = ema50_stoch_oversold(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "Dark Cloud Cover":
             sig = dark_cloud_cover(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "Morning Star (Bottom)":
             sig = morning_star_bottom(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "Evening Star (Top)":
             sig = evening_star_top(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "Breakaway Gaps":
             sig = breakaway_gap(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "RSI + ADX":
             sig = rsi_adx(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "RSI WM 60–40":
             if sym in data_w and sym in data_m:
                 df_wt = trim_df_to_date(data_w[sym], analysis_date)
                 df_mt = trim_df_to_date(data_m[sym], analysis_date)
-
                 if df_wt is None or df_mt is None:
                     continue
                 sig = rsi_wm(df, df_wt, df_mt)
                 if sig:
-                    results.append({"Symbol": sym, "Signal": sig})
+                    row = base_row.copy()
+                    row["Signal"] = sig
+                    results.append(row)
 
         elif scanner == "Bullish GSAS":
             if data_htf is not None and sym in data_htf:
@@ -1542,7 +1608,9 @@ if run:
                     continue
                 sig = bullish_gsas(df, df_htf)
                 if sig:
-                    results.append({"Symbol": sym, "Signal": sig})
+                    row = base_row.copy()
+                    row["Signal"] = sig
+                    results.append(row)
 
         elif scanner == "Bearish GSAS":
             if data_htf is not None and sym in data_htf:
@@ -1550,89 +1618,139 @@ if run:
                 if df_htf is None:
                     continue
                 sig = bearish_gsas(df, df_htf)
-
                 if sig:
-                    results.append({"Symbol": sym, "Signal": sig})
+                    row = base_row.copy()
+                    row["Signal"] = sig
+                    results.append(row)
 
         elif scanner == "50 EMA Fake Breakdown":
             sig = ema50_fake_breakdown(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "50 EMA Fake Breakout":
             sig = ema50_fake_breakout(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "KDJ BUY (Oversold)":
             sig = kdj_buy(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "KDJ SELL (Overbought)":
             sig = kdj_sell(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "Probable Momentum (Consecutive Close)":
             res = consecutive_close_momentum(df, min_count=3)
             if res:
                 direction, days = res
-                results.append({
-                    "Symbol": sym,
-                    "Signal": f"{direction} Momentum",
-                    "State": f"{days} Consecutive Days"
-                })
+                row = base_row.copy()
+                row["Signal"] = f"{direction} Momentum"
+                row["State"] = f"{days} Consecutive Days"
+                results.append(row)
 
         elif scanner == "Camarilla Breakout / Breakdown":
             sig = camarilla_breakout(df)
             if sig:
-                results.append({
-                    "Symbol": sym,
-                    "Signal": sig
-                })
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "CPR Breakout / Breakdown":
             sig = cpr_breakout(df)
             if sig:
-                results.append({
-                    "Symbol": sym,
-                    "Signal": sig
-                })
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "Inside Bar Breakout":
             sig = inside_bar_breakout(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "ADX Expansion (Trend Ignition)":
             sig = adx_expansion(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "Range Expansion Day":
             sig = range_expansion_day(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "Failed Breakout / Breakdown":
             sig = failed_breakout_breakdown(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
         elif scanner == "EMA Compression → Expansion":
             sig = ema_compression_expansion(df)
             if sig:
-                results.append({"Symbol": sym, "Signal": sig})
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
 
+    # ===== RESULT POST-PROCESSING =====
     if not results:
         st.info("No stocks matched.")
         df_res = empty_result_df()
     else:
         df_res = pd.DataFrame(results)
-        df_res["Confluence"] = 0
-        df_res["Bias"] = ""
-        df_res["Probability"] = ""
+
+        # Confluence already 0 / Bias,Probability "" हैं base_row में,
+        # फिर भी safety के लिए ensure कर देते हैं:
+        for c in SAFE_COLS:
+            if c not in df_res.columns:
+                if c == "Confluence":
+                    df_res[c] = 0
+                else:
+                    df_res[c] = ""
+
+        # calculate confluence
+        for i, row in df_res.iterrows():
+            score, bias, prob = calculate_confluence(row)
+            df_res.at[i, "Confluence"] = score
+            df_res.at[i, "Bias"] = bias
+            df_res.at[i, "Probability"] = prob
+
+        bias_rank = {"Bullish": 0, "Neutral": 1, "Bearish": 2}
+        df_res["_bias_rank"] = df_res["Bias"].map(bias_rank)
+
+        df_res = df_res.sort_values(
+            by=["Confluence", "_bias_rank"],
+            ascending=[False, True]
+        ).drop(columns="_bias_rank")
+
+        df_res = df_res[SAFE_COLS]
+        df_res = df_res.replace([np.inf, -np.inf], "").fillna("")
+
+        df_display = df_res.astype(str)
+
+        st.dataframe(
+            df_display,
+            use_container_width=True,
+            hide_index=True
+        )
+
 
         # --- calculate confluence FIRST ---
         for i, row in df_res.iterrows():
