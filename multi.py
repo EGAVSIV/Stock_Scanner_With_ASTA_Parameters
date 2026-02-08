@@ -950,6 +950,46 @@ def kdj_sell(df):
     return None
 
 
+def consecutive_close_momentum(df, min_count=3):
+    """
+    Counts consecutive higher-close or lower-close candles.
+    Returns:
+        ("Bull", count) or ("Bear", count) or None
+    """
+
+    if len(df) < min_count + 1:
+        return None
+
+    closes = df["close"].values
+
+    bull_count = 0
+    bear_count = 0
+
+    # Traverse backwards
+    for i in range(len(closes) - 1, 0, -1):
+        if closes[i] > closes[i - 1]:
+            bull_count += 1
+            bear_count = 0
+        elif closes[i] < closes[i - 1]:
+            bear_count += 1
+            bull_count = 0
+        else:
+            break
+
+        # stop once both reset logic breaks
+        if bull_count == 0 and bear_count == 0:
+            break
+
+    if bull_count >= min_count:
+        return "Bull", bull_count
+
+    if bear_count >= min_count:
+        return "Bear", bear_count
+
+    return None
+
+
+
 
 # ==================================================
 # SIDEBAR
@@ -992,6 +1032,8 @@ scanner = st.sidebar.selectbox(
         "50 EMA Fake Breakout",
         "KDJ BUY (Oversold)",
         "KDJ SELL (Overbought)",
+        "Probable Momentum (Consecutive Close)",
+
 
     ]
 )
@@ -1208,6 +1250,20 @@ if run:
             sig = kdj_sell(df)
             if sig:
                 results.append({"Symbol": sym, "Signal": sig})
+
+        elif scanner == "Probable Momentum (Consecutive Close)":
+        res = consecutive_close_momentum(df, min_count=3)
+        if res:
+            direction, days = res
+            results.append({
+                "Symbol": sym,
+                "Signal": f"{direction} Momentum",
+                "State": f"{days} Consecutive Days"
+            })
+
+
+
+    
 
 
     if not results:
