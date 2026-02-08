@@ -1252,14 +1252,15 @@ if run:
                 results.append({"Symbol": sym, "Signal": sig})
 
         elif scanner == "Probable Momentum (Consecutive Close)":
-        res = consecutive_close_momentum(df, min_count=3)
-        if res:
-            direction, days = res
-            results.append({
-                "Symbol": sym,
-                "Signal": f"{direction} Momentum",
-                "State": f"{days} Consecutive Days"
-            })
+            res = consecutive_close_momentum(df, min_count=3)
+            if res:
+                direction, days = res
+                results.append({
+                    "Symbol": sym,
+                    "Signal": f"{direction} Momentum",
+                    "State": f"{days} Consecutive Days"
+                })
+
 
 
 
