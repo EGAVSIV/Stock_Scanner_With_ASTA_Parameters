@@ -1198,12 +1198,14 @@ def calculate_confluence(row):
 
     abs_score = abs(score)
 
+
     if abs_score >= 4:
         prob = "High"
-    elif abs_score >= 2:
-        prob = "Medium"
-    else:
-        prob = "Low"
+        elif abs_score >= 3:
+            prob = "Medium"
+        else:
+            prob = "Low"
+
 
     return score, bias, prob
 
@@ -1554,10 +1556,20 @@ if run:
         df_res["Bias"] = ""
         df_res["Probability"] = ""
 
+# --- calculate confluence FIRST ---
+        for i, row in df_res.iterrows():
+            score, bias, prob = calculate_confluence(row)
+            df_res.at[i, "Confluence"] = score
+            df_res.at[i, "Bias"] = bias
+            df_res.at[i, "Probability"] = prob
+
+# --- THEN sort by strength ---
         df_res = df_res.sort_values(
-            by="Confluence",
-            ascending=False
+            by=["Confluence", "Bias"],
+            ascending=[False, True]
         )
+
+
 
 
         for i, row in df_res.iterrows():
