@@ -270,46 +270,62 @@ def volume_shocker(df):
 # --- NRB-7
 def nrb_7(df):
     """
-    NRB-7 + Breakout confirmation + Volume filter
+    NRB-7 style pattern:
+    - base = 7th candle from last
+    - next 6 candles fully inside base high/low (high, low, open, close)
+    - latest candle breaks out above base high or below base low
+    - with volume filter on the breakout candle
     Returns:
         None → no signal
         String → Bullish / Bearish NRB breakout
     """
-
     if len(df) < 20:
         return None
 
-    # NRB reference candle (7th from last)
+    # 7th from last = base candle
     base = df.iloc[-7]
 
-    # Next 6 candles (compression candles)
+    # Next 6 candles (compression / inside candles)
     inside = df.iloc[-6:-1]
 
     # Latest candle (breakout candle)
     last = df.iloc[-1]
 
-    # --- NRB-7 condition ---
-    is_nrb = (
-        base["high"] > inside["high"].max() and
-        base["low"] < inside["low"].min()
+    base_high = base["high"]
+    base_low = base["low"]
+
+    # --- NRB-7 condition: ALL 6 candles fully inside base range ---
+    # This ensures high, low, open, close all lie within base_high/base_low
+    cond_high_low = (
+        inside["high"].max() <= base_high and
+        inside["low"].min() >= base_low
     )
+    cond_open_close = (
+        inside["open"].max() <= base_high and
+        inside["open"].min() >= base_low and
+        inside["close"].max() <= base_high and
+        inside["close"].min() >= base_low
+    )
+
+    is_nrb = cond_high_low and cond_open_close
 
     if not is_nrb:
         return None
 
-    # --- Volume filter ---
+    # --- Volume filter on breakout candle ---
     avg_vol = df["volume"].rolling(10).mean().iloc[-2]
     if last["volume"] < 1.5 * avg_vol:
         return None
 
-    # --- Breakout confirmation ---
-    if last["close"] > base["high"]:
+    # --- Breakout / Breakdown confirmation relative to base ---
+    if last["close"] > base_high:
         return "NRB-7 Bullish Breakout + Volume"
 
-    if last["close"] < base["low"]:
+    if last["close"] < base_low:
         return "NRB-7 Bearish Breakdown + Volume"
 
     return None
+
 
 # --- Counter Attack
 def counter_attack(df):
@@ -472,84 +488,111 @@ def macd_rd(df, df_htf):
 
     return None
 
-def third_wave_finder(df):
-    if len(df) < 100:
+def third_wave_finder(df, lookback_cross=50, tolerance=0.02):
+    """
+    3rd-wave style finder:
+    - EMA20 & EMA50 were in negative crossover (20 < 50) for some bars
+    - Bullish crossover (20 crosses above 50) occurs recently
+    - After bullish crossover, current price has pulled back near EMA50
+    """
+    if len(df) < lookback_cross + 5:
         return False
 
-    # EMA calculation
-    ema20 = talib.EMA(df["close"], 20)
-    ema50 = talib.EMA(df["close"], 50)
+    close = df["close"]
+    ema20 = talib.EMA(close, 20)
+    ema50 = talib.EMA(close, 50)
 
-    # 1️⃣ Bullish EMA 20 / EMA 50 crossover (PCO)
-    if not (
-        ema20.iloc[-1] > ema50.iloc[-1] and
-        ema20.iloc[-2] < ema50.iloc[-2]
-    ):
+    # 1️⃣ Find latest bullish crossover index (20 crosses above 50)
+    cross_idx = None
+    for i in range(len(close) - 1, 0, -1):
+        # bullish cross at bar i (today relative to i-1)
+        if ema20.iloc[i] > ema50.iloc[i] and ema20.iloc[i - 1] <= ema50.iloc[i - 1]:
+            cross_idx = i
+            break
+
+    if cross_idx is None:
         return False
 
-    # 2️⃣ Find LOW before the crossover (Wave-2 low)
-    # Using candles before the crossover zone
-    pre_crossover_low = df["low"].iloc[-60:-30].min()
+    # 2️⃣ Verify that BEFORE this crossover, EMAs were in negative cross
+    start_idx = max(0, cross_idx - lookback_cross)
+    pre_ema20 = ema20.iloc[start_idx:cross_idx]
+    pre_ema50 = ema50.iloc[start_idx:cross_idx]
 
-    # 3️⃣ Find HIGH after crossover (Wave-1 high / pivot high)
-    post_crossover_high = df["high"].iloc[-30:].max()
-
-    # Safety check
-    if post_crossover_high <= pre_crossover_low:
+    if pre_ema20.empty:
         return False
 
-    # 4️⃣ Measure impulse move
-    move = post_crossover_high - pre_crossover_low
+    # Require that for most of that period, 20 was below 50 (bearish phase)
+    bearish_ratio = (pre_ema20 < pre_ema50).mean()
+    if bearish_ratio < 0.7:  # at least 70% of bars negative cross
+        return False
 
-    # 5️⃣ 50% retracement level
-    retrace_50 = pre_crossover_low + (move * 0.5)
+    # 3️⃣ After bullish cross, check if we are pulling back near EMA50 now
+    ema50_now = ema50.iloc[-1]
+    price_now = close.iloc[-1]
 
-    # 6️⃣ Check if price retraced near 50% (Wave-2 pullback)
-    current_price = df["close"].iloc[-1]
+    if ema50_now == 0 or np.isnan(ema50_now):
+        return False
 
-    if retrace_50 * 0.95 <= current_price <= retrace_50 * 1.05:
+    # Distance of price from EMA50 in percentage
+    dist = abs(price_now - ema50_now) / ema50_now
+
+    # If price is within 'tolerance' (e.g., 2%) of EMA50, treat as 3rd-wave setup
+    if dist <= tolerance:
         return True
 
     return False
 
-def c_wave_finder(df):
-    if len(df) < 100:
+
+def c_wave_finder(df, lookback_cross=50, tolerance=0.02):
+    """
+    Bearish C-wave style setup:
+    - EMA20 & EMA50 were in positive crossover (20 > 50) for a while
+    - Bearish crossover (20 crosses below 50) occurs
+    - After bearish cross, current price has pulled back near EMA50
+    """
+    if len(df) < lookback_cross + 5:
         return False
 
-    # EMA calculation
-    ema20 = talib.EMA(df["close"], 20)
-    ema50 = talib.EMA(df["close"], 50)
+    close = df["close"]
+    ema20 = talib.EMA(close, 20)
+    ema50 = talib.EMA(close, 50)
 
-    # 1️⃣ Bearish EMA 20 / EMA 50 crossover
-    if not (
-        ema20.iloc[-1] < ema50.iloc[-1] and
-        ema20.iloc[-2] > ema50.iloc[-2]
-    ):
+    # 1) Find latest bearish crossover index (20 crosses below 50)
+    cross_idx = None
+    for i in range(len(close) - 1, 0, -1):
+        if ema20.iloc[i] < ema50.iloc[i] and ema20.iloc[i - 1] >= ema50.iloc[i - 1]:
+            cross_idx = i
+            break
+
+    if cross_idx is None:
         return False
 
-    # 2️⃣ Find HIGH before crossover (Wave-B high)
-    pre_crossover_high = df["high"].iloc[-60:-30].max()
+    # 2) Before this, EMAs should be mostly in positive cross (20 > 50)
+    start_idx = max(0, cross_idx - lookback_cross)
+    pre_ema20 = ema20.iloc[start_idx:cross_idx]
+    pre_ema50 = ema50.iloc[start_idx:cross_idx]
 
-    # 3️⃣ Find LOW after crossover (Wave-A low)
-    post_crossover_low = df["low"].iloc[-30:].min()
-
-    # Safety check
-    if post_crossover_low >= pre_crossover_high:
+    if pre_ema20.empty:
         return False
 
-    # 4️⃣ Measure impulse move
-    move = pre_crossover_high - post_crossover_low
+    bullish_ratio = (pre_ema20 > pre_ema50).mean()
+    if bullish_ratio < 0.7:  # at least 70% time 20 > 50
+        return False
 
-    # 5️⃣ 50% retracement level (pullback upward)
-    retrace_50 = post_crossover_low + (move * 0.5)
+    # 3) After bearish cross: price now near EMA50 = pullback
+    ema50_now = ema50.iloc[-1]
+    price_now = close.iloc[-1]
 
-    # 6️⃣ Check if price retraced near 50%
-    current_price = df["close"].iloc[-1]
+    if ema50_now == 0 or np.isnan(ema50_now):
+        return False
 
-    if retrace_50 * 0.95 <= current_price <= retrace_50 * 1.05:
+    dist = abs(price_now - ema50_now) / ema50_now
+
+    if dist <= tolerance:
         return True
 
     return False
+
 
 def macd_peak_bearish_divergence(df):
     if len(df) < 80:
@@ -557,16 +600,26 @@ def macd_peak_bearish_divergence(df):
 
     macd, _, _ = talib.MACD(df["close"], 12, 26, 9)
 
-    price_high1 = df["high"].iloc[-60:-30].max()
-    price_high2 = df["high"].iloc[-30:].max()
+    # Older swing window
+    old_slice = slice(-60, -30)
+    new_slice = slice(-30, None)
 
-    macd_high1 = macd.iloc[-60:-30].max()
-    macd_high2 = macd.iloc[-30:].max()
+    # Price swing highs
+    price_high1 = df["high"].iloc[old_slice].max()
+    price_high2 = df["high"].iloc[new_slice].max()
+
+    # MACD values at those bar locations
+    idx1 = df["high"].iloc[old_slice].idxmax()
+    idx2 = df["high"].iloc[new_slice].idxmax()
+
+    macd_high1 = macd.loc[idx1]
+    macd_high2 = macd.loc[idx2]
 
     if price_high2 > price_high1 and macd_high2 < macd_high1:
         return "Bearish MACD Peak Divergence"
 
     return None
+
 
 def macd_base_bullish_divergence(df):
     if len(df) < 80:
@@ -584,6 +637,7 @@ def macd_base_bullish_divergence(df):
         return "Bullish MACD Base Divergence"
 
     return None
+
 
 def trend_alignment(df):
     if len(df) < 100:
@@ -656,14 +710,16 @@ def macd_hook_up(df):
     macd, signal, hist = talib.MACD(df["close"], 12, 26, 9)
 
     if (
-        macd.iloc[-1] > 0 and
-        macd.iloc[-2] < macd.iloc[-3] and
-        macd.iloc[-1] > macd.iloc[-2] and
-        hist.iloc[-1] > hist.iloc[-2]
+        macd.iloc[-1] > 0 and                    # MACD above zero
+        macd.iloc[-1] > signal.iloc[-1] and      # positive crossover (MACD > Signal)
+        macd.iloc[-2] < macd.iloc[-3] and        # was pointing down
+        macd.iloc[-1] > macd.iloc[-2] and        # now turns up (hook)
+        hist.iloc[-1] > hist.iloc[-2]            # histogram rising
     ):
         return "MACD Hook Up"
 
     return None
+
 
 def macd_hook_down(df):
     if len(df) < 35:
@@ -672,14 +728,16 @@ def macd_hook_down(df):
     macd, signal, hist = talib.MACD(df["close"], 12, 26, 9)
 
     if (
-        macd.iloc[-1] < 0 and
-        macd.iloc[-2] > macd.iloc[-3] and
-        macd.iloc[-1] < macd.iloc[-2] and
-        hist.iloc[-1] < hist.iloc[-2]
+        macd.iloc[-1] < 0 and                    # MACD below zero
+        macd.iloc[-1] < signal.iloc[-1] and      # negative crossover (MACD < Signal)
+        macd.iloc[-2] > macd.iloc[-3] and        # was pointing up
+        macd.iloc[-1] < macd.iloc[-2] and        # now turns down (hook)
+        hist.iloc[-1] < hist.iloc[-2]            # histogram falling
     ):
         return "MACD Hook Down"
 
     return None
+
 
 
 def macd_histogram_divergence(df):
@@ -735,7 +793,7 @@ def ema50_stoch_oversold(df):
     return None
 
 def dark_cloud_cover(df):
-    if len(df) < 15:  # RSI needs at least 14 candles
+    if len(df) < 15:
         return None
 
     prev = df.iloc[-2]
@@ -750,17 +808,21 @@ def dark_cloud_cover(df):
     if rsi.iloc[-2] <= 60:
         return None
 
+    # Current candle must be bearish
+    if curr["close"] >= curr["open"]:
+        return None
+
     # Gap up
-    gap_up = curr["open"] > prev["close"]
+    if curr["open"] <= prev["close"]:
+        return None
 
     # Close below 50% of previous candle body
     mid = (prev["open"] + prev["close"]) / 2
-    close_below_mid = curr["close"] < mid
+    if curr["close"] >= mid:
+        return None
 
-    if gap_up and close_below_mid:
-        return "Dark Cloud Cover (Bearish | RSI>60)"
+    return "Dark Cloud Cover (Bearish | RSI>60)"
 
-    return None
 
 def morning_star_bottom(df):
     if len(df) < 60:
@@ -894,21 +956,25 @@ def ema50_fake_breakout(df):
 # ===============================
 def kdj(df, period=9, signal=3):
     """
-    Returns pK, pD, pJ series
+    Returns pK, pD, pJ series (KDJ)
     """
-    low_min = df["low"].rolling(period).min()
+    low_min  = df["low"].rolling(period).min()
     high_max = df["high"].rolling(period).max()
 
-    rsv = 100 * (df["close"] - low_min) / (high_max - low_min)
+    # Avoid division by zero
+    range_ = (high_max - low_min)
+    range_ = range_.replace(0, np.nan)
 
-    # bcwsma equivalent
+    rsv = 100 * (df["close"] - low_min) / range_
+    rsv = rsv.clip(lower=0, upper=100)  # keep in [0,100]
+
     def bcwsma(series, length, m=1):
         out = []
         for i, val in enumerate(series):
             if i == 0 or np.isnan(val):
                 out.append(val)
             else:
-                out.append((m * val + (length - m) * out[i - 1]) / length)
+                out.append((m * val + (length - m) * out[i-1]) / length)
         return pd.Series(out, index=series.index)
 
     pK = bcwsma(rsv, signal, 1)
@@ -917,42 +983,47 @@ def kdj(df, period=9, signal=3):
 
     return pK, pD, pJ
 
+
 def kdj_buy(df):
-    if len(df) < 15:
+    if len(df) < 20:
         return None
 
     pK, pD, pJ = kdj(df)
 
-    # Cross condition
-    crossed_up = (
-        pJ.iloc[-2] < pD.iloc[-2] and
-        pJ.iloc[-1] > pD.iloc[-1]
-    )
+    # Last two values valid हों (NaN नहीं)
+    if pd.isna(pD.iloc[-1]) or pd.isna(pD.iloc[-2]) or pd.isna(pJ.iloc[-1]) or pd.isna(pJ.iloc[-2]):
+        return None
 
-    oversold = pD.iloc[-1] < 20 and pJ.iloc[-1] < 20
+    crossed_up = (pJ.iloc[-2] < pD.iloc[-2]) and (pJ.iloc[-1] > pD.iloc[-1])
+
+    # थोड़ा relax: D < 30, J < 30
+    oversold = (pD.iloc[-1] < 30) and (pJ.iloc[-1] < 30)
 
     if crossed_up and oversold:
-        return "KDJ BUY (J↑D below 20)"
+        return "KDJ BUY (J↑D oversold)"
 
     return None
 
+
 def kdj_sell(df):
-    if len(df) < 15:
+    if len(df) < 20:
         return None
 
     pK, pD, pJ = kdj(df)
 
-    crossed_down = (
-        pJ.iloc[-2] > pD.iloc[-2] and
-        pJ.iloc[-1] < pD.iloc[-1]
-    )
+    if pd.isna(pD.iloc[-1]) or pd.isna(pD.iloc[-2]) or pd.isna(pJ.iloc[-1]) or pd.isna(pJ.iloc[-2]):
+        return None
 
-    overbought = pD.iloc[-1] > 80 and pJ.iloc[-1] > 80
+    crossed_down = (pJ.iloc[-2] > pD.iloc[-2]) and (pJ.iloc[-1] < pD.iloc[-1])
+
+    # थोड़ा relax: D > 70, J > 70
+    overbought = (pD.iloc[-1] > 70) and (pJ.iloc[-1] > 70)
 
     if crossed_down and overbought:
-        return "KDJ SELL (J↓D above 80)"
+        return "KDJ SELL (J↓D overbought)"
 
     return None
+
 
 
 def consecutive_close_momentum(df, min_count=3):
