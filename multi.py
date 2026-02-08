@@ -990,6 +990,70 @@ def consecutive_close_momentum(df, min_count=3):
 
     return None
 
+def camarilla_breakout(df):
+    """
+    Uses previous day's OHLC
+    Returns Bullish / Bearish breakout
+    """
+
+    if len(df) < 2:
+        return None
+
+    prev = df.iloc[-2]
+    curr = df.iloc[-1]
+
+    high = prev["high"]
+    low  = prev["low"]
+    close = prev["close"]
+
+    range_ = high - low
+
+    # Camarilla H4 & L4
+    H4 = close + (range_ * 1.1 / 2)
+    L4 = close - (range_ * 1.1 / 2)
+
+    if curr["close"] > H4:
+        return "Bullish Camarilla Breakout"
+
+    if curr["close"] < L4:
+        return "Bearish Camarilla Breakdown"
+
+    return None
+
+
+def cpr_breakout(df):
+    """
+    CPR Breakout / Breakdown
+    Uses previous day OHLC
+    """
+
+    if len(df) < 2:
+        return None
+
+    prev = df.iloc[-2]
+    curr = df.iloc[-1]
+
+    high = prev["high"]
+    low  = prev["low"]
+    close = prev["close"]
+
+    pivot = (high + low + close) / 3
+    bc = (high + low) / 2
+    tc = (pivot * 2) - bc
+
+    # ensure correct ordering
+    top = max(tc, bc)
+    bottom = min(tc, bc)
+
+    if curr["close"] > top:
+        return "Bullish CPR Breakout"
+
+    if curr["close"] < bottom:
+        return "Bearish CPR Breakdown"
+
+    return None
+
+
 
 
 
@@ -1035,6 +1099,8 @@ scanner = st.sidebar.selectbox(
         "KDJ BUY (Oversold)",
         "KDJ SELL (Overbought)",
         "Probable Momentum (Consecutive Close)",
+        "Camarilla Breakout / Breakdown",
+        "CPR Breakout / Breakdown",
 
 
     ]
@@ -1262,6 +1328,24 @@ if run:
                     "Signal": f"{direction} Momentum",
                     "State": f"{days} Consecutive Days"
                 })
+
+        elif scanner == "Camarilla Breakout / Breakdown":
+            sig = camarilla_breakout(df)
+            if sig:
+                results.append({
+                    "Symbol": sym,
+                    "Signal": sig
+                })
+
+        elif scanner == "CPR Breakout / Breakdown":
+            sig = cpr_breakout(df)
+            if sig:
+                results.append({
+                    "Symbol": sym,
+                    "Signal": sig
+                })
+
+
 
 
 
