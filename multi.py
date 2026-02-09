@@ -1895,7 +1895,6 @@ if selected_symbol != "NA":
                 "Monthly": load_data(TIMEFRAMES["Monthly"]),
             }
 
-            # 👇 सिर्फ यही call रखना है, कोई data_w / data_m keyword नहीं
             results_dict = run_all_scanners_for_symbol(
                 selected_symbol,
                 df_sym,
@@ -1903,7 +1902,6 @@ if selected_symbol != "NA":
                 analysis_date,
                 data_all_tfs,
             )
-
 
             mat_df = pd.DataFrame(
                 {
@@ -1916,6 +1914,7 @@ if selected_symbol != "NA":
             st.info("Not enough data for this symbol at selected date.")
     else:
         st.info("Symbol data not found for this timeframe.")
+
 
 
 
