@@ -1796,12 +1796,6 @@ if run:
 
         df_display = df_res.astype(str)
 
-        st.dataframe(
-            df_display,
-            use_container_width=True,
-            hide_index=True
-        )
-
         st.markdown("## 🧠 Master Momentum Dashboard")
 
         col1, col2, col3 = st.columns(3)
