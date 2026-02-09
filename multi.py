@@ -1272,10 +1272,13 @@ def calculate_confluence(row):
 # ==================================================
 # SIDEBAR: TIMEFRAME ONLY
 # ==================================================
+tf_options = list(TIMEFRAMES.keys())
 tf = st.sidebar.selectbox(
     "Timeframe",
-    list(TIMEFRAMES.keys())
+    tf_options,
+    index=tf_options.index("Daily")   # default = "Daily"
 )
+
 
 # ==================================================
 # SCANNER TILES CONFIG (HOME PAGE)
