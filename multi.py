@@ -1927,6 +1927,7 @@ if selected_symbol != "NA":
                 data_all_tfs,
             )
 
+
             mat_df = pd.DataFrame(
                 {
                     "Scanner": list(results_dict.keys()),
