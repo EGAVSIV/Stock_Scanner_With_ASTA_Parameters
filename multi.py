@@ -502,6 +502,7 @@ def third_wave_finder(df, lookback_cross=50, tolerance=0.02):
     - EMA20 & EMA50 were in negative crossover (20 < 50) for some bars
     - Bullish crossover (20 crosses above 50) occurs recently
     - After bullish crossover, current price has pulled back near EMA50
+    - At detection bar: EMA20 > EMA50 (uptrend intact)
     """
     if len(df) < lookback_cross + 5:
         return False
@@ -513,7 +514,6 @@ def third_wave_finder(df, lookback_cross=50, tolerance=0.02):
     # 1️⃣ Find latest bullish crossover index (20 crosses above 50)
     cross_idx = None
     for i in range(len(close) - 1, 0, -1):
-        # bullish cross at bar i (today relative to i-1)
         if ema20.iloc[i] > ema50.iloc[i] and ema20.iloc[i - 1] <= ema50.iloc[i - 1]:
             cross_idx = i
             break
@@ -521,7 +521,7 @@ def third_wave_finder(df, lookback_cross=50, tolerance=0.02):
     if cross_idx is None:
         return False
 
-    # 2️⃣ Verify that BEFORE this crossover, EMAs were in negative cross
+    # 2️⃣ Before this crossover: mostly negative cross (20 < 50)
     start_idx = max(0, cross_idx - lookback_cross)
     pre_ema20 = ema20.iloc[start_idx:cross_idx]
     pre_ema50 = ema50.iloc[start_idx:cross_idx]
@@ -529,24 +529,26 @@ def third_wave_finder(df, lookback_cross=50, tolerance=0.02):
     if pre_ema20.empty:
         return False
 
-    # Require that for most of that period, 20 was below 50 (bearish phase)
     bearish_ratio = (pre_ema20 < pre_ema50).mean()
-    if bearish_ratio < 0.7:  # at least 70% of bars negative cross
+    if bearish_ratio < 0.7:
         return False
 
-    # 3️⃣ After bullish cross, check if we are pulling back near EMA50 now
+    # 3️⃣ After bullish cross: price now near EMA50 (pullback)
     ema50_now = ema50.iloc[-1]
     price_now = close.iloc[-1]
 
     if ema50_now == 0 or np.isnan(ema50_now):
         return False
 
-    # Distance of price from EMA50 in percentage
     dist = abs(price_now - ema50_now) / ema50_now
+    if dist > tolerance:
+        return False
 
-    # If price is within 'tolerance' (e.g., 2%) of EMA50, treat as 3rd-wave setup
-    if dist <= tolerance:
-        return True
+    # 4️⃣ Detection bar पर uptrend intact: EMA20 > EMA50
+    if ema20.iloc[-1] <= ema50.iloc[-1]:
+        return False
+
+    return True
 
     return False
 
@@ -557,6 +559,7 @@ def c_wave_finder(df, lookback_cross=50, tolerance=0.02):
     - EMA20 & EMA50 were in positive crossover (20 > 50) for a while
     - Bearish crossover (20 crosses below 50) occurs
     - After bearish cross, current price has pulled back near EMA50
+    - At detection bar: EMA20 < EMA50 (downtrend intact)
     """
     if len(df) < lookback_cross + 5:
         return False
@@ -595,11 +598,15 @@ def c_wave_finder(df, lookback_cross=50, tolerance=0.02):
         return False
 
     dist = abs(price_now - ema50_now) / ema50_now
+    if dist > tolerance:
+        return False
 
-    if dist <= tolerance:
-        return True
+    # 4) Detection bar पर downtrend intact: EMA20 < EMA50
+    if ema20.iloc[-1] >= ema50.iloc[-1]:
+        return False
 
-    return False
+    return True
+
 
 
 def macd_peak_bearish_divergence(df):
