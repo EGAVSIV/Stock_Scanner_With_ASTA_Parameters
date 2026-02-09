@@ -5,9 +5,11 @@ import hashlib
 
 import numpy as np
 import pandas as pd
-import streamlit as st
+
 import talib
 import plotly.express as px
+
+st.set_page_config("Rao_G", layout="wide", page_icon="🧮")
 
 # --- Python 3.13 image hack (as you had) ---
 if sys.version_info >= (3, 13):
@@ -15,6 +17,8 @@ if sys.version_info >= (3, 13):
     imghdr = types.ModuleType("imghdr")
     imghdr.what = lambda *args, **kwargs: None
     sys.modules["imghdr"] = imghdr
+
+import streamlit as st
 
 # ==============================
 # GLOBAL CONFIG
@@ -132,7 +136,7 @@ def get_last_candle_by_tf(folder_path: str):
 # ==============================
 # STREAMLIT CONFIG
 # ==============================
-st.set_page_config("Rao_G", layout="wide", page_icon="🧮")
+
 st.markdown(
     """
     <h1 style="color: yellow; font-weight: 700; margin-bottom: 0.2rem;">
