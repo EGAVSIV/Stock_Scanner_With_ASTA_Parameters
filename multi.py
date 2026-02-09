@@ -125,7 +125,7 @@ def get_last_candle_by_tf(folder_path: str):
 # ==================================================
 # STREAMLIT CONFIG
 # ==================================================
-#st.set_page_config("Multi-Timeframe Stock Screener", layout="wide", page_icon="🧮")
+st.set_page_config("Rao_G", layout="wide", page_icon="🧮")
 st.markdown(
     """
     <h1 style="color: yellow; font-weight: 700; margin-bottom: 0.2rem;">
