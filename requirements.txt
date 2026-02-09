@@ -11,6 +11,7 @@ streamlit==1.31.1
 ta-lib
 ta-lib
 plotly
+tabulate
 
 
 
