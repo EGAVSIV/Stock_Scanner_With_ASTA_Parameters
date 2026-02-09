@@ -9,7 +9,7 @@ import pandas as pd
 import talib
 import plotly.express as px
 
-st.set_page_config("Rao_G", layout="wide", page_icon="🧮")
+
 
 # --- Python 3.13 image hack (as you had) ---
 if sys.version_info >= (3, 13):
@@ -19,6 +19,8 @@ if sys.version_info >= (3, 13):
     sys.modules["imghdr"] = imghdr
 
 import streamlit as st
+
+st.set_page_config("Rao_G", layout="wide", page_icon="🧮")
 
 # ==============================
 # GLOBAL CONFIG
