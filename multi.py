@@ -31,6 +31,7 @@ SAFE_COLS = [
     "Confluence",
     "Bias",
     "Probability",
+    "TV_Link",
 ]
 
 BULL_KEYWORDS = ["Bullish", "BUY", "Breakout", "Uptrend", "Momentum"]
@@ -239,6 +240,9 @@ def load_data(folder: str):
 
     return data
 
+def make_tradingview_link(sym: str) -> str:
+    base = "https://in.tradingview.com/chart/LqUZraZ9/"
+    return f"{base}?symbol=NSE%3A{sym}"
 
 # ==============================
 # SCANNERS (PURE FUNCTIONS)
@@ -1347,6 +1351,7 @@ if run:
             "Confluence": 0,
             "Bias": "",
             "Probability": "",
+            "TV_Link": "",
         }
 
         # --- Top 10 ATR % special handling ---
@@ -1670,6 +1675,11 @@ if run:
             df_res.at[i, "Confluence"] = score
             df_res.at[i, "Bias"] = bias
             df_res.at[i, "Probability"] = prob
+        df_res["TV_Link"] = df_res["Symbol"].apply(
+            lambda s: f"[TV]({make_tradingview_link(s)})" if s else ""
+        )
+
+    
 
         bias_rank = {"Bullish": 0, "Neutral": 1, "Bearish": 2}
         df_res["_bias_rank"] = df_res["Bias"].map(bias_rank)
@@ -1683,7 +1693,8 @@ if run:
 
         df_display = df_res.astype(str)
 
-        st.dataframe(df_display, use_container_width=True, hide_index=True)
+        #st.dataframe(df_display, use_container_width=True, hide_index=True)
+        st.markdown(df_res.to_markdown(index=False), unsafe_allow_html=True)
 
         # RSI Market Pulse Donut Chart
         if scanner == "RSI Market Pulse" and not df_res.empty:
