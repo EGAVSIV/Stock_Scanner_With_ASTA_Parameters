@@ -143,6 +143,7 @@ st.markdown(
 )
 set_bg_image("Assets/BG1.jpeg")
 
+# 1) TIMEFRAMES
 TIMEFRAMES = {
     "15 Min": "stock_data_15",
     "1 Hour": "stock_data_1H",
@@ -150,6 +151,24 @@ TIMEFRAMES = {
     "Weekly": "stock_data_W",
     "Monthly": "stock_data_M",
 }
+
+# ... last_15m, last_1h, etc, top header code ...
+
+# 2) Sidebar: timeframe (यह block पहले से मौजूद है, इसे ऊपर लाओ)
+tf_options = list(TIMEFRAMES.keys())
+tf = st.sidebar.selectbox(
+    "Timeframe", tf_options, index=tf_options.index("Daily")
+)
+
+# 3) अब यहाँ single-stock dropdown वाला code रखो
+sample_data = load_data(TIMEFRAMES[tf])
+all_symbols = sorted(sample_data.keys()) if sample_data else []
+st.sidebar.markdown("### 🔍 Single Stock Scan")
+selected_symbol = st.sidebar.selectbox(
+    "Select Stock (for current timeframe)",
+    all_symbols if all_symbols else ["NA"],
+)
+
 
 last_15m = get_last_candle_by_tf(TIMEFRAMES["15 Min"])
 last_1h = get_last_candle_by_tf(TIMEFRAMES["1 Hour"])
@@ -244,14 +263,7 @@ def make_tradingview_link(sym: str) -> str:
     base = "https://in.tradingview.com/chart/LqUZraZ9/"
     return f"{base}?symbol=NSE%3A{sym}"
 
-sample_data = load_data(TIMEFRAMES[tf])
-all_symbols = sorted(sample_data.keys())
 
-st.sidebar.markdown("### 🔍 Single Stock Scan")
-selected_symbol = st.sidebar.selectbox(
-    "Select Stock (for current timeframe)", 
-    all_symbols if all_symbols else ["NA"]
-)
 
 
 # ==============================
@@ -1339,13 +1351,7 @@ def run_all_scanners_for_symbol(
 
 
 
-# ==============================
-# SIDEBAR: TIMEFRAME
-# ==============================
-tf_options = list(TIMEFRAMES.keys())
-tf = st.sidebar.selectbox(
-    "Timeframe", tf_options, index=tf_options.index("Daily")
-)
+
 
 # ==============================
 # SCANNER TILE CONFIG
