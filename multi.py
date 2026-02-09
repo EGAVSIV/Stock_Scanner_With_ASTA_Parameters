@@ -143,6 +143,41 @@ st.markdown(
 )
 set_bg_image("Assets/BG1.jpeg")
 
+
+# ==============================
+# DATA LOADER
+# ==============================
+@st.cache_data(show_spinner=False)
+def load_data(folder: str):
+    data = {}
+    if not os.path.exists(folder):
+        return data
+
+    for f in os.listdir(folder):
+        if not f.endswith(".parquet"):
+            continue
+
+        sym = f.replace(".parquet", "")
+        df = pd.read_parquet(os.path.join(folder, f))
+
+        if isinstance(df.index, pd.MultiIndex):
+            df = df.reset_index()
+
+        if "datetime" in df.columns:
+            df["datetime"] = pd.to_datetime(df["datetime"])
+            df = df.sort_values("datetime").set_index("datetime")
+
+        needed = {"open", "high", "low", "close", "volume"}
+        if not needed.issubset(df.columns):
+            continue
+
+        data[sym] = df
+
+    return data
+
+def make_tradingview_link(sym: str) -> str:
+    base = "https://in.tradingview.com/chart/LqUZraZ9/"
+    return f"{base}?symbol=NSE%3A{sym}"
 # 1) TIMEFRAMES
 TIMEFRAMES = {
     "15 Min": "stock_data_15",
@@ -228,40 +263,7 @@ def trim_df_to_date(df: pd.DataFrame, anchor_date):
     return df
 
 
-# ==============================
-# DATA LOADER
-# ==============================
-@st.cache_data(show_spinner=False)
-def load_data(folder: str):
-    data = {}
-    if not os.path.exists(folder):
-        return data
 
-    for f in os.listdir(folder):
-        if not f.endswith(".parquet"):
-            continue
-
-        sym = f.replace(".parquet", "")
-        df = pd.read_parquet(os.path.join(folder, f))
-
-        if isinstance(df.index, pd.MultiIndex):
-            df = df.reset_index()
-
-        if "datetime" in df.columns:
-            df["datetime"] = pd.to_datetime(df["datetime"])
-            df = df.sort_values("datetime").set_index("datetime")
-
-        needed = {"open", "high", "low", "close", "volume"}
-        if not needed.issubset(df.columns):
-            continue
-
-        data[sym] = df
-
-    return data
-
-def make_tradingview_link(sym: str) -> str:
-    base = "https://in.tradingview.com/chart/LqUZraZ9/"
-    return f"{base}?symbol=NSE%3A{sym}"
 
 
 
