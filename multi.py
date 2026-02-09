@@ -1932,15 +1932,23 @@ with pulse_container:
         col2.metric("🧨 Strong Bearish Stocks", strong_bear)
 
 st.markdown("""
----
-**Designed by:-  
-Gaurav Singh Yadav**  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-🩷💛🩵💙🩶💜🤍🤎💖  Built With Love 🫶  
-Energy | Commodity | Quant Intelligence 📶  
+<div style="line-height: 1.6;">
+<b>Designed by:-<br>
+Gaurav Singh Yadav</b><br><br>
 
-📱 +91-8003994518 〽️  
-💬 [WhatsApp](https://wa.me/918003994518)  
+🩷💛🩵💙🩶💜🤍🤎💖 Built With Love 🫶<br>
+Energy | Commodity | Quant Intelligence 📶<br><br>
+
+📱 +91-8003994518 〽️<br>
+
+💬 
+<a href="https://wa.me/918003994518" target="_blank">
+<i class="fa fa-whatsapp" style="color:#25D366;"></i> WhatsApp
+</a><br>
+
 📧 yadav.gauravsingh@gmail.com ™️
-""")
+</div>
+""", unsafe_allow_html=True)
 
