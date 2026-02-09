@@ -1466,10 +1466,12 @@ df_sym = trim_df_to_date(data_all_tfs[tf][selected_symbol], analysis_date)
 results_dict = run_all_scanners_for_symbol(
     selected_symbol,
     df_sym,
-    tf,
-    analysis_date,
-    data_all_tfs,
+    tf=tf,
+    analysis_date=analysis_date,
+    data_w=data_w,
+    data_m=data_m,
 )
+
 mat_df = pd.DataFrame(
     {
         "Scanner": list(results_dict.keys()),
@@ -1903,49 +1905,40 @@ st.markdown("---")
 st.markdown("### 🧾 Scanner Matrix for Selected Stock")
 
 if selected_symbol != "NA":
-    # current timeframe की data dict से df लो
     data_single_tf = load_data(TIMEFRAMES[tf])
     if selected_symbol in data_single_tf:
         df_sym = trim_df_to_date(data_single_tf[selected_symbol], analysis_date)
-
         if df_sym is not None:
-            # जरुरत वाले HTF / W / M pre-load
-            data_htf_map = {}
-
-            # MACD RD (4th Wave) के लिए
-            htf_map = {
-                "15 Min": "1 Hour",
-                "1 Hour": "Daily",
-                "Daily": "Weekly",
-                "Weekly": "Monthly",
+            # सभी जरूरी TF data एक dict में
+            data_all_tfs = {
+                tf: data_single_tf,                               # current TF
+                "1 Hour": load_data(TIMEFRAMES["1 Hour"]),
+                "Daily": load_data(TIMEFRAMES["Daily"]),
+                "Weekly": load_data(TIMEFRAMES["Weekly"]),
+                "Monthly": load_data(TIMEFRAMES["Monthly"]),
             }
-            if tf in htf_map:
-                data_htf_map["MACD RD (4th Wave)"] = load_data(TIMEFRAMES[htf_map[tf]])
 
-            data_w = load_data(TIMEFRAMES["Weekly"])
-            data_m = load_data(TIMEFRAMES["Monthly"])
-
+            # 👇 सिर्फ यही call रखना है, कोई data_w / data_m keyword नहीं
             results_dict = run_all_scanners_for_symbol(
                 selected_symbol,
                 df_sym,
-                data_htf_map=data_htf_map,
-                data_w=data_w,
-                data_m=data_m,
+                tf,
+                analysis_date,
+                data_all_tfs,
             )
 
-            # Dict → DataFrame (Yes/No में)
             mat_df = pd.DataFrame(
                 {
                     "Scanner": list(results_dict.keys()),
                     "Result": ["Yes" if v else "No" for v in results_dict.values()],
                 }
             )
-
             st.dataframe(mat_df, use_container_width=True, hide_index=True)
         else:
             st.info("Not enough data for this symbol at selected date.")
     else:
         st.info("Symbol data not found for this timeframe.")
+
 
 
 
