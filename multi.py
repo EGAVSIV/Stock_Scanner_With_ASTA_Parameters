@@ -156,7 +156,7 @@ last_d = get_last_candle_by_tf(TIMEFRAMES["Daily"])
 last_w = get_last_candle_by_tf(TIMEFRAMES["Weekly"])
 last_m = get_last_candle_by_tf(TIMEFRAMES["Monthly"])
 
-st.title("📊 Multi-Timeframe Stock Screener")
+#st.title("📊 Multi-Timeframe Stock Screener")
 # ==================================================
 # TOP DATA REFRESH + LAST CANDLE INFO
 # ==================================================
