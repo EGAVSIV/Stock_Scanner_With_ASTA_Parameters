@@ -145,7 +145,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-set_bg_image("Assets/BG1.jpeg")
+set_bg_image("Assets/BG11.png")
 
 
 # ==============================
