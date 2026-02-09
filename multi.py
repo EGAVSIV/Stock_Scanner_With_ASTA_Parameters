@@ -244,6 +244,16 @@ def make_tradingview_link(sym: str) -> str:
     base = "https://in.tradingview.com/chart/LqUZraZ9/"
     return f"{base}?symbol=NSE%3A{sym}"
 
+sample_data = load_data(TIMEFRAMES[tf])
+all_symbols = sorted(sample_data.keys())
+
+st.sidebar.markdown("### 🔍 Single Stock Scan")
+selected_symbol = st.sidebar.selectbox(
+    "Select Stock (for current timeframe)", 
+    all_symbols if all_symbols else ["NA"]
+)
+
+
 # ==============================
 # SCANNERS (PURE FUNCTIONS)
 # ==============================
@@ -1193,6 +1203,141 @@ def calculate_confluence(row):
 
     return score, bias, prob
 
+def run_all_scanners_for_symbol(
+    sym,
+    df,
+    tf,
+    analysis_date,
+    data_all_tfs,
+):
+    """
+    Returns dict: {scanner_name: True/False} for given symbol & timeframe.
+    True = इस symbol पर वो scanner trigger हुआ।
+    data_all_tfs: dict जैसे {"TF": data_dict}  → ex: {"Daily": load_data(...), "Weekly": ...}
+    """
+
+    results = {}
+
+    # ---------- बेसिक single-TF scanners ----------
+
+    # 1) RSI Market Pulse
+    results["RSI Market Pulse"] = rsi_market_pulse(df) is not None
+
+    # 2) Volume Shocker
+    results["Volume Shocker"] = volume_shocker(df)
+
+    # 3) NRB-7 Breakout
+    results["NRB-7 Breakout"] = nrb_7(df) is not None
+
+    # 4) Counter Attack
+    results["Counter Attack"] = counter_attack(df) is not None
+
+    # 5) Breakaway Gaps
+    results["Breakaway Gaps"] = breakaway_gap(df) is not None
+
+    # 6) RSI + ADX
+    results["RSI + ADX"] = rsi_adx(df) is not None
+
+    # 8) MACD Market Pulse
+    results["MACD Market Pulse"] = macd_market_pulse(df) is not None
+
+    # 9) MACD Normal Divergence
+    results["MACD Normal Divergence"] = macd_normal_divergence(df) is not None
+
+    # 12) EMA / MACD structure based
+    results["MACD Bearish Peak Divergence"] = macd_peak_bearish_divergence(df) is not None
+    results["MACD Bullish Base Divergence"] = macd_base_bullish_divergence(df) is not None
+    results["Trend Alignment (EMA)"] = trend_alignment(df) is not None
+    results["Pullback to EMA"] = pullback_to_ema(df) is not None
+    results["High Probability Confluence"] = confluence_setup(df) is not None
+    results["MACD Hook Up"] = macd_hook_up(df) is not None
+    results["MACD Hook Down"] = macd_hook_down(df) is not None
+    results["MACD Histogram Divergence"] = macd_histogram_divergence(df) is not None
+    results["EMA50 + Stoch Oversold"] = ema50_stoch_oversold(df) is not None
+    results["Dark Cloud Cover"] = dark_cloud_cover(df) is not None
+    results["Morning Star (Bottom)"] = morning_star_bottom(df) is not None
+    results["Evening Star (Top)"] = evening_star_top(df) is not None
+    results["50 EMA Fake Breakdown"] = ema50_fake_breakdown(df) is not None
+    results["50 EMA Fake Breakout"] = ema50_fake_breakout(df) is not None
+    results["KDJ BUY (Oversold)"] = kdj_buy(df) is not None
+    results["KDJ SELL (Overbought)"] = kdj_sell(df) is not None
+    results["Probable Momentum (Consecutive Close)"] = (
+        consecutive_close_momentum(df, min_count=3) is not None
+    )
+    results["Camarilla Breakout / Breakdown"] = camarilla_breakout(df) is not None
+    results["CPR Breakout / Breakdown"] = cpr_breakout(df) is not None
+    results["Inside Bar Breakout"] = inside_bar_breakout(df) is not None
+    results["ADX Expansion (Trend Ignition)"] = adx_expansion(df) is not None
+    results["Range Expansion Day"] = range_expansion_day(df) is not None
+    results["Failed Breakout / Breakdown"] = failed_breakout_breakdown(df) is not None
+    results["EMA Compression → Expansion"] = ema_compression_expansion(df) is not None
+
+    # ---------- Multi-TF scanners (RSI WM, MACD RD, GSAS) ----------
+
+    # RSI WM 60–40  → needs Weekly & Monthly
+    if "Weekly" in data_all_tfs and "Monthly" in data_all_tfs:
+        data_w = data_all_tfs["Weekly"]
+        data_m = data_all_tfs["Monthly"]
+        if sym in data_w and sym in data_m:
+            df_w = trim_df_to_date(data_w[sym], analysis_date)
+            df_m = trim_df_to_date(data_m[sym], analysis_date)
+            if df_w is not None and df_m is not None:
+                results["RSI WM 60–40"] = rsi_wm(df, df_w, df_m) is not None
+            else:
+                results["RSI WM 60–40"] = False
+        else:
+            results["RSI WM 60–40"] = False
+    else:
+        results["RSI WM 60–40"] = False
+
+    # MACD RD (4th Wave) + Bullish/Bearish GSAS  → need HTF mapping
+    htf_map = {
+        "15 Min": "1 Hour",
+        "1 Hour": "Daily",
+        "Daily": "Weekly",
+        "Weekly": "Monthly",
+    }
+    if tf in htf_map and htf_map[tf] in data_all_tfs:
+        data_htf = data_all_tfs[htf_map[tf]]
+    else:
+        data_htf = None
+
+    # 10) MACD RD (4th Wave)
+    if data_htf is not None and sym in data_htf:
+        df_htf = trim_df_to_date(data_htf[sym], analysis_date)
+        if df_htf is not None:
+            results["MACD RD (4th Wave)"] = macd_rd(df, df_htf) is not None
+        else:
+            results["MACD RD (4th Wave)"] = False
+    else:
+        results["MACD RD (4th Wave)"] = False
+
+    # 11) Probable 3rd / C Wave (same TF)
+    results["Probable 3rd Wave"] = third_wave_finder(df)
+    results["Probable C Wave"] = c_wave_finder(df)
+
+    # 24) Bullish / Bearish GSAS  (same TF + HTF)
+    if data_htf is not None and sym in data_htf:
+        df_htf = trim_df_to_date(data_htf[sym], analysis_date)
+        if df_htf is not None:
+            results["Bullish GSAS"] = bullish_gsas(df, df_htf) is not None
+            results["Bearish GSAS"] = bearish_gsas(df, df_htf) is not None
+        else:
+            results["Bullish GSAS"] = False
+            results["Bearish GSAS"] = False
+    else:
+        results["Bullish GSAS"] = False
+        results["Bearish GSAS"] = False
+
+    # ---------- Top 10 by ATR % (per-stock flag only) ----------
+    # यहाँ सिर्फ यह check कर रहे हैं कि ATR% valid है या नहीं;
+    # actual "Top 10" ranking main scanner में ही रहेगा.
+    atr_val = atr_percent(df)
+    results["Top 10 by ATR %"] = atr_val is not None
+
+    return results
+
+
 
 # ==============================
 # SIDEBAR: TIMEFRAME
@@ -1301,6 +1446,30 @@ st.markdown(f"**Active Scanner:** `{scanner}`  |  **Timeframe:** `{tf}`")
 run = clicked_scanner is not None
 
 df_res = empty_result_df()
+
+data_all_tfs = {
+    tf: load_data(TIMEFRAMES[tf]),
+    "Weekly": load_data(TIMEFRAMES["Weekly"]),
+    "Monthly": load_data(TIMEFRAMES["Monthly"]),
+}
+# जरूरत हो तो 1H/D/W/M सब add कर सकते हो
+
+df_sym = trim_df_to_date(data_all_tfs[tf][selected_symbol], analysis_date)
+results_dict = run_all_scanners_for_symbol(
+    selected_symbol,
+    df_sym,
+    tf,
+    analysis_date,
+    data_all_tfs,
+)
+mat_df = pd.DataFrame(
+    {
+        "Scanner": list(results_dict.keys()),
+        "Result": ["Yes" if v else "No" for v in results_dict.values()],
+    }
+)
+st.dataframe(mat_df, use_container_width=True, hide_index=True)
+
 
 # ==============================
 # MAIN EXECUTION
@@ -1720,6 +1889,56 @@ if run:
                 plot_bgcolor="rgba(0,0,0,0)",
             )
             st.plotly_chart(fig, use_container_width=True)
+
+
+st.markdown("---")
+st.markdown("### 🧾 Scanner Matrix for Selected Stock")
+
+if selected_symbol != "NA":
+    # current timeframe की data dict से df लो
+    data_single_tf = load_data(TIMEFRAMES[tf])
+    if selected_symbol in data_single_tf:
+        df_sym = trim_df_to_date(data_single_tf[selected_symbol], analysis_date)
+
+        if df_sym is not None:
+            # जरुरत वाले HTF / W / M pre-load
+            data_htf_map = {}
+
+            # MACD RD (4th Wave) के लिए
+            htf_map = {
+                "15 Min": "1 Hour",
+                "1 Hour": "Daily",
+                "Daily": "Weekly",
+                "Weekly": "Monthly",
+            }
+            if tf in htf_map:
+                data_htf_map["MACD RD (4th Wave)"] = load_data(TIMEFRAMES[htf_map[tf]])
+
+            data_w = load_data(TIMEFRAMES["Weekly"])
+            data_m = load_data(TIMEFRAMES["Monthly"])
+
+            results_dict = run_all_scanners_for_symbol(
+                selected_symbol,
+                df_sym,
+                data_htf_map=data_htf_map,
+                data_w=data_w,
+                data_m=data_m,
+            )
+
+            # Dict → DataFrame (Yes/No में)
+            mat_df = pd.DataFrame(
+                {
+                    "Scanner": list(results_dict.keys()),
+                    "Result": ["Yes" if v else "No" for v in results_dict.values()],
+                }
+            )
+
+            st.dataframe(mat_df, use_container_width=True, hide_index=True)
+        else:
+            st.info("Not enough data for this symbol at selected date.")
+    else:
+        st.info("Symbol data not found for this timeframe.")
+
 
 
 
