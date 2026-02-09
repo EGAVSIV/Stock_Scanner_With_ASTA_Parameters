@@ -1455,30 +1455,7 @@ run = clicked_scanner is not None
 
 df_res = empty_result_df()
 
-data_all_tfs = {
-    tf: load_data(TIMEFRAMES[tf]),
-    "Weekly": load_data(TIMEFRAMES["Weekly"]),
-    "Monthly": load_data(TIMEFRAMES["Monthly"]),
-}
-# जरूरत हो तो 1H/D/W/M सब add कर सकते हो
 
-df_sym = trim_df_to_date(data_all_tfs[tf][selected_symbol], analysis_date)
-results_dict = run_all_scanners_for_symbol(
-    selected_symbol,
-    df_sym,
-    tf=tf,
-    analysis_date=analysis_date,
-    data_w=data_w,
-    data_m=data_m,
-)
-
-mat_df = pd.DataFrame(
-    {
-        "Scanner": list(results_dict.keys()),
-        "Result": ["Yes" if v else "No" for v in results_dict.values()],
-    }
-)
-st.dataframe(mat_df, use_container_width=True, hide_index=True)
 
 
 # ==============================
