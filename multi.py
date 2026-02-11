@@ -1359,6 +1359,166 @@ def run_all_scanners_for_symbol(
 
 
 
+def liquidity_sweep_reversal(df, lookback=20):
+    if len(df) < lookback + 2:
+        return None
+
+    prev_high = df["high"].iloc[-lookback:-1].max()
+    prev_low = df["low"].iloc[-lookback:-1].min()
+
+    last = df.iloc[-1]
+
+    # Bullish sweep
+    if last["low"] < prev_low and last["close"] > prev_low:
+        return "Bullish Liquidity Sweep"
+
+    # Bearish sweep
+    if last["high"] > prev_high and last["close"] < prev_high:
+        return "Bearish Liquidity Sweep"
+
+    return None
+
+
+def island_reversal(df):
+    if len(df) < 5:
+        return None
+
+    a = df.iloc[-4]
+    b = df.iloc[-3]
+    c = df.iloc[-2]
+    d = df.iloc[-1]
+
+    # Bullish island
+    if b["low"] > a["high"] and d["open"] < c["low"]:
+        return "Bullish Island Reversal"
+
+    # Bearish island
+    if b["high"] < a["low"] and d["open"] > c["high"]:
+        return "Bearish Island Reversal"
+
+    return None
+
+
+def wyckoff_spring_upthrust(df, lookback=30):
+    if len(df) < lookback + 2:
+        return None
+
+    range_high = df["high"].iloc[-lookback:-1].max()
+    range_low = df["low"].iloc[-lookback:-1].min()
+
+    last = df.iloc[-1]
+
+    if last["low"] < range_low and last["close"] > range_low:
+        return "Wyckoff Spring (Bullish)"
+
+    if last["high"] > range_high and last["close"] < range_high:
+        return "Wyckoff Upthrust (Bearish)"
+
+    return None
+
+
+def smart_money_trap(df):
+    if len(df) < 3:
+        return None
+
+    prev = df.iloc[-2]
+    last = df.iloc[-1]
+
+    # Bull trap
+    if prev["close"] > prev["high"] * 0.99 and last["close"] < prev["low"]:
+        return "Bull Trap Reversal"
+
+    # Bear trap
+    if prev["close"] < prev["low"] * 1.01 and last["close"] > prev["high"]:
+        return "Bear Trap Reversal"
+
+    return None
+
+
+def bump_and_run_reversal(df):
+    if len(df) < 40:
+        return None
+
+    slope1 = (df["close"].iloc[-30] - df["close"].iloc[-40]) / 10
+    slope2 = (df["close"].iloc[-1] - df["close"].iloc[-10]) / 10
+
+    if slope2 > slope1 * 2 and df["close"].iloc[-1] < df["close"].iloc[-5]:
+        return "BARR Top Reversal"
+
+    if slope2 < slope1 * 2 and df["close"].iloc[-1] > df["close"].iloc[-5]:
+        return "BARR Bottom Reversal"
+
+    return None
+
+
+def exhaustion_bar(df):
+    if len(df) < 20:
+        return None
+
+    avg_range = (df["high"] - df["low"]).rolling(10).mean().iloc[-2]
+    last = df.iloc[-1]
+
+    big_bar = (last["high"] - last["low"]) > 2 * avg_range
+
+    if big_bar:
+        if last["close"] < last["open"]:
+            return "Bearish Exhaustion"
+        if last["close"] > last["open"]:
+            return "Bullish Exhaustion"
+
+    return None
+
+
+def shakeout_trap(df, lookback=20):
+    if len(df) < lookback + 2:
+        return None
+
+    high = df["high"].iloc[-lookback:-1].max()
+    low = df["low"].iloc[-lookback:-1].min()
+
+    prev = df.iloc[-2]
+    last = df.iloc[-1]
+
+    if prev["low"] < low and last["close"] > low:
+        return "Bullish Shakeout"
+
+    if prev["high"] > high and last["close"] < high:
+        return "Bearish Shakeout"
+
+    return None
+
+
+
+def hidden_pivot_reversal(df, lookback=25):
+    if len(df) < lookback:
+        return None
+
+    highs = df["high"].iloc[-lookback:]
+    lows = df["low"].iloc[-lookback:]
+
+    if highs.iloc[-1] > highs.iloc[:-1].max() and df["close"].iloc[-1] < highs.iloc[:-1].max():
+        return "Hidden Pivot Bearish Reversal"
+
+    if lows.iloc[-1] < lows.iloc[:-1].min() and df["close"].iloc[-1] > lows.iloc[:-1].min():
+        return "Hidden Pivot Bullish Reversal"
+
+    return None
+
+def springer_reversal(df, lookback=25):
+    if len(df) < lookback + 5:
+        return None
+
+    support = df["low"].iloc[-lookback:-5].min()
+    recent = df.iloc[-1]
+
+    if recent["low"] < support and recent["close"] > support:
+        return "Springer Reversal (Bullish)"
+
+    return None
+
+
+
+
 
 
 # ==============================
@@ -1404,6 +1564,15 @@ SCANNERS = [
     {"name": "Failed Breakout / Breakdown", "color": "#34495e"},
     {"name": "EMA Compression → Expansion", "color": "#34495e"},
     {"name": "Top 10 by ATR %", "color": "#9b59b6"},
+    {"name": "Liquidity Sweep Reversal", "color": "#ff6b81"},
+    {"name": "Island Reversal", "color": "#ff6b81"},
+    {"name": "Wyckoff Spring / Upthrust", "color": "#ff6b81"},
+    {"name": "Smart Money Trap", "color": "#ff6b81"},
+    {"name": "Bump & Run Reversal", "color": "#ff6b81"},
+    {"name": "Exhaustion Bar", "color": "#ff6b81"},
+    {"name": "Shakeout / Trap", "color": "#ff6b81"},
+    {"name": "Hidden Pivot Reversal", "color": "#ff6b81"},
+    {"name": "Springer Reversal", "color": "#ff6b81"},
 ]
 
 if "scanner" not in st.session_state:
@@ -1803,6 +1972,74 @@ if run:
                 row = base_row.copy()
                 row["Signal"] = sig
                 results.append(row)
+
+                # ==============================
+        # ADVANCED REVERSAL SCANNERS
+        # ==============================
+
+        elif scanner == "Liquidity Sweep Reversal":
+            sig = liquidity_sweep_reversal(df)
+            if sig:
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
+
+        elif scanner == "Island Reversal":
+            sig = island_reversal(df)
+            if sig:
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
+
+        elif scanner == "Wyckoff Spring / Upthrust":
+            sig = wyckoff_spring_upthrust(df)
+            if sig:
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
+
+        elif scanner == "Smart Money Trap":
+            sig = smart_money_trap(df)
+            if sig:
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
+
+        elif scanner == "Bump & Run Reversal":
+            sig = bump_and_run_reversal(df)
+            if sig:
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
+
+        elif scanner == "Exhaustion Bar":
+            sig = exhaustion_bar(df)
+            if sig:
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
+
+        elif scanner == "Shakeout / Trap":
+            sig = shakeout_trap(df)
+            if sig:
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
+
+        elif scanner == "Hidden Pivot Reversal":
+            sig = hidden_pivot_reversal(df)
+            if sig:
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
+
+        elif scanner == "Springer Reversal":
+            sig = springer_reversal(df)
+            if sig:
+                row = base_row.copy()
+                row["Signal"] = sig
+                results.append(row)
+
 
         elif scanner == "EMA Compression → Expansion":
             sig = ema_compression_expansion(df)
