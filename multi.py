@@ -1563,16 +1563,16 @@ SCANNERS = [
     {"name": "Range Expansion Day", "color": "#e67e22"},
     {"name": "Failed Breakout / Breakdown", "color": "#34495e"},
     {"name": "EMA Compression → Expansion", "color": "#34495e"},
-    {"name": "Top 10 by ATR %", "color": "#9b59b6"},
-    {"name": "Liquidity Sweep Reversal", "color": "#ff6b81"},
+    {"name": "Top 10 by ATR %", "color": "#34495e"},
+    {"name": "Liquidity Sweep Reversal", "color": "#34495e"},
     {"name": "Island Reversal", "color": "#ff6b81"},
     {"name": "Wyckoff Spring / Upthrust", "color": "#ff6b81"},
     {"name": "Smart Money Trap", "color": "#ff6b81"},
     {"name": "Bump & Run Reversal", "color": "#ff6b81"},
-    {"name": "Exhaustion Bar", "color": "#ff6b81"},
-    {"name": "Shakeout / Trap", "color": "#ff6b81"},
-    {"name": "Hidden Pivot Reversal", "color": "#ff6b81"},
-    {"name": "Springer Reversal", "color": "#ff6b81"},
+    {"name": "Exhaustion Bar", "color": "#3498db"},
+    {"name": "Shakeout / Trap", "color": "#3498db"},
+    {"name": "Hidden Pivot Reversal", "color": "#3498db"},
+    {"name": "Springer Reversal", "color": "#3498db"},
 ]
 
 if "scanner" not in st.session_state:
