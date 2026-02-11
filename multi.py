@@ -20,7 +20,14 @@ if sys.version_info >= (3, 13):
 
 import streamlit as st
 
-st.set_page_config("Rao_G", layout="wide", page_icon="🧮")
+st.set_page_config(
+    page_title="Rao_G",
+    layout="wide",
+    page_icon="🧮"
+)
+
+# THEN everything else
+
 
 # ==============================
 # GLOBAL CONFIG
@@ -75,7 +82,11 @@ def hash_pwd(pwd: str) -> str:
 # ==============================
 # AUTH
 # ==============================
-USERS = st.secrets["users"]
+try:
+    USERS = st.secrets["users"]
+except Exception:
+    USERS = {}
+
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
