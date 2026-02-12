@@ -4,10 +4,7 @@ import os
 import plotly.express as px
 import time
 import base64
-
-
-
-
+from datetime import timedelta
 
 # =====================================================
 # CONFIG
@@ -27,44 +24,14 @@ else:
         layout="wide"
     )
 
+# =====================================================
+# MANUAL REFRESH BUTTON (NO AUTO REFRESH)
+# =====================================================
+st.sidebar.button("🔄 Refresh Data")  # pressing this reruns the script
 
-
-# -----------------------------
-# INIT SESSION STATE
-# -----------------------------
-if "refresh_on" not in st.session_state:
-    st.session_state.refresh_on = False
-
-if "last_refresh" not in st.session_state:
-    st.session_state.last_refresh = time.time()
-
-# -----------------------------
-# TOGGLE
-# -----------------------------
-st.session_state.refresh_on = st.toggle(
-    "🔄 Auto Refresh (1 sec)",
-    value=st.session_state.refresh_on
-)
-
-# -----------------------------
-# AUTO REFRESH
-# -----------------------------
-if st.session_state.refresh_on:
-    if time.time() - st.session_state.last_refresh >= 1:
-        st.session_state.last_refresh = time.time()
-        st.rerun()
-
-# -----------------------------
-# STOP REFRESH ON USER ACTION
-# -----------------------------
-def stop_refresh():
-    st.session_state.refresh_on = False
-
-bg_path = os.path.join(BASE_PATH, "Assets", "BG11.png")
-if os.path.exists(bg_path):
-    set_bg_image(bg_path)
-
-
+# =====================================================
+# BACKGROUND IMAGE
+# =====================================================
 def set_bg_image(image_path: str):
     with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
@@ -84,27 +51,29 @@ def set_bg_image(image_path: str):
         unsafe_allow_html=True,
     )
 
-for p in [BROADER_PATH, SECTOR_PATH, FNO_PATH]:
-    if not os.path.exists(p):
-        st.error(f"Missing data folder: {p}")
-        st.stop()
+bg_path = os.path.join(BASE_PATH, "Assets", "BG11.png")
+if os.path.exists(bg_path):
+    set_bg_image(bg_path)
 
-
-
+# =====================================================
+# PATHS (DEFINE BEFORE FIRST USE)
+# =====================================================
 BASE_DIR = "market_data"
 BROADER_PATH = os.path.join(BASE_DIR, "broader_index", "D")
 SECTOR_PATH  = os.path.join(BASE_DIR, "sector_index", "D")
 FNO_PATH     = os.path.join(BASE_DIR, "fno", "D")
 
-BASE_PATH = os.path.dirname(__file__)
-SECTOR_MAP_FILE = os.path.join(BASE_PATH, "market_data", "FNOSECTOR.xlsx")
+for p in [BROADER_PATH, SECTOR_PATH, FNO_PATH]:
+    if not os.path.exists(p):
+        st.error(f"Missing data folder: {p}")
+        st.stop()
 
+SECTOR_MAP_FILE = os.path.join(BASE_PATH, "market_data", "FNOSECTOR.xlsx")
 if not os.path.exists(SECTOR_MAP_FILE):
     st.error("❌ FNOSECTOR.xlsx not found inside market_data folder")
     st.stop()
 
 sector_map = pd.read_excel(SECTOR_MAP_FILE)
-
 
 
 
