@@ -7,7 +7,7 @@ from tvDatafeed import TvDatafeed, Interval
 # CONFIG
 # =====================================================
 UPDATE_INTERVAL_SECONDS = 30
-MAX_WORKERS = 16
+MAX_WORKERS = 2
 BARS = 300
 
 # =====================================================
