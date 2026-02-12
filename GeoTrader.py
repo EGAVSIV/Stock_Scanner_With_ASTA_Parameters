@@ -11,7 +11,7 @@ import time
 # =====================================================
 # CONFIG
 # =====================================================
-st.set_page_config(page_title="Market Dashboard", layout="wide",page_icon="Assets/sgy1.png")
+st.set_page_config(page_title="Market Dashboard", layout="wide",page_icon="Assets/BG11.png")
 #st.image("Assets/sgy1.png", width=300)
 
 
