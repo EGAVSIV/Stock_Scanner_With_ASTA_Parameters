@@ -12,8 +12,21 @@ import base64
 # =====================================================
 # CONFIG
 # =====================================================
-st.set_page_config(page_title="Market Dashboard", layout="wide",page_icon="Assets/BG11.png")
-#st.image("Assets/sgy1.png", width=300)
+BASE_PATH = os.path.dirname(__file__)
+ICON_PATH = os.path.join(BASE_PATH, "Assets", "BG11.png")
+
+if os.path.exists(ICON_PATH):
+    st.set_page_config(
+        page_title="Market Dashboard",
+        layout="wide",
+        page_icon=ICON_PATH
+    )
+else:
+    st.set_page_config(
+        page_title="Market Dashboard",
+        layout="wide"
+    )
+
 
 
 # -----------------------------
@@ -47,6 +60,11 @@ if st.session_state.refresh_on:
 def stop_refresh():
     st.session_state.refresh_on = False
 
+bg_path = os.path.join(BASE_PATH, "Assets", "BG11.png")
+if os.path.exists(bg_path):
+    set_bg_image(bg_path)
+
+
 def set_bg_image(image_path: str):
     with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
@@ -66,6 +84,10 @@ def set_bg_image(image_path: str):
         unsafe_allow_html=True,
     )
 
+for p in [BROADER_PATH, SECTOR_PATH, FNO_PATH]:
+    if not os.path.exists(p):
+        st.error(f"Missing data folder: {p}")
+        st.stop()
 
 
 
@@ -193,7 +215,13 @@ bottom5 = df_fno_all.sort_values("Change").head(5)
 col_logo, col_ticker = st.columns([0.22, 0.78])
 
 with col_logo:
-    st.image("Assets/BG11.png", width=220)
+    logo_path = os.path.join(BASE_PATH, "Assets", "BG11.png")
+
+    if os.path.exists(logo_path):
+        st.image(logo_path, width=220)
+    else:
+        st.warning("Logo not found")
+
 
 
 if "quotes_rendered" not in st.session_state:
@@ -334,11 +362,15 @@ st.markdown("---")
 
 
 
-df_fno_plot = (
-    pd.concat([top5, bottom5])
-    .sort_values("Change")
-    .reset_index(drop=True)
-)
+if not df_fno_all.empty:
+    df_fno_plot = (
+        pd.concat([top5, bottom5])
+        .sort_values("Change")
+        .reset_index(drop=True)
+    )
+else:
+    df_fno_plot = pd.DataFrame(columns=["Symbol", "Change"])
+
 max_pos = df_fno_plot["Change"].max()
 min_neg = df_fno_plot["Change"].min()
 
@@ -393,7 +425,7 @@ df_ad = pd.DataFrame({
 # =====================================================
 # LOAD SECTOR → STOCK MAPPING (ROBUST)
 # =====================================================
-sector_map = pd.read_excel(SECTOR_MAP_FILE)
+
 
 # Normalize column names
 sector_map.columns = (
