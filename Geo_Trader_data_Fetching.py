@@ -152,11 +152,15 @@ def process_symbol(symbol):
                     interval=interval,
                     n_bars=BARS
                 )
-            except:
+            except Exception as e:
+                print(f"❌ {symbol} {tf} fetch error: {e}")
                 continue
 
+
             if df is None or df.empty:
+                print(f"⚠️ Empty data for {symbol} {tf}")
                 continue
+
 
             df = df.sort_index().tail(BARS)
 
@@ -204,5 +208,28 @@ def process_symbol(symbol):
             df.to_parquet(save_path)
 
         return f"✅ {symbol} updated [LOCAL FNO]"
+
+
+# =====================================================
+# MAIN EXECUTION (RUN ONCE)
+# =====================================================
+if __name__ == "__main__":
+
+    print("\n🚀 Hybrid Collector Started\n")
+
+    start = time.time()
+
+    symbols = ALL_SYMBOLS.copy()
+    random.shuffle(symbols)
+
+    with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = [executor.submit(process_symbol, s) for s in symbols]
+        for f in as_completed(futures):
+            print(f.result())
+
+    elapsed = int(time.time() - start)
+    print(f"\n✅ Completed in {elapsed} seconds\n")
+
+
 
 
