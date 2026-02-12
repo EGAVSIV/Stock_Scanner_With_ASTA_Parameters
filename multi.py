@@ -9,6 +9,9 @@ import pandas as pd
 import talib
 import plotly.express as px
 
+BASE_PATH = os.path.dirname(__file__)
+
+
 
 
 # --- Python 3.13 image hack (as you had) ---
@@ -158,7 +161,11 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-set_bg_image("Assets/BG11.png")
+bg_path = os.path.join(BASE_PATH, "Assets", "BG11.png")
+
+if os.path.exists(bg_path):
+    set_bg_image(bg_path)
+
 
 
 # ==============================
@@ -197,12 +204,13 @@ def make_tradingview_link(sym: str) -> str:
     return f"{base}?symbol=NSE%3A{sym}"
 # 1) TIMEFRAMES
 TIMEFRAMES = {
-    "15 Min": "stock_data_15",
-    "1 Hour": "stock_data_1H",
-    "Daily": "stock_data_D",
-    "Weekly": "stock_data_W",
-    "Monthly": "stock_data_M",
+    "15 Min": os.path.join("market_data", "fno", "15m"),
+    "1 Hour": os.path.join("market_data", "fno", "1H"),
+    "Daily": os.path.join("market_data", "fno", "D"),
+    "Weekly": os.path.join("market_data", "fno", "W"),
+    "Monthly": os.path.join("market_data", "fno", "M"),
 }
+
 
 # ... last_15m, last_1h, etc, top header code ...
 
@@ -2104,7 +2112,8 @@ if run:
         df_display = df_res.astype(str)
 
         #st.dataframe(df_display, use_container_width=True, hide_index=True)
-        st.markdown(df_res.to_markdown(index=False), unsafe_allow_html=True)
+        st.dataframe(df_res, use_container_width=True, hide_index=True)
+
 
         # RSI Market Pulse Donut Chart
         if scanner == "RSI Market Pulse" and not df_res.empty:
