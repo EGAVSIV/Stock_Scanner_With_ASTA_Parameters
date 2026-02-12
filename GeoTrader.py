@@ -5,6 +5,8 @@ import plotly.express as px
 import time
 import base64
 from datetime import timedelta
+import pytz
+
 
 # =====================================================
 # CONFIG
@@ -23,6 +25,9 @@ else:
         page_title="Market Dashboard",
         layout="wide"
     )
+
+IST = pytz.timezone("Asia/Kolkata")
+
 
 # =====================================================
 # MANUAL REFRESH BUTTON (NO AUTO REFRESH)
@@ -1083,6 +1088,14 @@ else:
     for ev in sorted(st.session_state.rolling_events, key=lambda x: x["ts"], reverse=True):
         color = "#00c48c" if ev["signal"] == "BUY" else "#ff6b6b"
 
+        ts = ev["ts"]
+    # ts agar timezone‑aware UTC hai:
+        if ts.tzinfo is not None:
+            ts_ist = ts.astimezone(IST)
+        else:
+        # agar naive hai (no tz), treat as UTC then convert
+            ts_ist = ts.replace(tzinfo=pytz.UTC).astimezone(IST)
+
         st.markdown(
             f"""
             <div style="
@@ -1092,7 +1105,7 @@ else:
                 margin-bottom: 8px;
                 border-radius: 6px;
             ">
-                <b>{ev['ts'].strftime('%d %b %H:%M')}</b>
+                <b>{ts_ist.strftime('%d %b %H:%M')}</b>
                 | <b>{ev['symbol']}</b>
                 | {ev['tf']}
                 | <b style="color:{color}">{ev['signal']}</b>
@@ -1102,6 +1115,7 @@ else:
             """,
             unsafe_allow_html=True
         )
+
 
 
 
