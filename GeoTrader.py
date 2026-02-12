@@ -608,7 +608,7 @@ def sector_fno_bar(sector_name, title):
     st.subheader(title)
     st.plotly_chart(fig, use_container_width=True)
 
-
+# ✅ only once
 sector_list = df_sector["Symbol"].tolist()
 
 with stock_col1:
@@ -626,6 +626,7 @@ with stock_col3:
 with stock_col4:
     sector_4 = st.selectbox("Sector 4", sector_list, key="sector_4")
     sector_fno_bar(sector_4, f"{sector_4} Stocks")
+
 
 ##################################################################
 
