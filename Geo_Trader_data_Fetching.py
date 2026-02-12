@@ -50,10 +50,14 @@ TIMEFRAMES = {
     "M": Interval.in_monthly,
 }
 
-# Create folders
-for path in BUCKET_PATHS.values():
+# =====================================================
+# ENSURE FULL OUTPUT FOLDER STRUCTURE EXISTS
+# =====================================================
+for bucket_name, bucket_path in BUCKET_PATHS.items():
     for tf in TIMEFRAMES.keys():
-        os.makedirs(os.path.join(path, tf), exist_ok=True)
+        full_path = os.path.join(bucket_path, tf)
+        os.makedirs(full_path, exist_ok=True)
+
 
 # =====================================================
 # SYMBOL LISTS (same as yours)
@@ -165,8 +169,11 @@ def process_symbol(symbol):
             df['cam_h3'], df['cam_h4'], df['cam_l3'], df['cam_l4'] = \
                 calc_camarilla(df)
 
-            save_path = os.path.join(base_path, tf, f"{symbol}.parquet")
-            df.to_parquet(save_path)
+            save_dir = os.path.join(base_path, tf)
+            os.makedirs(save_dir, exist_ok=True)
+
+            save_path = os.path.join(save_dir, f"{symbol}.parquet")
+            df.to_parquet(save_path, index=True)
 
         return f"✅ {symbol} updated [TV]"
 
