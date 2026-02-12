@@ -566,10 +566,7 @@ st.markdown("---")
 stock_col1, stock_col2, stock_col3, stock_col4 = st.columns([1.2, 1.2, 1, 1.2])
 
 def sector_fno_bar(sector_name, title):
-    stocks = sector_map[
-        sector_map["Sector"] == sector_name
-    ]["Stock"].unique()
-
+    stocks = sector_map[sector_map["Sector"] == sector_name]["Stock"].unique()
     df_sec = df_fno_all[df_fno_all["Symbol"].isin(stocks)]
 
     if df_sec.empty:
@@ -612,6 +609,23 @@ def sector_fno_bar(sector_name, title):
     st.plotly_chart(fig, use_container_width=True)
 
 
+sector_list = df_sector["Symbol"].tolist()
+
+with stock_col1:
+    sector_1 = st.selectbox("Sector 1", sector_list, key="sector_1")
+    sector_fno_bar(sector_1, f"{sector_1} Stocks")
+
+with stock_col2:
+    sector_2 = st.selectbox("Sector 2", sector_list, key="sector_2")
+    sector_fno_bar(sector_2, f"{sector_2} Stocks")
+
+with stock_col3:
+    sector_3 = st.selectbox("Sector 3", sector_list, key="sector_3")
+    sector_fno_bar(sector_3, f"{sector_3} Stocks")
+
+with stock_col4:
+    sector_4 = st.selectbox("Sector 4", sector_list, key="sector_4")
+    sector_fno_bar(sector_4, f"{sector_4} Stocks")
 
 
 sector_list = df_sector["Symbol"].tolist()
