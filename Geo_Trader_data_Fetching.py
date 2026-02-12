@@ -199,21 +199,3 @@ def process_symbol(symbol):
         return f"✅ {symbol} updated [LOCAL FNO]"
 
 
-# =====================================================
-# MAIN LOOP
-# =====================================================
-if __name__ == "__main__":
-    print("\n🚀 Hybrid Collector Started (TV + Local FNO)\n")
-
-    while True:
-        start = time.time()
-        symbols = ALL_SYMBOLS.copy()
-        random.shuffle(symbols)
-
-        with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
-            futures = [executor.submit(process_symbol, s) for s in symbols]
-            for f in as_completed(futures):
-                print(f.result())
-
-        elapsed = int(time.time() - start)
-        time.sleep(max(0, UPDATE_INTERVAL_SECONDS - elapsed))
