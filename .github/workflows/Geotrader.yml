@@ -2,7 +2,6 @@ name: Fetch stock data
 
 on:
   schedule:
-    # UTC Time (IST = UTC + 5:30)
     - cron: "0 4 * * 1-5"
     - cron: "30 4 * * 1-5"
     - cron: "0 5 * * 1-5"
@@ -24,7 +23,6 @@ jobs:
   fetch-data:
     runs-on: ubuntu-latest
 
-    # 🚦 Prevent overlapping executions
     concurrency:
       group: stock-data-fetch
       cancel-in-progress: false
@@ -49,6 +47,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install tradingview-datafeed pandas numpy pyarrow requests openpyxl scipy matplotlib
 
+      # ✅ AUTO CREATE REQUIRED FOLDERS
+      - name: Ensure market_data folders exist
+        run: |
+          mkdir -p market_data/broader_index
+          mkdir -p market_data/sector_index
+          mkdir -p market_data/fno
+
+          # Add .gitkeep so Git tracks empty folders
+          touch market_data/broader_index/.gitkeep
+          touch market_data/sector_index/.gitkeep
+          touch market_data/fno/.gitkeep
+
       - name: Run Geo Trader Data Fetch
         run: |
           python "Geo_Trader_data_Fetching.py"
@@ -60,11 +70,11 @@ jobs:
 
           git add stock_data_* download_log.txt error_symbols.txt market_data/
 
-          # Only commit if there are changes
-          git diff --quiet && git diff --staged --quiet || \
-          git commit -m "Auto update stock data ($(date -u '+%Y-%m-%d %H:%M:%S UTC'))"
+          if ! git diff --cached --quiet; then
+            git commit -m "Auto update stock data ($(date -u '+%Y-%m-%d %H:%M:%S UTC'))"
+          else
+            echo "No changes to commit"
+          fi
 
-          # Rebase to avoid push rejection
           git pull --rebase origin main || echo "Nothing to rebase"
-
           git push origin main
