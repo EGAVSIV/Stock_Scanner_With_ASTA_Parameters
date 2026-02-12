@@ -164,7 +164,7 @@ bottom5 = df_fno_all.sort_values("Change").head(5)
 col_logo, col_ticker = st.columns([0.22, 0.78])
 
 with col_logo:
-    st.image("Assets/sgy1.png", width=220)
+    st.image("Assets/BG11.png", width=220)
 
 
 if "quotes_rendered" not in st.session_state:
