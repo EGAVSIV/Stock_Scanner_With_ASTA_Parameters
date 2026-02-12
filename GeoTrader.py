@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import plotly.express as px
 import time
+import base64
 
 
 
@@ -45,6 +46,26 @@ if st.session_state.refresh_on:
 # -----------------------------
 def stop_refresh():
     st.session_state.refresh_on = False
+
+def set_bg_image(image_path: str):
+    with open(image_path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/png;base64,{encoded}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 
 
