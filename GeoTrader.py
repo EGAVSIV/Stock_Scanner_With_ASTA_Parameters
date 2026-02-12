@@ -53,7 +53,15 @@ BROADER_PATH = os.path.join(BASE_DIR, "broader_index", "D")
 SECTOR_PATH  = os.path.join(BASE_DIR, "sector_index", "D")
 FNO_PATH     = os.path.join(BASE_DIR, "fno", "D")
 
-SECTOR_MAP_FILE = "FNOSECTOR.xlsx"
+BASE_PATH = os.path.dirname(__file__)
+SECTOR_MAP_FILE = os.path.join(BASE_PATH, "market_data", "FNOSECTOR.xlsx")
+
+if not os.path.exists(SECTOR_MAP_FILE):
+    st.error("❌ FNOSECTOR.xlsx not found inside market_data folder")
+    st.stop()
+
+sector_map = pd.read_excel(SECTOR_MAP_FILE)
+
 
 
 
