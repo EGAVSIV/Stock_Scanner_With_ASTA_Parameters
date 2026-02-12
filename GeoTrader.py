@@ -611,8 +611,7 @@ def sector_fno_bar(sector_name, title):
     st.subheader(title)
     st.plotly_chart(fig, use_container_width=True)
 
-def should_draw():
-    return not st.session_state.refresh_on
+
 
 
 sector_list = df_sector["Symbol"].tolist()
@@ -625,11 +624,8 @@ with stock_col1:
         "Sector 1",
         sector_list,
         key="sector_1",
-        on_change=stop_refresh
     )
-
-    if should_draw():
-        sector_fno_bar(sector_1, f"{sector_1} Stocks")
+    sector_fno_bar(sector_1, f"{sector_1} Stocks")
 
 # =========================
 # SECTOR 2
@@ -639,11 +635,8 @@ with stock_col2:
         "Sector 2",
         sector_list,
         key="sector_2",
-        on_change=stop_refresh
     )
-
-    if should_draw():
-        sector_fno_bar(sector_2, f"{sector_2} Stocks")
+    sector_fno_bar(sector_2, f"{sector_2} Stocks")
 
 # =========================
 # SECTOR 3
@@ -653,11 +646,8 @@ with stock_col3:
         "Sector 3",
         sector_list,
         key="sector_3",
-        on_change=stop_refresh
     )
-
-    if should_draw():
-        sector_fno_bar(sector_3, f"{sector_3} Stocks")
+    sector_fno_bar(sector_3, f"{sector_3} Stocks")
 
 # =========================
 # SECTOR 4
@@ -667,11 +657,8 @@ with stock_col4:
         "Sector 4",
         sector_list,
         key="sector_4",
-        on_change=stop_refresh
     )
-
-    if should_draw():
-        sector_fno_bar(sector_4, f"{sector_4} Stocks")
+    sector_fno_bar(sector_4, f"{sector_4} Stocks")
 
 
 ##################################################################
