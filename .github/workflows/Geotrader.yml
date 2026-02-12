@@ -51,7 +51,7 @@ jobs:
 
       - name: Run Geo Trader Data Fetch
         run: |
-          python "Geo_trader_data_Feth.py"
+          python "Geo_Trader_data_Fetching.py"
 
       - name: Commit & Push changes safely
         run: |
