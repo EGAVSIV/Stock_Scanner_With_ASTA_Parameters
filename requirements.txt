@@ -12,6 +12,7 @@ ta-lib
 ta-lib
 plotly
 tabulate
+tradingview-datafeed
 
 
 
