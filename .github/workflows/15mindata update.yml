@@ -23,8 +23,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run Script
-        run: |
-          python Datafetch15M.py
+        run: python Datafetch15M.py
