@@ -1,30 +1,58 @@
-name: Run 15M Data Fetch
+name: Fetch 15M Stock Data
 
 on:
   schedule:
-    - cron: '45-59/5 3 * * 1-5'
-    - cron: '*/5 4-9 * * 1-5'
-    - cron: '0 10 * * 1-5'
+    # 09:15–09:55 IST
+    - cron: "45-59/5 3 * * 1-5"
+
+    # 10:00–14:55 IST
+    - cron: "*/5 4-9 * * 1-5"
+
+    # 15:00–15:30 IST
+    - cron: "0 10 * * 1-5"
 
   workflow_dispatch:
 
 jobs:
-  run-script:
+  fetch-data:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    concurrency:
+      group: stock-data-fetch-15m
+      cancel-in-progress: false
 
-      - name: Set up Python
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.11"
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          pip install tradingview-datafeed pandas numpy pyarrow requests openpyxl scipy matplotlib
 
-      - name: Run Script
-        run: python Datafetch15M.py
+      - name: Run 15M data fetch
+        run: |
+          python "Datafetch15M.py"
+
+      - name: Commit & Push data safely
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add stock_data_15 download_log.txt error_symbols.txt
+          git commit -m "Auto update 15M data ($(date -u '+%Y-%m-%d %H:%M:%S UTC'))" || echo "No changes to commit"
+
+          git pull --rebase origin main || echo "Nothing to rebase"
+
+          git push origin main
