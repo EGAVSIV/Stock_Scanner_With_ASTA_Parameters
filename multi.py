@@ -155,7 +155,7 @@ def get_last_candle_by_tf(folder_path: str):
 
 st.markdown(
     """
-    <h1 style="color: yellow; font-weight: 700; margin-bottom: 0.2rem;">
+    <h1 style="color: blue; font-weight: 700; margin-bottom: 0.2rem;">
         📊 Multi-Timeframe Stock Screener
     </h1>
     """,
