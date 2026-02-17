@@ -7,7 +7,7 @@ from tvDatafeed import TvDatafeed, Interval
 # CONFIG
 # =====================================================
 MAX_WORKERS = 2
-BARS = 300
+BARS = 3000
 
 # =====================================================
 # LOGGING
