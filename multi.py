@@ -22,6 +22,8 @@ if sys.version_info >= (3, 13):
     sys.modules["imghdr"] = imghdr
 
 import streamlit as st
+from streamlit.runtime.caching import cache_data
+
 
 st.set_page_config(
     page_title="Rao_G",
@@ -240,9 +242,10 @@ col1, col2 = st.columns([1, 6])
 
 with col1:
     if st.button("🔄 Refresh Data"):
-        st.cache_data.clear()
+        cache_data.clear()   # <-- correct method
         st.success("Fresh data loaded")
-        st.rerun()
+        st.experimental_rerun()
+
 
 with col2:
     st.markdown(
