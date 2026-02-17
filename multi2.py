@@ -19,7 +19,7 @@ if sys.version_info >= (3, 13):
     sys.modules["imghdr"] = imghdr
 
 import streamlit as st
-from streamlit.runtime.caching import cache_data
+
 
 # ==============================
 # GLOBAL CONFIG
@@ -251,9 +251,10 @@ col1, col2 = st.columns([1, 6])
 
 with col1:
     if st.button("🔄 Refresh Data"):
-        cache_data.clear()
+        st.cache_data.clear()
         st.success("Fresh data loaded")
-        st.experimental_rerun()
+        st.rerun()
+
 
 with col2:
     st.markdown(
