@@ -38,3 +38,8 @@ LTIM,W,Failed after retries
 LTIM,M,Failed after retries
 LTIM,15,Failed after retries
 LTIM,1H,Failed after retries
+LTIM,D,Failed after retries
+LTIM,W,Failed after retries
+LTIM,M,Failed after retries
+LTIM,15,Failed after retries
+LTIM,1H,Failed after retries
