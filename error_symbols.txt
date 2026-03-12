@@ -73,3 +73,15 @@ LTIM,W,Failed after retries
 LTIM,M,Failed after retries
 LTIM,15,Failed after retries
 LTIM,1H,Failed after retries
+NBCC,D,Failed after retries
+FEDERALBNK,D,Failed after retries
+ZYDUSLIFE,D,Failed after retries
+DABUR,W,Failed after retries
+NCC,D,Failed after retries
+FORTIS,D,Failed after retries
+BANKNIFTY,D,Failed after retries
+DALBHARAT,W,Failed after retries
+NESTLEIND,D,Failed after retries
+GAIL,D,Failed after retries
+CNXFINANCE,D,Failed after retries
+DELHIVERY,W,Failed after retries
