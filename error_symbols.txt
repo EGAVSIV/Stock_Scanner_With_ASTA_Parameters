@@ -85,3 +85,5 @@ NESTLEIND,D,Failed after retries
 GAIL,D,Failed after retries
 CNXFINANCE,D,Failed after retries
 DELHIVERY,W,Failed after retries
+AMBUJACEM,W,Failed after retries
+POLICYBZR,M,Failed after retries
