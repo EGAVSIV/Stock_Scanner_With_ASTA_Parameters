@@ -87,3 +87,10 @@ CNXFINANCE,D,Failed after retries
 DELHIVERY,W,Failed after retries
 AMBUJACEM,W,Failed after retries
 POLICYBZR,M,Failed after retries
+PIDILITIND,D,Failed after retries
+ITC,D,Failed after retries
+BHEL,D,Failed after retries
+SOLARINDS,D,Failed after retries
+PETRONET,D,Failed after retries
+JSWSTEEL,D,Failed after retries
+CAMS,W,Failed after retries
