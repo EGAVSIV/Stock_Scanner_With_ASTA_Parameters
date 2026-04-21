@@ -101,3 +101,10 @@ IIFL,1H,Failed after retries
 AUBANK,1H,Failed after retries
 HCLTECH,1H,Failed after retries
 INDIGO,1H,Failed after retries
+CNXFINANCE,D,Failed after retries
+GODREJCP,D,Failed after retries
+NYKAA,D,Failed after retries
+DIXON,W,Failed after retries
+CNXMIDCAP,D,Failed after retries
+GODREJPROP,D,Failed after retries
+DLF,W,Failed after retries
