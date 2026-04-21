@@ -95,3 +95,9 @@ PETRONET,D,Failed after retries
 JSWSTEEL,D,Failed after retries
 CAMS,W,Failed after retries
 LTIM,W,Failed after retries
+NHPC,1H,Failed after retries
+WAAREEENER,15,Failed after retries
+IIFL,1H,Failed after retries
+AUBANK,1H,Failed after retries
+HCLTECH,1H,Failed after retries
+INDIGO,1H,Failed after retries
