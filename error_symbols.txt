@@ -94,3 +94,4 @@ SOLARINDS,D,Failed after retries
 PETRONET,D,Failed after retries
 JSWSTEEL,D,Failed after retries
 CAMS,W,Failed after retries
+LTIM,W,Failed after retries
