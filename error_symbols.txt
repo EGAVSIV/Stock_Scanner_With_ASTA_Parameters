@@ -108,3 +108,9 @@ DIXON,W,Failed after retries
 CNXMIDCAP,D,Failed after retries
 GODREJPROP,D,Failed after retries
 DLF,W,Failed after retries
+KOTAKBANK,M,Failed after retries
+ULTRACEMCO,W,Failed after retries
+MCX,W,Failed after retries
+CHOLAFIN,M,Failed after retries
+KPITTECH,M,Failed after retries
+UNIONBANK,W,Failed after retries
