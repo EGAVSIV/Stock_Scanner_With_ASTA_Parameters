@@ -114,3 +114,11 @@ MCX,W,Failed after retries
 CHOLAFIN,M,Failed after retries
 KPITTECH,M,Failed after retries
 UNIONBANK,W,Failed after retries
+HINDALCO,W,Failed after retries
+INDUSINDBK,D,Failed after retries
+BANDHANBNK,D,Failed after retries
+RELIANCE,D,Failed after retries
+DRREDDY,1H,Failed after retries
+MPHASIS,1H,Failed after retries
+ABCAPITAL,15,Failed after retries
+UNOMINDA,1H,Failed after retries
