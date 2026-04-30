@@ -122,3 +122,4 @@ DRREDDY,1H,Failed after retries
 MPHASIS,1H,Failed after retries
 ABCAPITAL,15,Failed after retries
 UNOMINDA,1H,Failed after retries
+IRCTC,W,Failed after retries
