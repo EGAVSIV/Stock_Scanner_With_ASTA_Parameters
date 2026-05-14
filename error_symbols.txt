@@ -124,3 +124,7 @@ ABCAPITAL,15,Failed after retries
 UNOMINDA,1H,Failed after retries
 IRCTC,W,Failed after retries
 MARUTI,W,Failed after retries
+ICICIGI,15,Failed after retries
+SHRIRAMFIN,M,Failed after retries
+PNBHOUSING,15,Failed after retries
+BEL,M,Failed after retries
