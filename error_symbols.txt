@@ -129,3 +129,7 @@ SHRIRAMFIN,M,Failed after retries
 PNBHOUSING,15,Failed after retries
 BEL,M,Failed after retries
 BEL,W,Failed after retries
+POWERGRID,1H,Failed after retries
+IEX,1H,Failed after retries
+BAJAJHLDNG,15,Failed after retries
+AUBANK,1H,Failed after retries
