@@ -133,3 +133,15 @@ POWERGRID,1H,Failed after retries
 IEX,1H,Failed after retries
 BAJAJHLDNG,15,Failed after retries
 AUBANK,1H,Failed after retries
+MPHASIS,D,Failed after retries
+DRREDDY,D,Failed after retries
+COFORGE,W,Failed after retries
+VBL,D,Failed after retries
+MUTHOOTFIN,D,Failed after retries
+EICHERMOT,D,Failed after retries
+COLPAL,W,Failed after retries
+VEDL,D,Failed after retries
+NATIONALUM,D,Failed after retries
+ETERNAL,D,Failed after retries
+CONCOR,W,Failed after retries
+VOLTAS,D,Failed after retries
