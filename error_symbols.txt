@@ -205,3 +205,15 @@ DIVISLAB,1H,Failed after retries
 TVSMOTOR,1H,Failed after retries
 MOTHERSON,1H,Failed after retries
 APLAPOLLO,15,Failed after retries
+RELIANCE,D,Failed after retries
+BAJAJ_AUTO,D,Failed after retries
+INOXWIND,D,Failed after retries
+HINDZINC,W,Failed after retries
+IEX,1H,Failed after retries
+BAJAJFINSV,1H,Failed after retries
+INDUSINDBK,1H,Failed after retries
+SAIL,1H,Failed after retries
+SWIGGY,15,Failed after retries
+BAJFINANCE,1H,Failed after retries
+INDUSTOWER,1H,Failed after retries
+SAMMAANCAP,1H,Failed after retries
