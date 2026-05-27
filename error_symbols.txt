@@ -446,3 +446,10 @@ M&M,1H,Failed after retries
 ASIANPAINT,15,Failed after retries
 TATATECH,1H,Failed after retries
 PIIND,1H,Failed after retries
+POLICYBZR,W,Failed after retries
+DIVISLAB,M,Failed after retries
+AMBER,W,Failed after retries
+MAXHEALTH,M,Failed after retries
+MAZDOCK,M,Failed after retries
+PATANJALI,M,Failed after retries
+ABCAPITAL,M,Failed after retries
