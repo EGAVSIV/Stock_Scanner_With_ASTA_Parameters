@@ -251,3 +251,7 @@ ASIANPAINT,1H,Failed after retries
 IEX,1H,Failed after retries
 BAJAJHLDNG,15,Failed after retries
 POWERGRID,1H,Failed after retries
+OIL,D,Failed after retries
+HAL,D,Failed after retries
+ADANIENT,D,Failed after retries
+DMART,W,Failed after retries
