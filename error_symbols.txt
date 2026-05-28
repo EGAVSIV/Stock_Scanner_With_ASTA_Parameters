@@ -525,3 +525,16 @@ SHRIRAMFIN,15,Failed after retries
 TORNTPOWER,M,Failed after retries
 JSWENERGY,15,Failed after retries
 HFCL,15,Failed after retries
+RBLBANK,D,Failed after retries
+HINDUNILVR,W,Failed after retries
+BAJAJ_AUTO,D,Failed after retries
+INDUSTOWER,D,Failed after retries
+RECLTD,D,Failed after retries
+HINDZINC,W,Failed after retries
+BAJAJFINSV,D,Failed after retries
+INFY,D,Failed after retries
+RELIANCE,D,Failed after retries
+HUDCO,W,Failed after retries
+BAJFINANCE,D,Failed after retries
+INOXWIND,D,Failed after retries
+BANDHANBNK,D,Failed after retries
