@@ -538,3 +538,10 @@ HUDCO,W,Failed after retries
 BAJFINANCE,D,Failed after retries
 INOXWIND,D,Failed after retries
 BANDHANBNK,D,Failed after retries
+MPHASIS,D,Failed after retries
+COLPAL,W,Failed after retries
+UPL,D,Failed after retries
+EICHERMOT,D,Failed after retries
+CONCOR,W,Failed after retries
+VEDL,D,Failed after retries
+FEDERALBNK,D,Failed after retries
