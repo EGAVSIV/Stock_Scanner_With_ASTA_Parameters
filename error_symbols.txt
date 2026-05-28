@@ -470,3 +470,11 @@ LODHA,1H,Failed after retries
 YESBANK,15,Failed after retries
 TORNTPHARM,1H,Failed after retries
 ZYDUSLIFE,15,Failed after retries
+CROMPTON,W,Failed after retries
+HUDCO,D,Failed after retries
+MUTHOOTFIN,W,Failed after retries
+RECLTD,W,Failed after retries
+RELIANCE,W,Failed after retries
+HINDZINC,W,Failed after retries
+BAJAJ_AUTO,W,Failed after retries
+NBCC,W,Failed after retries
