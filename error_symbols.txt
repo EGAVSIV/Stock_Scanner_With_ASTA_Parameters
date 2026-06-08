@@ -658,3 +658,10 @@ ANGELONE,W,Failed after retries
 PGEL,M,Failed after retries
 MARUTI,M,Failed after retries
 M&M,M,Failed after retries
+ONGC,15,Failed after retries
+MARUTI,1H,Failed after retries
+ULTRACEMCO,15,Failed after retries
+DMART,1H,Failed after retries
+MAZDOCK,1H,Failed after retries
+AUROPHARMA,15,Failed after retries
+UNIONBANK,15,Failed after retries
