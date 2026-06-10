@@ -665,3 +665,11 @@ DMART,1H,Failed after retries
 MAZDOCK,1H,Failed after retries
 AUROPHARMA,15,Failed after retries
 UNIONBANK,15,Failed after retries
+INFY,W,Failed after retries
+PRESTIGE,W,Failed after retries
+HINDZINC,M,Failed after retries
+BAJAJFINSV,W,Failed after retries
+INOXWIND,W,Failed after retries
+RBLBANK,W,Failed after retries
+HUDCO,M,Failed after retries
+BAJFINANCE,W,Failed after retries
