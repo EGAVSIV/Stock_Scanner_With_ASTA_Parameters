@@ -673,3 +673,12 @@ INOXWIND,W,Failed after retries
 RBLBANK,W,Failed after retries
 HUDCO,M,Failed after retries
 BAJFINANCE,W,Failed after retries
+SHREECEM,D,Failed after retries
+BHARTIARTL,D,Failed after retries
+PETRONET,D,Failed after retries
+JSWENERGY,D,Failed after retries
+BLUESTARCO,D,Failed after retries
+SONACOMS,D,Failed after retries
+HFCL,D,Failed after retries
+BOSCHLTD,D,Failed after retries
+KALYANKJIL,D,Failed after retries
