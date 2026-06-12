@@ -682,3 +682,11 @@ SONACOMS,D,Failed after retries
 HFCL,D,Failed after retries
 BOSCHLTD,D,Failed after retries
 KALYANKJIL,D,Failed after retries
+SHREECEM,D,Failed after retries
+JINDALSTEL,D,Failed after retries
+BHARTIARTL,D,Failed after retries
+LTIM,D,Failed after retries
+SHRIRAMFIN,D,Failed after retries
+JIOFIN,D,Failed after retries
+BHEL,D,Failed after retries
+INDIANB,D,Failed after retries
