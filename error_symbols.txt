@@ -690,3 +690,5 @@ SHRIRAMFIN,D,Failed after retries
 JIOFIN,D,Failed after retries
 BHEL,D,Failed after retries
 INDIANB,D,Failed after retries
+SBIN,W,Failed after retries
+JINDALSTEL,1H,Failed after retries
