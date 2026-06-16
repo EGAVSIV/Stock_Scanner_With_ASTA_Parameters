@@ -697,3 +697,5 @@ HAVELLS,15,Failed after retries
 ITC,15,Failed after retries
 NIFTY,15,Failed after retries
 MPHASIS,1H,Failed after retries
+JINDALSTEL,D,Failed after retries
+BHARATFORG,D,Failed after retries
