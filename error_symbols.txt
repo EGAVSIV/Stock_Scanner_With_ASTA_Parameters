@@ -699,3 +699,11 @@ NIFTY,15,Failed after retries
 MPHASIS,1H,Failed after retries
 JINDALSTEL,D,Failed after retries
 BHARATFORG,D,Failed after retries
+INDIANB,1H,Failed after retries
+BIOCON,1H,Failed after retries
+IRFC,1H,Failed after retries
+SBILIFE,1H,Failed after retries
+INDHOTEL,1H,Failed after retries
+BLUESTARCO,1H,Failed after retries
+ITC,1H,Failed after retries
+SBIN,1H,Failed after retries
