@@ -707,3 +707,12 @@ INDHOTEL,1H,Failed after retries
 BLUESTARCO,1H,Failed after retries
 ITC,1H,Failed after retries
 SBIN,1H,Failed after retries
+COFORGE,D,Failed after retries
+TITAGARH,D,Failed after retries
+BRITANNIA,W,Failed after retries
+MANAPPURAM,D,Failed after retries
+SAIL,15,Failed after retries
+TATASTEEL,15,Failed after retries
+DABUR,15,Failed after retries
+MCX,15,Failed after retries
+UNOMINDA,15,Failed after retries
