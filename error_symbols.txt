@@ -901,3 +901,14 @@ JSWSTEEL,M,Failed after retries
 MARICO,W,Failed after retries
 PPLPHARMA,M,Failed after retries
 OFSS,15,Failed after retries
+MPHASIS,15,Failed after retries
+EICHERMOT,15,Failed after retries
+PATANJALI,15,Failed after retries
+HINDALCO,15,Failed after retries
+SBIN,M,Failed after retries
+BANKBARODA,M,Failed after retries
+MFSL,15,Failed after retries
+ADANIPORTS,15,Failed after retries
+DMART,1H,Failed after retries
+ULTRACEMCO,1H,Failed after retries
+MUTHOOTFIN,1H,Failed after retries
