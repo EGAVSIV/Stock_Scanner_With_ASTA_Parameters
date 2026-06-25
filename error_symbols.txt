@@ -891,3 +891,13 @@ CGPOWER,1H,Failed after retries
 LICHSGFIN,1H,Failed after retries
 SWIGGY,1H,Failed after retries
 SUZLON,1H,Failed after retries
+TORNTPOWER,W,Failed after retries
+INDIANB,M,Failed after retries
+JSWENERGY,M,Failed after retries
+MANKIND,W,Failed after retries
+TRENT,W,Failed after retries
+INDHOTEL,M,Failed after retries
+JSWSTEEL,M,Failed after retries
+MARICO,W,Failed after retries
+PPLPHARMA,M,Failed after retries
+OFSS,15,Failed after retries
