@@ -940,3 +940,8 @@ SUNPHARMA,15,Failed after retries
 KAYNES,15,Failed after retries
 ALKEM,15,Failed after retries
 GLENMARK,1H,Failed after retries
+BAJAJ_AUTO,M,Failed after retries
+NBCC,15,Failed after retries
+SBICARD,M,Failed after retries
+HINDALCO,15,Failed after retries
+BAJAJFINSV,M,Failed after retries
