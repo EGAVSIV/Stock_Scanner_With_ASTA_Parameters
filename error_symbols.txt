@@ -1012,3 +1012,5 @@ UPL,15,Failed after retries
 DABUR,15,Failed after retries
 LUPIN,15,Failed after retries
 VBL,15,Failed after retries
+MCX,D,Failed after retries
+UPL,D,Failed after retries
