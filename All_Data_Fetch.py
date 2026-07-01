@@ -50,7 +50,7 @@ symbols = [
     'AUROPHARMA','AXISBANK','BAJAJ_AUTO','BAJAJFINSV','BAJFINANCE','BANDHANBNK','BANKBARODA','BANKINDIA',
     'BDL','BEL','BHARATFORG','BHARTIARTL','BHEL','BIOCON','BLUESTARCO','BOSCHLTD','BPCL','BAJAJHLDNG','WAAREEENER','PREMIERENE','SWIGGY',"TMPV",
 ]
-
+# last update on 1 july 2026
 # ==============================
 # Logs (repo root)
 # ==============================
