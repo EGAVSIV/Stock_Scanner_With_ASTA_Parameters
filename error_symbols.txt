@@ -1014,3 +1014,17 @@ LUPIN,15,Failed after retries
 VBL,15,Failed after retries
 MCX,D,Failed after retries
 UPL,D,Failed after retries
+ONGC,W,Failed after retries
+MOTHERSON,M,Failed after retries
+ABB,W,Failed after retries
+DRREDDY,M,Failed after retries
+PAGEIND,W,Failed after retries
+MPHASIS,M,Failed after retries
+ABCAPITAL,W,Failed after retries
+EICHERMOT,M,Failed after retries
+PATANJALI,W,Failed after retries
+MUTHOOTFIN,M,Failed after retries
+ADANIENSOL,W,Failed after retries
+ETERNAL,M,Failed after retries
+PAYTM,W,Failed after retries
+NATIONALUM,M,Failed after retries
