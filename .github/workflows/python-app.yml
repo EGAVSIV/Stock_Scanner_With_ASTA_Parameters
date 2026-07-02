@@ -1,4 +1,4 @@
-name: Fetch stock data
+name: Fetch Stock Data
 
 on:
   schedule:
