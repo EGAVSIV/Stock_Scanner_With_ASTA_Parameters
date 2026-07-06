@@ -1028,3 +1028,7 @@ ADANIENSOL,W,Failed after retries
 ETERNAL,M,Failed after retries
 PAYTM,W,Failed after retries
 NATIONALUM,M,Failed after retries
+HEROMOTOCO,D,Failed after retries
+PATANJALI,D,Failed after retries
+ALKEM,D,Failed after retries
+FORTIS,W,Failed after retries
