@@ -1032,3 +1032,4 @@ HEROMOTOCO,D,Failed after retries
 PATANJALI,D,Failed after retries
 ALKEM,D,Failed after retries
 FORTIS,W,Failed after retries
+KOTAKBANK,W,Failed after retries
