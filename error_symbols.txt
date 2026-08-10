@@ -1269,3 +1269,8 @@ BSE,1H,Failed after retries
 JIOFIN,1H,Failed after retries
 NHPC,1H,Failed after retries
 AMBER,1H,Failed after retries
+EICHERMOT,W,Failed after retries
+ALKEM,W,Failed after retries
+AMBUJACEM,W,Failed after retries
+MANKIND,M,Failed after retries
+AUBANK,W,Failed after retries
