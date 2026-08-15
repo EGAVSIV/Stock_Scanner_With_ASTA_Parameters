@@ -35,9 +35,20 @@ jobs:
       # CRITICAL: Remove oversized runtime files from ALL Git history
       # ==============================
       - name: Clean large runtime files from Git history
+        shell: bash
         run: |
+          set -e
+
+          # git-filter-repo removes the origin remote as a safety measure.
+          # Save it first so the rewritten history can be force-pushed back.
+          ORIGIN_URL="$(git remote get-url origin)"
+          echo "Saved origin: $ORIGIN_URL"
+
           python -m pip install --upgrade git-filter-repo
           git filter-repo --force --path download_log.txt --path error_symbols.txt --invert-paths
+
+          git remote add origin "$ORIGIN_URL"
+          git remote -v
 
       # ==============================
       # Setup Python + Enable Cache
@@ -96,4 +107,5 @@ jobs:
           git add -A .gitignore
           git commit -m "Auto update 15M data ($(date -u '+%Y-%m-%d %H:%M:%S UTC'))" || echo "No changes to commit"
 
+          # History was rewritten above, so the first push must update main forcibly.
           git push --force-with-lease origin main
