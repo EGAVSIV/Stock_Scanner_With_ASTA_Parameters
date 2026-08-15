@@ -10,8 +10,6 @@ on:
 
   workflow_dispatch:
 
-
-
 jobs:
   fetch-data:
     runs-on: ubuntu-latest
@@ -58,14 +56,21 @@ jobs:
           python Datafetch15M.py
 
       # ==============================
-      # Commit & Push Changes
+      # Keep runtime logs out of Git
+      # ==============================
+      - name: Remove runtime logs from Git worktree
+        run: |
+          rm -f download_log.txt error_symbols.txt
+
+      # ==============================
+      # Commit & Push data safely
       # ==============================
       - name: Commit & Push data safely
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add stock_data_15 download_log.txt error_symbols.txt
+          git add stock_data_15
           git commit -m "Auto update 15M data ($(date -u '+%Y-%m-%d %H:%M:%S UTC'))" || echo "No changes to commit"
 
           git pull --rebase origin main || echo "Nothing to rebase"
