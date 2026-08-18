@@ -1,18 +1,9 @@
-altair==4.2.2
-tradingview-datafeed
-pyarrow
-numpy
-pandas
-scipy
-matplotlib
-requests
-openpyxl
-streamlit==1.31.1
-ta-lib
-ta-lib
-plotly
-tabulate
-tradingview-datafeed
+pandas>=2.2.0
+numpy>=1.26.0
+requests>=2.31.0
+websocket-client>=1.7.0
+git+https://github.com/rongardF/tvdatafeed.git
+#tradingview-datafeed
 
 
 
