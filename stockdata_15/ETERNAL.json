@@ -1,59 +1,5 @@
 [
     {
-        "datetime":"2025-12-26T04:45:00.000",
-        "symbol":"NSE:ETERNAL",
-        "open":283.15,
-        "high":283.4,
-        "low":282.8,
-        "close":282.95,
-        "volume":260959.0
-    },
-    {
-        "datetime":"2025-12-26T05:00:00.000",
-        "symbol":"NSE:ETERNAL",
-        "open":282.95,
-        "high":283.5,
-        "low":282.55,
-        "close":282.65,
-        "volume":201073.0
-    },
-    {
-        "datetime":"2025-12-26T05:15:00.000",
-        "symbol":"NSE:ETERNAL",
-        "open":282.65,
-        "high":284.65,
-        "low":282.2,
-        "close":284.2,
-        "volume":968590.0
-    },
-    {
-        "datetime":"2025-12-26T05:30:00.000",
-        "symbol":"NSE:ETERNAL",
-        "open":284.2,
-        "high":284.6,
-        "low":283.5,
-        "close":283.75,
-        "volume":451598.0
-    },
-    {
-        "datetime":"2025-12-26T05:45:00.000",
-        "symbol":"NSE:ETERNAL",
-        "open":283.6,
-        "high":283.75,
-        "low":283.3,
-        "close":283.4,
-        "volume":1087709.0
-    },
-    {
-        "datetime":"2025-12-26T06:00:00.000",
-        "symbol":"NSE:ETERNAL",
-        "open":283.35,
-        "high":283.85,
-        "low":282.8,
-        "close":283.75,
-        "volume":390407.0
-    },
-    {
         "datetime":"2025-12-26T06:15:00.000",
         "symbol":"NSE:ETERNAL",
         "open":283.7,
@@ -35994,9 +35940,63 @@
         "datetime":"2026-08-20T07:45:00.000",
         "symbol":"NSE:ETERNAL",
         "open":327.1,
-        "high":327.35,
+        "high":327.4,
         "low":327.05,
-        "close":327.2,
-        "volume":286102.0
+        "close":327.4,
+        "volume":630835.0
+    },
+    {
+        "datetime":"2026-08-20T08:00:00.000",
+        "symbol":"NSE:ETERNAL",
+        "open":327.35,
+        "high":327.6,
+        "low":327.05,
+        "close":327.3,
+        "volume":638152.0
+    },
+    {
+        "datetime":"2026-08-20T08:15:00.000",
+        "symbol":"NSE:ETERNAL",
+        "open":327.4,
+        "high":327.6,
+        "low":327.25,
+        "close":327.6,
+        "volume":605176.0
+    },
+    {
+        "datetime":"2026-08-20T08:30:00.000",
+        "symbol":"NSE:ETERNAL",
+        "open":327.55,
+        "high":327.95,
+        "low":327.45,
+        "close":327.9,
+        "volume":896532.0
+    },
+    {
+        "datetime":"2026-08-20T08:45:00.000",
+        "symbol":"NSE:ETERNAL",
+        "open":327.95,
+        "high":328.0,
+        "low":327.55,
+        "close":328.0,
+        "volume":780135.0
+    },
+    {
+        "datetime":"2026-08-20T09:00:00.000",
+        "symbol":"NSE:ETERNAL",
+        "open":328.05,
+        "high":328.25,
+        "low":327.6,
+        "close":327.6,
+        "volume":1138523.0
+    },
+    {
+        "datetime":"2026-08-20T09:15:00.000",
+        "symbol":"NSE:ETERNAL",
+        "open":327.6,
+        "high":327.65,
+        "low":327.45,
+        "close":327.45,
+        "volume":178223.0
     }
 ]

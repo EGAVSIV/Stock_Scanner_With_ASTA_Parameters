@@ -1,59 +1,5 @@
 [
     {
-        "datetime":"2025-12-26T04:45:00.000",
-        "symbol":"NSE:RELIANCE",
-        "open":1558.9,
-        "high":1560.0,
-        "low":1556.0,
-        "close":1558.0,
-        "volume":95410.0
-    },
-    {
-        "datetime":"2025-12-26T05:00:00.000",
-        "symbol":"NSE:RELIANCE",
-        "open":1558.0,
-        "high":1559.6,
-        "low":1556.4,
-        "close":1558.6,
-        "volume":40968.0
-    },
-    {
-        "datetime":"2025-12-26T05:15:00.000",
-        "symbol":"NSE:RELIANCE",
-        "open":1559.1,
-        "high":1560.4,
-        "low":1558.2,
-        "close":1560.1,
-        "volume":55864.0
-    },
-    {
-        "datetime":"2025-12-26T05:30:00.000",
-        "symbol":"NSE:RELIANCE",
-        "open":1560.1,
-        "high":1560.2,
-        "low":1556.6,
-        "close":1558.0,
-        "volume":64551.0
-    },
-    {
-        "datetime":"2025-12-26T05:45:00.000",
-        "symbol":"NSE:RELIANCE",
-        "open":1558.0,
-        "high":1558.9,
-        "low":1556.7,
-        "close":1558.3,
-        "volume":72963.0
-    },
-    {
-        "datetime":"2025-12-26T06:00:00.000",
-        "symbol":"NSE:RELIANCE",
-        "open":1558.3,
-        "high":1559.3,
-        "low":1557.6,
-        "close":1558.0,
-        "volume":57089.0
-    },
-    {
         "datetime":"2025-12-26T06:15:00.000",
         "symbol":"NSE:RELIANCE",
         "open":1558.0,
@@ -35994,9 +35940,63 @@
         "datetime":"2026-08-20T07:45:00.000",
         "symbol":"NSE:RELIANCE",
         "open":1313.9,
-        "high":1314.3,
-        "low":1312.9,
-        "close":1312.9,
-        "volume":49351.0
+        "high":1315.5,
+        "low":1312.8,
+        "close":1315.5,
+        "volume":158710.0
+    },
+    {
+        "datetime":"2026-08-20T08:00:00.000",
+        "symbol":"NSE:RELIANCE",
+        "open":1315.7,
+        "high":1316.5,
+        "low":1314.4,
+        "close":1315.3,
+        "volume":146307.0
+    },
+    {
+        "datetime":"2026-08-20T08:15:00.000",
+        "symbol":"NSE:RELIANCE",
+        "open":1315.0,
+        "high":1315.5,
+        "low":1312.2,
+        "close":1312.8,
+        "volume":85541.0
+    },
+    {
+        "datetime":"2026-08-20T08:30:00.000",
+        "symbol":"NSE:RELIANCE",
+        "open":1312.8,
+        "high":1314.4,
+        "low":1311.9,
+        "close":1314.0,
+        "volume":159387.0
+    },
+    {
+        "datetime":"2026-08-20T08:45:00.000",
+        "symbol":"NSE:RELIANCE",
+        "open":1314.0,
+        "high":1314.9,
+        "low":1312.8,
+        "close":1314.4,
+        "volume":154710.0
+    },
+    {
+        "datetime":"2026-08-20T09:00:00.000",
+        "symbol":"NSE:RELIANCE",
+        "open":1314.5,
+        "high":1315.0,
+        "low":1313.5,
+        "close":1314.5,
+        "volume":144137.0
+    },
+    {
+        "datetime":"2026-08-20T09:15:00.000",
+        "symbol":"NSE:RELIANCE",
+        "open":1314.5,
+        "high":1314.5,
+        "low":1314.3,
+        "close":1314.5,
+        "volume":2776.0
     }
 ]

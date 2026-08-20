@@ -30496,8 +30496,17 @@
         "symbol":"NSE:PREMIERENE",
         "open":1049.2,
         "high":1049.5,
-        "low":1045.9,
-        "close":1046.8,
-        "volume":22383.0
+        "low":1042.0,
+        "close":1045.5,
+        "volume":189658.0
+    },
+    {
+        "datetime":"2026-08-20T08:45:00.000",
+        "symbol":"NSE:PREMIERENE",
+        "open":1045.5,
+        "high":1047.8,
+        "low":1042.4,
+        "close":1044.4,
+        "volume":84930.0
     }
 ]
