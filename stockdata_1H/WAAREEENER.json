@@ -28084,8 +28084,26 @@
         "symbol":"NSE:WAAREEENER",
         "open":2694.5,
         "high":2707.0,
-        "low":2694.4,
-        "close":2697.1,
-        "volume":35741.0
+        "low":2693.1,
+        "close":2698.4,
+        "volume":43754.0
+    },
+    {
+        "datetime":"2026-08-20T06:45:00.000",
+        "symbol":"NSE:WAAREEENER",
+        "open":2698.1,
+        "high":2712.0,
+        "low":2698.1,
+        "close":2703.2,
+        "volume":68289.0
+    },
+    {
+        "datetime":"2026-08-20T07:45:00.000",
+        "symbol":"NSE:WAAREEENER",
+        "open":2702.5,
+        "high":2703.0,
+        "low":2700.5,
+        "close":2702.0,
+        "volume":4214.0
     }
 ]

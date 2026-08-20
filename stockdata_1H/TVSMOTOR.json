@@ -1,23 +1,5 @@
 [
     {
-        "datetime":"2024-04-25T09:45:00.000",
-        "symbol":"NSE:TVSMOTOR",
-        "open":2004.8,
-        "high":2014.1,
-        "low":2003.4,
-        "close":2011.0,
-        "volume":150955.0
-    },
-    {
-        "datetime":"2024-04-26T03:45:00.000",
-        "symbol":"NSE:TVSMOTOR",
-        "open":2019.6,
-        "high":2019.7,
-        "low":1995.65,
-        "close":2017.05,
-        "volume":122421.0
-    },
-    {
         "datetime":"2024-04-26T04:45:00.000",
         "symbol":"NSE:TVSMOTOR",
         "open":2017.7,
@@ -35996,7 +35978,25 @@
         "open":4401.5,
         "high":4406.8,
         "low":4393.7,
-        "close":4401.0,
-        "volume":25180.0
+        "close":4400.0,
+        "volume":32910.0
+    },
+    {
+        "datetime":"2026-08-20T06:45:00.000",
+        "symbol":"NSE:TVSMOTOR",
+        "open":4401.2,
+        "high":4404.0,
+        "low":4383.2,
+        "close":4383.3,
+        "volume":27594.0
+    },
+    {
+        "datetime":"2026-08-20T07:45:00.000",
+        "symbol":"NSE:TVSMOTOR",
+        "open":4383.3,
+        "high":4385.0,
+        "low":4381.6,
+        "close":4381.7,
+        "volume":4104.0
     }
 ]
