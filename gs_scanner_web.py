@@ -37,11 +37,13 @@ def get_last_candle_by_tf(folder_path: str):
         return None
 
     for f in os.listdir(folder_path):
-        if not f.endswith(".parquet"):
+        # Updated: Check for JSON files instead of Parquet
+        if not f.endswith(".json"):
             continue
 
         try:
-            df = pd.read_parquet(os.path.join(folder_path, f))
+            # Updated: Read JSON format
+            df = pd.read_json(os.path.join(folder_path, f))
             if df.empty:
                 continue
 
@@ -71,22 +73,24 @@ def get_last_candle_by_tf(folder_path: str):
     return last_dt
 
 
-
 # =========================================================
-# CONFIG
+# CONFIG & GITHUB API ENDPOINTS
 # =========================================================
 
-
-
-
-
+GITHUB_DIR_APIS = {
+    "M":   "https://api.github.com/repos/EGAVSIV/Data-Collector/tree/main/stockdata_M",
+    "D":   "https://api.github.com/repos/EGAVSIV/Data-Collector/tree/main/stockdata_D",
+    "W":   "https://api.github.com/repos/EGAVSIV/Data-Collector/tree/main/stockdata_W",
+    "15m": "https://api.github.com/repos/EGAVSIV/Data-Collector/tree/main/stockdata_15",
+    "1h":  "https://api.github.com/repos/EGAVSIV/Data-Collector/tree/main/stockdata_1H",
+}
 
 FOLDERS = {
-    "D":   "stock_data_D",
-    "W":   "stock_data_W",
-    "M":   "stock_data_M",
-    "15m": "stock_data_15",
-    "1h":  "stock_data_1H",
+    "D":   "stockdata_D",
+    "W":   "stockdata_W",
+    "M":   "stockdata_M",
+    "15m": "stockdata_15",
+    "1h":  "stockdata_1H",
 }
 
 FILTER_OPTIONS = [
@@ -217,7 +221,7 @@ def add_flags(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # =========================================================
-# LOAD LATEST ROW PER SYMBOL FOR ONE TIMEFRAME
+# LOAD LATEST ROW PER SYMBOL FOR ONE TIMEFRAME (JSON)
 # =========================================================
 
 def load_latest_from_folder(folder_path: str) -> pd.DataFrame:
@@ -226,11 +230,13 @@ def load_latest_from_folder(folder_path: str) -> pd.DataFrame:
 
     rows = []
     for fname in os.listdir(folder_path):
-        if not fname.endswith(".parquet"):
+        # Updated: Filter for JSON files
+        if not fname.endswith(".json"):
             continue
         fpath = os.path.join(folder_path, fname)
         try:
-            df = pd.read_parquet(fpath)
+            # Updated: Read JSON format
+            df = pd.read_json(fpath)
             if df.empty:
                 continue
             df = df.sort_index()
@@ -238,20 +244,19 @@ def load_latest_from_folder(folder_path: str) -> pd.DataFrame:
             df = add_flags(df)
             rows.append(df.iloc[-1])
         except Exception as e:
-            # Optional: log error if needed
-            # st.write(f"Error reading {fpath}: {e}")
             continue
 
     if not rows:
         return pd.DataFrame()
 
     result = pd.DataFrame(rows)
-    result.set_index("symbol", inplace=True)
+    if "symbol" in result.columns:
+        result.set_index("symbol", inplace=True)
     return result
 
 
 # =========================================================
-# CORE SCAN FUNCTION (SAME LOGIC AS TKINTER VERSION)
+# CORE SCAN FUNCTION
 # =========================================================
 
 def run_scan(
@@ -321,12 +326,11 @@ st.set_page_config(
 )
 
 # =====================================================
-# LAST CANDLE DATES PER TIMEFRAME (FROM SOURCE DATA)
+# LAST CANDLE DATES PER TIMEFRAME
 # =====================================================
 last_daily = get_last_candle_by_tf(FOLDERS["D"])
 last_15m   = get_last_candle_by_tf(FOLDERS["15m"])
 last_1h    = get_last_candle_by_tf(FOLDERS["1h"])
-
 
 
 # ---- Top title area ----
@@ -338,6 +342,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
 # =====================================================
 # DISPLAY LAST CANDLE INFO
 # =====================================================
@@ -352,9 +357,6 @@ st.markdown(
     unsafe_allow_html=False
 )
 
-
-
-# =====================================================
 # =====================================================
 # TOP DATA REFRESH CONTROL (IST - SAFE)
 # =====================================================
@@ -372,7 +374,6 @@ with col2:
     st.caption(
         f"🕒 Last refresh (IST): {ist_now.strftime('%d %b %Y, %I:%M:%S %p')}"
     )
-
 
 st.markdown(
     f"""
@@ -423,7 +424,6 @@ with st.sidebar:
     run_btn = st.button("🔍 Run Scan")
     reset_btn = st.button("♻ Reset Filters")
 
-# ---- Reset logic (just reload page in Streamlit world) ----
 if reset_btn:
     st.rerun()
 
@@ -450,7 +450,6 @@ if run_btn:
     else:
         df_show = df_res.reset_index()
 
-        # Show only some main columns for clarity
         show_cols = [
             "symbol",
             f"close_{tf1}", f"rsi_{tf1}", f"macd_{tf1}",
@@ -465,7 +464,6 @@ if run_btn:
 
         result_placeholder.dataframe(df_show[show_cols], use_container_width=True)
 
-        # CSV download
         csv_data = df_show.to_csv(index=False).encode("utf-8")
         download_placeholder.download_button(
             label="📥 Download CSV",
@@ -476,7 +474,6 @@ if run_btn:
 else:
     st.info("Configure filters in the sidebar and click **Run Scan**.")
 
-
 st.markdown("""
 ---
 **Designed by:-  
@@ -486,21 +483,3 @@ Energy | Commodity | Quant Intelligence 📶
 📱 +91-8003994518 〽️   
 📧 yadav.gauravsingh@gmail.com ™️
 """)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
